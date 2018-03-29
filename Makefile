@@ -6,11 +6,13 @@ MEDIA=src/media
 
 .PHONY: media watch
 
+all: media watch
+
 watch:
 	cd src && watchify -v -t babelify -s $(BUNDLE) main.js -o $(BUNDLE).js
 
 media:
-	$(XCF2ATLAS) --image=$(MEDIA)/sprites.png --json=$(MEDIA)/sprites.json rawdata/*.xcf
+	$(XCF2ATLAS) --image=$(MEDIA)/sprites.png --json=$(MEDIA)/sprites.json rawdata/*.xcf --max-width=400
 
 #dist:
 #	test -d dist || mkdir dist 2> /dev/null
