@@ -15,7 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function onload()
+var Resource = require("./resource");
+
+class TitleScreen
 {
-    officetemp.start('play_area');
+    constructor() {
+	this.name = "title";
+    }
+
+    start() {
+	console.log("TITLE");
+    }
+
+    update(dt) {
+    }
 }
+
+module.exports = TitleScreen;
+

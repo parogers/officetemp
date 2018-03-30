@@ -1,5 +1,7 @@
-.canvas_area {
+#play_area {
     border: 0px;
     margin: 0px;
     padding: 0px;
+    width: 400px;
+    height: 400px;
 }
