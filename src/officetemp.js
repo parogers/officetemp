@@ -40863,15 +40863,17 @@ class LoadingScreen {
    constructor() {
       this.mediaPath = "media";
       this.doneLoading = false;
+      this.stage = new PIXI.Container();
    }
 
    start() {
       PIXI.loader.defaultQueryString = "nocache=" + new Date().getTime();
 
-      for (let key in Resource) {
+      for (let key in Resource.ALL) {
          /* Store the resources by path (minus the base path) */
-         let path = this.mediaPath + "/" + Resource[key];
-         PIXI.loader.add(Resource[key], path);
+         let path = this.mediaPath + "/" + Resource.ALL[key];
+         PIXI.loader.add(Resource.ALL[key], path);
+         console.log(Resource.ALL[key] + " => " + path);
       }
       PIXI.loader.onError.add(arg => {
          console.log("ERROR: " + arg);
@@ -40889,6 +40891,10 @@ class LoadingScreen {
       // ...
    }
 
+   getStage() {
+      return this.stage;
+   }
+
    isDone() {
       return this.doneLoading;
    }
@@ -40896,7 +40902,7 @@ class LoadingScreen {
 
 module.exports = LoadingScreen;
 
-},{"./resource":193}],191:[function(require,module,exports){
+},{"./resource":192}],191:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -40924,207 +40930,145 @@ require("pixi-sound");
 
 var LoadingScreen = require("./loading");
 var TitleScreen = require("./title");
-var Render = require("./render");
 
 /* Globals */
 
-const ASPECT_RATIO = 1.5;
+const GAME_WIDTH = 250;
+const GAME_HEIGHT = 150;
+const ASPECT_RATIO = GAME_WIDTH / GAME_HEIGHT;
+
 var game = null;
 
 class Game {
-				constructor(container) {
-								if (typeof container == 'string') {
-												container = document.getElementById(container);
-								}
-								this.container = container;
-								this.pixiApp = null;
-								this.screens = {};
-								this.currentScreen = null;
-				}
+	constructor(container) {
+		if (typeof container == 'string') {
+			container = document.getElementById(container);
+		}
+		this.container = container;
+		this.pixiApp = null;
+		this.screens = {};
+		this.screen = null;
+	}
 
-				start() {
-								PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-								// TODO - enable the ticker?
-								PIXI.ticker.shared.autoStart = false;
-								PIXI.ticker.shared.stop();
+	start() {
+		PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+		// TODO - enable the ticker?
+		//PIXI.ticker.shared.autoStart = false;
+		//PIXI.ticker.shared.stop();
 
-								let rect = getLargestRect(this.container, ASPECT_RATIO);
-								this.pixiApp = new PIXI.Application({
-												width: rect.width,
-												height: rect.height,
-												antialias: false
-								});
-								this.pixiApp.renderer.plugins.interaction.destroy();
-								this.container.appendChild(this.pixiApp.view);
+		let rect = getLargestRect(this.container, ASPECT_RATIO);
+		this.pixiApp = new PIXI.Application({
+			width: rect.width,
+			height: rect.height,
+			antialias: false
+		});
+		this.pixiApp.renderer.plugins.interaction.destroy();
+		this.container.appendChild(this.pixiApp.view);
 
-								this.screens = {
-												loading: new LoadingScreen(),
-												title: new TitleScreen()
-								};
-								this.currentScreen = this.screens.loading;
-								this.currentScreen.start();
-				}
+		this.pixiApp.stage.scale.set(rect.width / GAME_WIDTH);
 
-				update() {
-								let dt = 0;
-								if (this.currentScreen) {
-												this.currentScreen.update(dt);
-								}
+		this.screens = {
+			loading: new LoadingScreen(),
+			title: new TitleScreen()
+		};
+		this.screen = this.screens.loading;
+		this.screen.start();
 
-								// If the screen is done, figure out where to go next
-								if (this.currentScreen.isDone()) {
-												if (this.currentScreen === this.screens.loading) {
-																// Title screen
-																this.currentScreen = this.screens.title;
-												} else if (this.currentScreen === this.screens.title) {
-																// Game play
-																// ...
-												}
-								}
-				}
+		// Start the ticker, which will drive the render loop
+		PIXI.ticker.shared.add(() => {
+			this.update(PIXI.ticker.shared.elapsedMS);
+		});
+	}
 
-				resize() {
-								let rect = get_largest_rect(this.container, ASPECT_RATIO);
-								this.pixiApp.renderer.resize(rect.width, rect.height);
-				}
+	update(dt) {
+		if (this.screen) {
+			this.screen.update(dt);
+			this.pixiApp.render();
+		}
+
+		// If the screen is done, figure out where to go next
+		if (this.screen.isDone()) {
+			let screen = null;
+			if (this.screen === this.screens.loading) {
+				// Title screen
+				screen = this.screens.title;
+			} else if (this.screen === this.screens.title) {
+				// Game play
+				// ...
+			}
+			this.screen = null;
+
+			if (screen) {
+				screen.start();
+				this.pixiApp.stage.removeChildren();
+				this.pixiApp.stage.addChild(screen.getStage());
+				this.screen = screen;
+			}
+		}
+	}
+
+	resize() {
+		let rect = get_largest_rect(this.container, ASPECT_RATIO);
+		this.pixiApp.renderer.resize(rect.width, rect.height);
+	}
 }
 
 /* Returns the largest rectangle that will fit into the given container 
  * element. */
 function getLargestRect(container, aspect) {
-				let rect = container.getBoundingClientRect();
-				if (rect.width === 0 || rect.height === 0) {
-								throw Error("invalid container size");
-				}
+	let rect = container.getBoundingClientRect();
+	if (rect.width === 0 || rect.height === 0) {
+		throw Error("invalid container size");
+	}
 
-				// Maintain the aspect ratio when sizing the render view
-				let width = Math.round(rect.height * aspect);
-				let height = rect.height;
+	// Maintain the aspect ratio when sizing the render view
+	let width = Math.round(rect.height * aspect);
+	let height = rect.height;
 
-				if (width > rect.width) {
-								width = rect.width;
-								height = Math.round(rect.height / aspect);
-				}
-				return {
-								width: width,
-								height: height
-				};
+	if (width > rect.width) {
+		width = rect.width;
+		height = Math.round(rect.height / aspect);
+	}
+	return {
+		width: width,
+		height: height
+	};
 }
 
 module.exports = {};
 
 /* Call to start the game */
 module.exports.start = function (container) {
-				game = new Game(container);
-				game.start();
+	game = new Game(container);
+	game.start();
 };
 
 /* Call to have the canvas automatically resize to fill it's container */
 module.exports.resize = function () {
-				game.resize();
+	game.resize();
 };
 
-},{"./loading":190,"./render":192,"./title":194,"pixi-sound":26,"pixi.js":142}],192:[function(require,module,exports){
-/* APDUNGEON - A dungeon crawler demo written in javascript + pixi.js
- * Copyright (C) 2017  Peter Rogers (peter.rogers@gmail.com)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * See LICENSE.txt for the full text of the license.
- */
-
-// The PIXI renderer
-var renderer = null;
-// The containing element
-var container = null;
-// The preferred aspect ratio for sizing the render view
-var aspectRatio = 1;
+},{"./loading":190,"./title":193,"pixi-sound":26,"pixi.js":142}],192:[function(require,module,exports){
 
 module.exports = {};
 
-/* Configures the renderer (via PIXI) and adds the view to the given HTML
- * element. The renderer width/height will conform to the given aspect 
- * ratio. */
-module.exports.configure = function (div, aspect) {
-    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-    // Disable the ticker sinc we don't use it (rendering happens as needed)
-    PIXI.ticker.shared.autoStart = false;
-    PIXI.ticker.shared.stop();
-
-    let rect = div.getBoundingClientRect();
-    if (rect.width === 0 || rect.height === 0) {
-        throw Error("Invalid size for renderer");
-    }
-
-    // Maintain the aspect ratio when sizing the render view
-    let width = Math.round(rect.height * aspect);
-    let height = rect.height;
-
-    if (width > rect.width) {
-        width = rect.width;
-        height = Math.round(rect.height / aspect);
-    }
-
-    //renderer = PIXI.autoDetectRenderer({
-    renderer = new PIXI.WebGLRenderer({
-        width: width,
-        height: height,
-        antialias: false
-        // Required to prevent flickering in Chrome on Android (others too?)
-        //preserveDrawingBuffer: true,
-        //clearBeforeRender: true
-    });
-    renderer.plugins.interaction.destroy();
-
-    div.appendChild(renderer.view);
-    container = div;
-    aspectRatio = aspect;
-};
-
-module.exports.getContainer = function () {
-    return container;
-};
-
-module.exports.getRenderer = function () {
-    return renderer;
-};
-
-/* Resize the renderer to fit the parent container */
-module.exports.resize = function () {
-    let rect = container.getBoundingClientRect();
-    // Maintain the aspect ratio when resizing the render view
-    let width = Math.round(rect.height * aspectRatio);
-    let height = rect.height;
-
-    if (width > rect.width) {
-        width = rect.width;
-        height = Math.round(rect.width / aspectRatio);
-    }
-
-    renderer.resize(width, height);
-    //container.innerHTML = "";
-    //container.appendChild(renderer.view);
-};
-
-},{}],193:[function(require,module,exports){
-
-module.exports = {
+module.exports.ALL = {
     SPRITES: 'sprites.json',
     SND_TEST: 'powerup1.wav'
 };
 
-},{}],194:[function(require,module,exports){
+for (let key in module.exports.ALL) {
+    module.exports[key] = module.exports.ALL[key];
+}
+
+module.exports.getImage = function (sheet, name) {
+    if (name === undefined) {
+        return PIXI.loader.resources[sheet];
+    }
+    return PIXI.loader.resources[sheet].textures[name];
+};
+
+},{}],193:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41146,17 +41090,42 @@ var Resource = require("./resource");
 
 class TitleScreen {
    constructor() {
-      this.name = "title";
+      this.stage = new PIXI.Container();
    }
 
    start() {
       console.log("TITLE");
+      this.timer = 0;
+      this.terranceX = 200;
+      this.terranceY = 110;
+      this.terrance = new PIXI.Sprite(Resource.getImage(Resource.SPRITES, "terrance_frazzled"));
+      this.terrance.anchor.set(0.5, 1);
+      this.terrance.scale.set(1.35);
+      this.terrance.position.set(this.terranceX, this.terranceY);
+      this.stage.addChild(this.terrance);
+
+      this.sweaterGuy = new PIXI.Sprite(Resource.getImage(Resource.SPRITES, "sweater_drink1"));
+      this.sweaterGuy.anchor.set(0.5, 1);
+      this.sweaterGuy.scale.set(1.35);
+      this.sweaterGuy.position.set(50, 110);
+      this.stage.addChild(this.sweaterGuy);
    }
 
-   update(dt) {}
+   update(dt) {
+      this.timer += dt;
+      this.terrance.position.set(this.terranceX + 0.75 * Math.cos(this.timer / 20), this.terranceY + 0.5 * Math.sin(this.timer / 15));
+   }
+
+   getStage() {
+      return this.stage;
+   }
+
+   isDone() {
+      return false;
+   }
 }
 
 module.exports = TitleScreen;
 
-},{"./resource":193}]},{},[191])(191)
+},{"./resource":192}]},{},[191])(191)
 });

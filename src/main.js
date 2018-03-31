@@ -25,11 +25,13 @@ require("pixi-sound");
 
 var LoadingScreen = require("./loading");
 var TitleScreen = require("./title");
-var Render = require("./render");
 
 /* Globals */
 
-const ASPECT_RATIO = 1.5;
+const GAME_WIDTH = 250;
+const GAME_HEIGHT = 150;
+const ASPECT_RATIO = GAME_WIDTH/GAME_HEIGHT;
+
 var game = null;
 
 class Game
@@ -41,14 +43,14 @@ class Game
 	this.container = container;
 	this.pixiApp = null;
 	this.screens = {};
-	this.currentScreen = null;
+	this.screen = null;
     }
 
     start() {
 	PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 	// TODO - enable the ticker?
-	PIXI.ticker.shared.autoStart = false;
-	PIXI.ticker.shared.stop();
+	//PIXI.ticker.shared.autoStart = false;
+	//PIXI.ticker.shared.stop();
 
 	let rect = getLargestRect(this.container, ASPECT_RATIO);
 	this.pixiApp = new PIXI.Application({
@@ -59,30 +61,46 @@ class Game
 	this.pixiApp.renderer.plugins.interaction.destroy();
 	this.container.appendChild(this.pixiApp.view);
 
+	this.pixiApp.stage.scale.set(rect.width / GAME_WIDTH);
+
 	this.screens = {
 	    loading: new LoadingScreen(),
 	    title: new TitleScreen()
 	}
-	this.currentScreen = this.screens.loading;
-	this.currentScreen.start();
+	this.screen = this.screens.loading;
+	this.screen.start();
+
+	// Start the ticker, which will drive the render loop
+	PIXI.ticker.shared.add(() => {
+	    this.update(PIXI.ticker.shared.elapsedMS);
+	});
     }
 
-    update() {
-	let dt = 0;
-	if (this.currentScreen) {
-	    this.currentScreen.update(dt);
+    update(dt) {
+	if (this.screen) {
+	    this.screen.update(dt);
+	    this.pixiApp.render();
 	}
 
 	// If the screen is done, figure out where to go next
-	if (this.currentScreen.isDone())
+	if (this.screen.isDone())
 	{
-	    if (this.currentScreen === this.screens.loading) {
+	    let screen = null;
+	    if (this.screen === this.screens.loading) {
 		// Title screen
-		this.currentScreen = this.screens.title;
+		screen = this.screens.title;
 	    }
-	    else if (this.currentScreen === this.screens.title) {
+	    else if (this.screen === this.screens.title) {
 		// Game play
 		// ...
+	    }
+	    this.screen = null;
+	    
+	    if (screen) {
+		screen.start();
+		this.pixiApp.stage.removeChildren();
+		this.pixiApp.stage.addChild(screen.getStage());
+		this.screen = screen;
 	    }
 	}
     }

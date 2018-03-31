@@ -22,15 +22,17 @@ class LoadingScreen
     constructor() {
 	this.mediaPath = "media";
 	this.doneLoading = false;
+	this.stage = new PIXI.Container();
     }
 
     start() {
 	PIXI.loader.defaultQueryString = "nocache=" + (new Date()).getTime();
 
-	for (let key in Resource) {
+	for (let key in Resource.ALL) {
 	    /* Store the resources by path (minus the base path) */
-	    let path = this.mediaPath + "/" + Resource[key];
-	    PIXI.loader.add(Resource[key], path);
+	    let path = this.mediaPath + "/" + Resource.ALL[key];
+	    PIXI.loader.add(Resource.ALL[key], path);
+	    console.log(Resource.ALL[key] + " => " + path);
 	}
 	PIXI.loader.onError.add((arg) => {
 	    console.log("ERROR: " + arg);
@@ -47,6 +49,10 @@ class LoadingScreen
     update() {
 	// Show loading progress
 	// ...
+    }
+
+    getStage() {
+	return this.stage;
     }
 
     isDone() {
