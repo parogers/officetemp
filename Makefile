@@ -14,6 +14,8 @@ watch:
 media:
 	$(XCF2ATLAS) --image=$(MEDIA)/sprites.png --json=$(MEDIA)/sprites.json rawdata/*.xcf --max-width=400
 
+	inkscape --export-png=$(MEDIA)/title-text.png --export-area-page -z rawdata/title-text.svg 
+
 #dist:
 #	test -d dist || mkdir dist 2> /dev/null
 #	uglifyjs $(BUNDLE).js > dist/$(BUNDLE)-dist.js

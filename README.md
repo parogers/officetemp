@@ -1,5 +1,5 @@
-Office Temp
------------
+Office Temper
+-------------
 
 A tongue-in-cheek game about temp work. Written in Javascript. Uses Phaser 
 for graphics and sound.

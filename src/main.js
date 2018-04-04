@@ -56,6 +56,7 @@ class Game
 	this.pixiApp = new PIXI.Application({
 	    width: rect.width,
 	    height: rect.height,
+	    backgroundColor: 0xffffff,
 	    antialias: false,
 	});
 	this.pixiApp.renderer.plugins.interaction.destroy();

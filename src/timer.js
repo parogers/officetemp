@@ -65,7 +65,4 @@ class Timer
     }
 }
 
-module.exports = {
-    TimerList: TimerList,
-    Timer: Timer
-};
+module.exports = TimerList;
