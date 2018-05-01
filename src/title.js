@@ -88,13 +88,13 @@ class TitleScreen
 	    let t1 = new Tween(this.terrance, {
 		src: [this.terranceX+50, this.terranceY],
 		dest: [this.terranceX, this.terranceY],
-		func: Tween.LinearSlowdown,
+		interpolate: Tween.LinearSlowdown,
 		duration: 0.5,
 	    });
 	    let t2 = new Tween(this.sweaterGuy, {
 		src: [this.sweaterX-50, this.sweaterY],
 		dest: [this.sweaterX, this.sweaterY],
-		func: Tween.LinearSlowdown,
+		interpolate: Tween.LinearSlowdown,
 		duration: 0.5,
 	    });
 	    return [this.process.add(t1),
@@ -164,7 +164,7 @@ class TitleScreen
 		let tween = new Tween(paper, {
 		    src: [this.terranceX + dx, stop*5],
 		    dest: [this.terranceX + dx, this.terranceY + stop],
-		    func: Tween.Linear,
+		    interpolate: Tween.Linear,
 		    duration: 0.5,
 		});
 		lst.push(this.process.add(tween));

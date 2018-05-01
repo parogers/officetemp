@@ -29,9 +29,9 @@ class Aisle
 	// The container holds everything in this aisle
 	this.container = new PIXI.Container();
 	// Things that are behind the counter
-	this.behind = new PIXI.Container();
-	this.behind.position.set(0, -5);
-	this.container.addChild(this.behind);
+	this.behindCounter = new PIXI.Container();
+	this.behindCounter.position.set(0, -5);
+	this.container.addChild(this.behindCounter);
 
 	this.counter = new PIXI.Sprite(
 	    getImage(Resource.OFFICE, 'office_desk1'));
@@ -39,11 +39,13 @@ class Aisle
 	//this.counter.position.set(0, ypos);
 	this.container.addChild(this.counter);
 
-	this.cabinet = new PIXI.Sprite(
-	    getImage(Resource.SPRITES, 'cabinet_closed'));
-	this.cabinet.anchor.set(0, 1);
-	this.cabinet.position.set(220, -4);
-	this.container.addChild(this.cabinet);
+	this.cabinet = new Cabinet();
+	this.cabinet.sprite.position.set(220, -4);
+	this.container.addChild(this.cabinet.sprite);
+
+	this.cabinetArea = new PIXI.Container();
+	this.cabinetArea.position.set(205, -5);
+	this.container.addChild(this.cabinetArea);
 
 	this.player = null;
     }
@@ -53,15 +55,31 @@ class Aisle
     }
 
     addPlayerSprite(player) {
-	this.behind.addChild(player);
+	this.cabinetArea.addChild(player);
 	this.player = player;
     }
 
     removePlayerSprite() {
 	if (this.player) {
-	    this.behind.removeChild(this.player);
+	    this.cabinetArea.removeChild(this.player);
 	    this.player = null;
 	}
+    }
+}
+
+class Cabinet
+{
+    constructor() {
+	this.sprite = new PIXI.Sprite();
+	this.sprite.anchor.set(0, 1);
+	this.setOpen(false);
+    }
+
+    setOpen(b) {
+	let img = null;
+	if (b) img = 'cabinet_open';
+	else img = 'cabinet_closed';
+	this.sprite.texture = getImage(Resource.SPRITES, img);
     }
 }
 
@@ -78,16 +96,13 @@ class GameScreen
 
     start() {
 	let img = getImage(Resource.OFFICE, 'office_carpet');
-	this.background = new PIXI.Sprite(img);
-	this.stage.addChild(this.background);
+	this.stage.addChild(new PIXI.Sprite(img));
 
-	this.shadows = new PIXI.Sprite(
-	    getImage(Resource.OFFICE, 'office_shadows'));
-	this.stage.addChild(this.shadows);
+	img = getImage(Resource.OFFICE, 'office_shadows');
+	this.stage.addChild(new PIXI.Sprite(img));
 
-	this.wall = new PIXI.Sprite(
-	    getImage(Resource.OFFICE, 'office_wall'));
-	this.stage.addChild(this.wall);
+	img = getImage(Resource.OFFICE, 'office_wall');
+	this.stage.addChild(new PIXI.Sprite(img));
 
 	this.aisleList = [];
 	for (let ypos of AISLE_YPOS_LIST) {
@@ -96,9 +111,7 @@ class GameScreen
 	    this.stage.addChild(aisle.container);
 	    this.aisleList.push(aisle);
 	}
-
 	this.player = new Player(this.controls, this.aisleList);
-	this.player.sprite.position.set(210, 0);
 	this.aisleList[this.aisle].addPlayerSprite(this.player.sprite);
     }
 

@@ -21,7 +21,7 @@ class Tween
 	this.target = target;
 	this.src = args.src;
 	this.dest = args.dest;
-	this.func = args.func;
+	this.interpolate = args.interpolate;
 	this.duration = args.duration;
 	this.elapsed = 0;
     }
@@ -31,8 +31,8 @@ class Tween
 	let param = this.elapsed / this.duration;
 	if (param > 1) param = 1;
 
-	let pos = this.func(param, this.src, this.dest);
-	this.target.position.set(pos);
+	let pos = this.interpolate(param, this.src, this.dest);
+	this.target.position.set(pos[0], pos[1]);
 	
 	if (param >= 1) {
 	    return false;

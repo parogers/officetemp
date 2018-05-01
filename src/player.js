@@ -32,8 +32,10 @@ class Player
 	    getImage(Resource.SPRITES, 'terrance_idle'));
 	this.sprite.anchor.set(0.5, 1);
 	this.state = STATE.IDLE;
+	this.lastState = -1;
 	this.aisleList = aisleList;
 	this.aisle = 0;
+	this.timer = 0;
 	this.nextAisle = -1;
 	this.controls = controls;
     }
@@ -43,26 +45,33 @@ class Player
     }
 
     setImage(name) {
-	this.texture = getImage(Resource.SPRITES, name);
+	this.sprite.texture = getImage(Resource.SPRITES, name);
     }
 
     update(dt)
     {
+	let stateChanged = (this.lastState != this.state);
+	this.lastState = this.state;
 	if (this.state == STATE.IDLE)
 	{
-	    this.setImage('terrance_idle');
+	    if (stateChanged) {
+		// Done searching
+		this.sprite.scale.x = 1;
+		this.sprite.position.x = 0;
+		this.setImage('terrance_idle');
+	    }
 
+	    // Handle up/down movement
 	    this.nextAisle = -1;
 	    if (this.controls.up.justPressed && this.aisle > 0)
 	    {
 		this.nextAisle = this.aisle-1;
 	    }
-	    else if (this.controls.down.justPressed &&
-		     this.aisle < this.aisleList.length-1)
+	    if (this.controls.down.justPressed &&
+		this.aisle < this.aisleList.length-1)
 	    {
 		this.nextAisle = this.aisle+1;
 	    }
-
 	    if (this.nextAisle != -1)
 	    {
 		let dy = (this.aisleList[this.aisle].getY() -
@@ -71,13 +80,19 @@ class Player
 		    src: [this.sprite.position.x, this.sprite.position.y],
 		    dest: [this.sprite.position.x, this.sprite.position.y-dy],
 		    duration: 0.1,
-		    func: Tween.Linear,
+		    interpolate: Tween.Linear,
 		});
 		this.state = STATE.MOVING;
+		return;
+	    }
+	    // Handle searching
+	    if (this.controls.right.justPressed) {
+		this.state = STATE.SEARCHING;
 	    }
 	}
 	else if (this.state == STATE.MOVING)
 	{
+	    // The player is moving between aisles
 	    if (!this.tween.update(dt))
 	    {
 		this.aisleList[this.aisle].removePlayerSprite();
@@ -90,7 +105,24 @@ class Player
 	}
 	else if (this.state == STATE.SEARCHING)
 	{
-	    this.setImage('terrance_search');
+	    if (stateChanged) {
+		// The player is searching the filing cabinet
+		this.setImage('terrance_search');
+		this.sprite.position.x = 14;
+		this.sprite.position.y = -1;
+		this.sprite.scale.x = -1;
+		// Open the cabinet
+		this.getAisle().cabinet.setOpen(true);
+		// Have the player searching for a minimum amount of time
+		this.timer = 0.25;
+	    }
+	    this.timer -= dt;
+	    if (!this.controls.right.held && this.timer <= 0)
+	    {
+		this.state = STATE.IDLE;
+		// Close the cabinet
+		this.getAisle().cabinet.setOpen(false);
+	    }
 	}
     }
 };

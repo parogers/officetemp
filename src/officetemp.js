@@ -41035,19 +41035,22 @@ class Aisle {
 						// The container holds everything in this aisle
 						this.container = new PIXI.Container();
 						// Things that are behind the counter
-						this.behind = new PIXI.Container();
-						this.behind.position.set(0, -5);
-						this.container.addChild(this.behind);
+						this.behindCounter = new PIXI.Container();
+						this.behindCounter.position.set(0, -5);
+						this.container.addChild(this.behindCounter);
 
 						this.counter = new PIXI.Sprite(getImage(Resource.OFFICE, 'office_desk1'));
 						this.counter.anchor.set(0, 1);
 						//this.counter.position.set(0, ypos);
 						this.container.addChild(this.counter);
 
-						this.cabinet = new PIXI.Sprite(getImage(Resource.SPRITES, 'cabinet_closed'));
-						this.cabinet.anchor.set(0, 1);
-						this.cabinet.position.set(220, -4);
-						this.container.addChild(this.cabinet);
+						this.cabinet = new Cabinet();
+						this.cabinet.sprite.position.set(220, -4);
+						this.container.addChild(this.cabinet.sprite);
+
+						this.cabinetArea = new PIXI.Container();
+						this.cabinetArea.position.set(205, -5);
+						this.container.addChild(this.cabinetArea);
 
 						this.player = null;
 			}
@@ -41057,15 +41060,29 @@ class Aisle {
 			}
 
 			addPlayerSprite(player) {
-						this.behind.addChild(player);
+						this.cabinetArea.addChild(player);
 						this.player = player;
 			}
 
 			removePlayerSprite() {
 						if (this.player) {
-									this.behind.removeChild(this.player);
+									this.cabinetArea.removeChild(this.player);
 									this.player = null;
 						}
+			}
+}
+
+class Cabinet {
+			constructor() {
+						this.sprite = new PIXI.Sprite();
+						this.sprite.anchor.set(0, 1);
+						this.setOpen(false);
+			}
+
+			setOpen(b) {
+						let img = null;
+						if (b) img = 'cabinet_open';else img = 'cabinet_closed';
+						this.sprite.texture = getImage(Resource.SPRITES, img);
 			}
 }
 
@@ -41081,14 +41098,13 @@ class GameScreen {
 
 			start() {
 						let img = getImage(Resource.OFFICE, 'office_carpet');
-						this.background = new PIXI.Sprite(img);
-						this.stage.addChild(this.background);
+						this.stage.addChild(new PIXI.Sprite(img));
 
-						this.shadows = new PIXI.Sprite(getImage(Resource.OFFICE, 'office_shadows'));
-						this.stage.addChild(this.shadows);
+						img = getImage(Resource.OFFICE, 'office_shadows');
+						this.stage.addChild(new PIXI.Sprite(img));
 
-						this.wall = new PIXI.Sprite(getImage(Resource.OFFICE, 'office_wall'));
-						this.stage.addChild(this.wall);
+						img = getImage(Resource.OFFICE, 'office_wall');
+						this.stage.addChild(new PIXI.Sprite(img));
 
 						this.aisleList = [];
 						for (let ypos of AISLE_YPOS_LIST) {
@@ -41097,9 +41113,7 @@ class GameScreen {
 									this.stage.addChild(aisle.container);
 									this.aisleList.push(aisle);
 						}
-
 						this.player = new Player(this.controls, this.aisleList);
-						this.player.sprite.position.set(210, 0);
 						this.aisleList[this.aisle].addPlayerSprite(this.player.sprite);
 			}
 
@@ -41239,8 +41253,8 @@ class Game {
 		//PIXI.ticker.shared.autoStart = false;
 		//PIXI.ticker.shared.stop();
 
-		//PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-		PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.NEAREST;
+		PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+		//PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.NEAREST;
 
 		//let rect = getLargestRect(this.container, ASPECT_RATIO);
 
@@ -41389,8 +41403,10 @@ class Player {
 		this.sprite = new PIXI.Sprite(getImage(Resource.SPRITES, 'terrance_idle'));
 		this.sprite.anchor.set(0.5, 1);
 		this.state = STATE.IDLE;
+		this.lastState = -1;
 		this.aisleList = aisleList;
 		this.aisle = 0;
+		this.timer = 0;
 		this.nextAisle = -1;
 		this.controls = controls;
 	}
@@ -41400,31 +41416,45 @@ class Player {
 	}
 
 	setImage(name) {
-		this.texture = getImage(Resource.SPRITES, name);
+		this.sprite.texture = getImage(Resource.SPRITES, name);
 	}
 
 	update(dt) {
+		let stateChanged = this.lastState != this.state;
+		this.lastState = this.state;
 		if (this.state == STATE.IDLE) {
-			this.setImage('terrance_idle');
+			if (stateChanged) {
+				// Done searching
+				this.sprite.scale.x = 1;
+				this.sprite.position.x = 0;
+				this.setImage('terrance_idle');
+			}
 
+			// Handle up/down movement
 			this.nextAisle = -1;
 			if (this.controls.up.justPressed && this.aisle > 0) {
 				this.nextAisle = this.aisle - 1;
-			} else if (this.controls.down.justPressed && this.aisle < this.aisleList.length - 1) {
+			}
+			if (this.controls.down.justPressed && this.aisle < this.aisleList.length - 1) {
 				this.nextAisle = this.aisle + 1;
 			}
-
 			if (this.nextAisle != -1) {
 				let dy = this.aisleList[this.aisle].getY() - this.aisleList[this.nextAisle].getY();
 				this.tween = new Tween(this.sprite, {
 					src: [this.sprite.position.x, this.sprite.position.y],
 					dest: [this.sprite.position.x, this.sprite.position.y - dy],
 					duration: 0.1,
-					func: Tween.Linear
+					interpolate: Tween.Linear
 				});
 				this.state = STATE.MOVING;
+				return;
+			}
+			// Handle searching
+			if (this.controls.right.justPressed) {
+				this.state = STATE.SEARCHING;
 			}
 		} else if (this.state == STATE.MOVING) {
+			// The player is moving between aisles
 			if (!this.tween.update(dt)) {
 				this.aisleList[this.aisle].removePlayerSprite();
 				this.aisleList[this.nextAisle].addPlayerSprite(this.sprite);
@@ -41434,7 +41464,23 @@ class Player {
 				this.sprite.position.y = 0;
 			}
 		} else if (this.state == STATE.SEARCHING) {
-			this.setImage('terrance_search');
+			if (stateChanged) {
+				// The player is searching the filing cabinet
+				this.setImage('terrance_search');
+				this.sprite.position.x = 14;
+				this.sprite.position.y = -1;
+				this.sprite.scale.x = -1;
+				// Open the cabinet
+				this.getAisle().cabinet.setOpen(true);
+				// Have the player searching for a minimum amount of time
+				this.timer = 0.25;
+			}
+			this.timer -= dt;
+			if (!this.controls.right.held && this.timer <= 0) {
+				this.state = STATE.IDLE;
+				// Close the cabinet
+				this.getAisle().cabinet.setOpen(false);
+			}
 		}
 	}
 };
@@ -41630,13 +41676,13 @@ class TitleScreen {
 			let t1 = new Tween(this.terrance, {
 				src: [this.terranceX + 50, this.terranceY],
 				dest: [this.terranceX, this.terranceY],
-				func: Tween.LinearSlowdown,
+				interpolate: Tween.LinearSlowdown,
 				duration: 0.5
 			});
 			let t2 = new Tween(this.sweaterGuy, {
 				src: [this.sweaterX - 50, this.sweaterY],
 				dest: [this.sweaterX, this.sweaterY],
-				func: Tween.LinearSlowdown,
+				interpolate: Tween.LinearSlowdown,
 				duration: 0.5
 			});
 			return [this.process.add(t1), this.process.add(t2)];
@@ -41684,7 +41730,7 @@ class TitleScreen {
 				let tween = new Tween(paper, {
 					src: [this.terranceX + dx, stop * 5],
 					dest: [this.terranceX + dx, this.terranceY + stop],
-					func: Tween.Linear,
+					interpolate: Tween.Linear,
 					duration: 0.5
 				});
 				lst.push(this.process.add(tween));
@@ -41732,12 +41778,11 @@ module.exports = TitleScreen;
  */
 
 class Tween {
-    constructor(sprite, args) {
-        this.sprite = sprite;
-        //this.src = [sprite.position.x, sprite.position.y];
+    constructor(target, args) {
+        this.target = target;
         this.src = args.src;
         this.dest = args.dest;
-        this.func = args.func;
+        this.interpolate = args.interpolate;
         this.duration = args.duration;
         this.elapsed = 0;
     }
@@ -41747,12 +41792,9 @@ class Tween {
         let param = this.elapsed / this.duration;
         if (param > 1) param = 1;
 
-        let pos = this.func(param, this.src, this.dest);
-        this.sprite.position.set(pos[0], pos[1]);
+        let pos = this.interpolate(param, this.src, this.dest);
+        this.target.position.set(pos[0], pos[1]);
 
-        /*this.sprite.position.set(
-            this.src[0] + dx,
-            this.src[1] + dy);*/
         if (param >= 1) {
             return false;
         }
