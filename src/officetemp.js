@@ -41025,6 +41025,7 @@ module.exports.KeyboardControls = KeyboardControls;
 var Tween = require("./tween");
 var Process = require("./process");
 var Resource = require("./resource");
+var Player = require("./player");
 var getImage = Resource.getImage;
 
 var AISLE_YPOS_LIST = [72, 111, 150];
@@ -41051,12 +41052,16 @@ class Aisle {
 						this.player = null;
 			}
 
-			addPlayer(player) {
+			getY() {
+						return this.container.position.y;
+			}
+
+			addPlayerSprite(player) {
 						this.behind.addChild(player);
 						this.player = player;
 			}
 
-			removePlayer() {
+			removePlayerSprite() {
 						if (this.player) {
 									this.behind.removeChild(this.player);
 									this.player = null;
@@ -41071,6 +41076,7 @@ class GameScreen {
 						this.controls = controls;
 						this.timer = 0;
 						this.aisle = 0;
+						this.player = null;
 			}
 
 			start() {
@@ -41092,10 +41098,9 @@ class GameScreen {
 									this.aisleList.push(aisle);
 						}
 
-						this.terrance = new PIXI.Sprite(getImage(Resource.SPRITES, 'terrance_idle'));
-						this.terrance.anchor.set(0.5, 1);
-						this.terrance.position.set(210, 0);
-						this.aisleList[this.aisle].addPlayer(this.terrance);
+						this.player = new Player(this.controls, this.aisleList);
+						this.player.sprite.position.set(210, 0);
+						this.aisleList[this.aisle].addPlayerSprite(this.player.sprite);
 			}
 
 			getStage() {
@@ -41104,19 +41109,7 @@ class GameScreen {
 
 			update(dt) {
 						this.timer += dt;
-
-						let nextAisle = -1;
-						if (this.controls.up.justPressed && this.aisle > 0) {
-									nextAisle = this.aisle - 1;
-						} else if (this.controls.down.justPressed && this.aisle < this.aisleList.length - 1) {
-									nextAisle = this.aisle + 1;
-						}
-
-						if (nextAisle != -1) {
-									this.aisleList[this.aisle].removePlayer();
-									this.aisleList[nextAisle].addPlayer(this.terrance);
-									this.aisle = nextAisle;
-						}
+						this.player.update(dt);
 			}
 
 			isDone() {
@@ -41126,7 +41119,7 @@ class GameScreen {
 
 module.exports = GameScreen;
 
-},{"./process":194,"./resource":195,"./tween":197}],192:[function(require,module,exports){
+},{"./player":194,"./process":195,"./resource":196,"./tween":198}],192:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41189,7 +41182,7 @@ class LoadingScreen {
 
 module.exports = LoadingScreen;
 
-},{"./resource":195}],193:[function(require,module,exports){
+},{"./resource":196}],193:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41306,11 +41299,9 @@ class Game {
 		if (this.screen.isDone()) {
 			let screen = null;
 			if (this.screen === this.screens.loading) {
-				// Show the title screen
-				screen = this.screens.title;
-				//screen = this.screens.game;
+				//screen = this.screens.title;
+				screen = this.screens.game;
 			} else if (this.screen === this.screens.title) {
-				// Game play
 				screen = this.screens.game;
 			}
 			this.screen = null;
@@ -41365,7 +41356,92 @@ module.exports.resize = function () {
 	game.resize();
 };
 
-},{"./controls":190,"./game":191,"./loading":192,"./title":196,"pixi-sound":26,"pixi.js":142}],194:[function(require,module,exports){
+},{"./controls":190,"./game":191,"./loading":192,"./title":197,"pixi-sound":26,"pixi.js":142}],194:[function(require,module,exports){
+/* officetemper - A game about temp work
+ * Copyright (C) 2017  Peter Rogers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var Tween = require("./tween");
+var Resource = require("./resource");
+var getImage = Resource.getImage;
+
+var STATE = {
+	IDLE: 0,
+	MOVING: 1,
+	SEARCHING: 2
+};
+
+class Player {
+	constructor(controls, aisleList) {
+		this.sprite = new PIXI.Sprite(getImage(Resource.SPRITES, 'terrance_idle'));
+		this.sprite.anchor.set(0.5, 1);
+		this.state = STATE.IDLE;
+		this.aisleList = aisleList;
+		this.aisle = 0;
+		this.nextAisle = -1;
+		this.controls = controls;
+	}
+
+	getAisle() {
+		return this.aisleList[this.aisle];
+	}
+
+	setImage(name) {
+		this.texture = getImage(Resource.SPRITES, name);
+	}
+
+	update(dt) {
+		if (this.state == STATE.IDLE) {
+			this.setImage('terrance_idle');
+
+			this.nextAisle = -1;
+			if (this.controls.up.justPressed && this.aisle > 0) {
+				this.nextAisle = this.aisle - 1;
+			} else if (this.controls.down.justPressed && this.aisle < this.aisleList.length - 1) {
+				this.nextAisle = this.aisle + 1;
+			}
+
+			if (this.nextAisle != -1) {
+				let dy = this.aisleList[this.aisle].getY() - this.aisleList[this.nextAisle].getY();
+				this.tween = new Tween(this.sprite, {
+					src: [this.sprite.position.x, this.sprite.position.y],
+					dest: [this.sprite.position.x, this.sprite.position.y - dy],
+					duration: 0.1,
+					func: Tween.Linear
+				});
+				this.state = STATE.MOVING;
+			}
+		} else if (this.state == STATE.MOVING) {
+			if (!this.tween.update(dt)) {
+				this.aisleList[this.aisle].removePlayerSprite();
+				this.aisleList[this.nextAisle].addPlayerSprite(this.sprite);
+				this.aisle = this.nextAisle;
+				this.tween = null;
+				this.state = STATE.IDLE;
+				this.sprite.position.y = 0;
+			}
+		} else if (this.state == STATE.SEARCHING) {
+			this.setImage('terrance_search');
+		}
+	}
+};
+
+module.exports = Player;
+
+},{"./resource":196,"./tween":198}],195:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41436,36 +41512,41 @@ class Process {
 
 module.exports = Process;
 
-},{}],195:[function(require,module,exports){
+},{}],196:[function(require,module,exports){
 
 module.exports = {};
 
 module.exports.ALL = {
-    SPRITES: 'sprites.json',
-    TITLE: 'title-text.png',
-    OFFICE: 'office.json',
-    SND_TEST: 'powerup1.wav'
+   SPRITES: 'sprites.json',
+   TITLE: 'title-text.png',
+   OFFICE: 'office.json',
+   SND_TEST: 'powerup1.wav'
 };
 
 for (let key in module.exports.ALL) {
-    module.exports[key] = module.exports.ALL[key];
+   module.exports[key] = module.exports.ALL[key];
 }
 
 module.exports.getImage = function (sheet, name) {
-    let img = null;
-    let res = PIXI.loader.resources[sheet];
-    if (name === undefined) {
-        img = res.texture;
-    } else {
-        img = res.textures[name];
-    }
-    if (!img) {
-        console.log("WARNING: can't find texture: " + sheet + "/" + name);
-    }
-    return img;
+   let img = null;
+   let res = PIXI.loader.resources[sheet];
+   if (!res) {
+      console.log("WARNING: cannot find sheet " + sheet);
+      return null;
+   }
+
+   if (name === undefined) {
+      img = res.texture;
+   } else {
+      img = res.textures[name];
+   }
+   if (!img) {
+      console.log("WARNING: can't find texture: " + sheet + "/" + name);
+   }
+   return img;
 };
 
-},{}],196:[function(require,module,exports){
+},{}],197:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41632,7 +41713,7 @@ class TitleScreen {
 
 module.exports = TitleScreen;
 
-},{"./process":194,"./resource":195,"./tween":197}],197:[function(require,module,exports){
+},{"./process":195,"./resource":196,"./tween":198}],198:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *

@@ -15,6 +15,11 @@ for (let key in module.exports.ALL) {
 module.exports.getImage = function(sheet, name) {
     let img = null;
     let res = PIXI.loader.resources[sheet];
+    if (!res) {
+	console.log("WARNING: cannot find sheet " + sheet);
+	return null;
+    }
+    
     if (name === undefined) {
 	img = res.texture;
     } else {

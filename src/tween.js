@@ -17,9 +17,8 @@
 
 class Tween
 {
-    constructor(sprite, args) {
-	this.sprite = sprite;
-	//this.src = [sprite.position.x, sprite.position.y];
+    constructor(target, args) {
+	this.target = target;
 	this.src = args.src;
 	this.dest = args.dest;
 	this.func = args.func;
@@ -33,11 +32,8 @@ class Tween
 	if (param > 1) param = 1;
 
 	let pos = this.func(param, this.src, this.dest);
-	this.sprite.position.set(pos[0], pos[1]);
+	this.target.position.set(pos);
 	
-	/*this.sprite.position.set(
-	    this.src[0] + dx,
-	    this.src[1] + dy);*/
 	if (param >= 1) {
 	    return false;
 	}

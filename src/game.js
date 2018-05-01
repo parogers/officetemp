@@ -18,6 +18,7 @@
 var Tween = require("./tween");
 var Process = require("./process");
 var Resource = require("./resource");
+var Player = require("./player");
 var getImage = Resource.getImage;
 
 var AISLE_YPOS_LIST = [72, 111, 150];
@@ -47,12 +48,16 @@ class Aisle
 	this.player = null;
     }
 
-    addPlayer(player) {
+    getY() {
+	return this.container.position.y;
+    }
+
+    addPlayerSprite(player) {
 	this.behind.addChild(player);
 	this.player = player;
     }
 
-    removePlayer() {
+    removePlayerSprite() {
 	if (this.player) {
 	    this.behind.removeChild(this.player);
 	    this.player = null;
@@ -68,6 +73,7 @@ class GameScreen
 	this.controls = controls;
 	this.timer = 0;
 	this.aisle = 0;
+	this.player = null;
     }
 
     start() {
@@ -91,11 +97,9 @@ class GameScreen
 	    this.aisleList.push(aisle);
 	}
 
-	this.terrance = new PIXI.Sprite(
-	    getImage(Resource.SPRITES, 'terrance_idle'));
-	this.terrance.anchor.set(0.5, 1);
-	this.terrance.position.set(210, 0);
-	this.aisleList[this.aisle].addPlayer(this.terrance);
+	this.player = new Player(this.controls, this.aisleList);
+	this.player.sprite.position.set(210, 0);
+	this.aisleList[this.aisle].addPlayerSprite(this.player.sprite);
     }
 
     getStage() {
@@ -104,22 +108,7 @@ class GameScreen
 
     update(dt) {
 	this.timer += dt;
-
-	let nextAisle = -1;
-	if (this.controls.up.justPressed && this.aisle > 0) {
-	    nextAisle = this.aisle-1;
-	}
-	else if (this.controls.down.justPressed &&
-		 this.aisle < this.aisleList.length-1)
-	{
-	    nextAisle = this.aisle+1;
-	}
-
-	if (nextAisle != -1) {
-	    this.aisleList[this.aisle].removePlayer();
-	    this.aisleList[nextAisle].addPlayer(this.terrance);
-	    this.aisle = nextAisle;
-	}
+	this.player.update(dt);
     }
 
     isDone() {

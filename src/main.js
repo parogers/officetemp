@@ -38,7 +38,8 @@ var game = null;
 
 class Game
 {
-    constructor(container) {
+    constructor(container)
+    {
 	if (typeof(container) == 'string') {
 	    container = document.getElementById(container);
 	}
@@ -55,8 +56,8 @@ class Game
 	//PIXI.ticker.shared.autoStart = false;
 	//PIXI.ticker.shared.stop();
 
-	//PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-	PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.NEAREST;
+	PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+	//PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.NEAREST;
 
 	//let rect = getLargestRect(this.container, ASPECT_RATIO);
 
@@ -118,12 +119,10 @@ class Game
 	{
 	    let screen = null;
 	    if (this.screen === this.screens.loading) {
-		// Show the title screen
-		screen = this.screens.title;
-		//screen = this.screens.game;
+		//screen = this.screens.title;
+		screen = this.screens.game;
 	    }
 	    else if (this.screen === this.screens.title) {
-		// Game play
 		screen = this.screens.game;
 	    }
 	    this.screen = null;
