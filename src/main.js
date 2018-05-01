@@ -25,6 +25,8 @@ require("pixi-sound");
 
 var LoadingScreen = require("./loading");
 var TitleScreen = require("./title");
+var Controls = require("./controls");
+var GameScreen = require("./game");
 
 /* Globals */
 
@@ -44,56 +46,85 @@ class Game
 	this.pixiApp = null;
 	this.screens = {};
 	this.screen = null;
+	this.controls = new Controls.KeyboardControls();
+	this.controls.attachKeyboardEvents();
     }
 
     start() {
-	PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 	// TODO - enable the ticker?
 	//PIXI.ticker.shared.autoStart = false;
 	//PIXI.ticker.shared.stop();
 
-	let rect = getLargestRect(this.container, ASPECT_RATIO);
+	//PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+	PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.NEAREST;
+
+	//let rect = getLargestRect(this.container, ASPECT_RATIO);
+
+	let rect = this.container.getBoundingClientRect();
+	let scale = Math.min(
+	    rect.width / GAME_WIDTH,
+	    rect.height / GAME_HEIGHT);
+
+	//scale = Math.floor(scale);
+	//if (scale <= 0) scale = 1;
+	
 	this.pixiApp = new PIXI.Application({
-	    width: rect.width,
-	    height: rect.height,
-	    backgroundColor: 0xffffff,
-	    antialias: false,
+	    width: GAME_WIDTH*scale,
+	    height: GAME_HEIGHT*scale,
+	    backgroundColor: 0xe0e0a0,
+	    //resolution: 1,
+	    //preserveDrawingBuffer: true,
+	    //antialias: false,
+	    forceCanvas: true,
+	    roundPixels: true,
 	});
 	this.pixiApp.renderer.plugins.interaction.destroy();
 	this.container.appendChild(this.pixiApp.view);
 
-	this.pixiApp.stage.scale.set(rect.width / GAME_WIDTH);
+	this.pixiApp.stage.scale.set(scale);
 
 	this.screens = {
 	    loading: new LoadingScreen(),
-	    title: new TitleScreen()
+	    title: new TitleScreen(this.controls),
+	    game: new GameScreen(this.controls),
 	}
 	this.screen = this.screens.loading;
 	this.screen.start();
 
 	// Start the ticker, which will drive the render loop
 	PIXI.ticker.shared.add(() => {
-	    this.update(PIXI.ticker.shared.elapsedMS);
+	    this.update(PIXI.ticker.shared.elapsedMS/1000.0);
 	});
+	//this.redraw();
     }
+
+    /*
+    redraw() {
+	this.update(1/60.0);
+	requestAnimationFrame(() => {
+	    this.redraw();
+	});
+    }*/
 
     update(dt) {
 	if (this.screen) {
 	    this.screen.update(dt);
 	    this.pixiApp.render();
 	}
+	this.controls.update(dt);
 
 	// If the screen is done, figure out where to go next
 	if (this.screen.isDone())
 	{
 	    let screen = null;
 	    if (this.screen === this.screens.loading) {
-		// Title screen
+		// Show the title screen
 		screen = this.screens.title;
+		//screen = this.screens.game;
 	    }
 	    else if (this.screen === this.screens.title) {
 		// Game play
-		// ...
+		screen = this.screens.game;
 	    }
 	    this.screen = null;
 	    

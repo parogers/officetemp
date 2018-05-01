@@ -12,7 +12,9 @@ watch:
 	cd src && watchify -v -t babelify -s $(BUNDLE) main.js -o $(BUNDLE).js
 
 media:
-	$(XCF2ATLAS) --image=$(MEDIA)/sprites.png --json=$(MEDIA)/sprites.json rawdata/*.xcf --max-width=400
+	$(XCF2ATLAS) --image=$(MEDIA)/sprites.png --json=$(MEDIA)/sprites.json rawdata/sprites/*.xcf --max-width=400
+
+	$(XCF2ATLAS) --image=$(MEDIA)/office.png --json=$(MEDIA)/office.json rawdata/office.xcf
 
 	inkscape --export-png=$(MEDIA)/title-text.png --export-area-page -z rawdata/title-text.svg 
 

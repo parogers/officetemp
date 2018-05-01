@@ -40840,6 +40840,293 @@ module.exports = {
 };
 
 },{}],190:[function(require,module,exports){
+/* APDUNGEON - A dungeon crawler demo written in javascript + pixi.js
+ * Copyright (C) 2017  Peter Rogers (peter.rogers@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * See LICENSE.txt for the full text of the license.
+ */
+
+var PRIMARY = 90;
+var PRIMARY_ALT = 65;
+var SWAP = 88;
+var SPACE = 32;
+var ARROW_UP = 38;
+var ARROW_LEFT = 37;
+var ARROW_RIGHT = 39;
+var ARROW_DOWN = 40;
+var TEST_KEY = 75;
+
+var DOUBLE_PRESS_TIME = 0.3;
+
+var DEFAULTS = {
+    up: ARROW_UP,
+    down: ARROW_DOWN,
+    left: ARROW_LEFT,
+    right: ARROW_RIGHT,
+    primary: [PRIMARY, PRIMARY_ALT],
+    swap: SWAP,
+    space: SPACE
+};
+
+/* A single input (eg attack) */
+class Input {
+    constructor(name) {
+        this.name = name;
+        this.held = false;
+        this.justPressed = false;
+        this.justReleased = false;
+        this.doublePressed = false;
+    }
+
+    press(set) {
+        this.justPressed = !this.held;
+        this.held = set === undefined ? true : set;
+    }
+
+    release(set) {
+        this.justReleased = !!this.held;
+        this.held = false;
+    }
+}
+
+class KeyboardControls {
+    constructor() {
+        // Map of Input instances stored by key code
+        this.inputByKey = {};
+        this.inputs = [];
+        this.time = 0;
+        // Keep track of the last input pressed, so we can detect double-clicks
+        this.lastInputPressed = null;
+        this.lastInputPressedTime = 0;
+        for (let name of Object.keys(DEFAULTS)) {
+            let keys = DEFAULTS[name];
+
+            if (typeof keys.push !== "function") {
+                keys = [keys];
+            }
+
+            this[name] = new Input(name);
+            this.inputs.push(this[name]);
+            for (let key of keys) {
+                this.inputByKey[key] = this[name];
+            }
+        }
+    }
+
+    getX() {
+        return this.right.held - this.left.held;
+    }
+
+    getY() {
+        return this.down.held - this.up.held;
+    }
+
+    /* This should be called after the game state is updated */
+    update(dt) {
+        this.time += dt;
+        for (let input of this.inputs) {
+            input.justPressed = false;
+            input.justReleased = false;
+            input.doublePressed = false;
+        }
+    }
+
+    attachKeyboardEvents() {
+        window.addEventListener("keydown", event => {
+            var input = this.inputByKey[event.keyCode];
+            if (input && !input.held) {
+                // Handle double-pressing the input
+                if (this.lastInputPressed === input && this.time - this.lastInputPressedTime < DOUBLE_PRESS_TIME) {
+                    input.doublePressed = true;
+                }
+                this.lastInputPressedTime = this.time;
+                this.lastInputPressed = input;
+
+                input.press();
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        });
+
+        window.addEventListener("keyup", event => {
+            var input = this.inputByKey[event.keyCode];
+            if (input) {
+                input.release();
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        });
+    }
+}
+
+/******************/
+/* ManualControls */
+/******************/
+
+class ManualControls {
+    constructor() {
+        this.dirx = 0;
+        this.diry = 0;
+
+        for (let name of Object.keys(DEFAULTS)) {
+            this[name] = new Input(name);
+        }
+    }
+
+    getX() {
+        return this.dirx;
+    }
+
+    getY() {
+        return this.diry;
+    }
+}
+
+/***********/
+/* Exports */
+/***********/
+
+module.exports = {};
+
+module.exports.ManualControls = ManualControls;
+module.exports.KeyboardControls = KeyboardControls;
+
+},{}],191:[function(require,module,exports){
+/* officetemper - A game about temp work
+ * Copyright (C) 2017  Peter Rogers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var Tween = require("./tween");
+var Process = require("./process");
+var Resource = require("./resource");
+var getImage = Resource.getImage;
+
+var AISLE_YPOS_LIST = [72, 111, 150];
+
+class Aisle {
+			constructor() {
+						// The container holds everything in this aisle
+						this.container = new PIXI.Container();
+						// Things that are behind the counter
+						this.behind = new PIXI.Container();
+						this.behind.position.set(0, -5);
+						this.container.addChild(this.behind);
+
+						this.counter = new PIXI.Sprite(getImage(Resource.OFFICE, 'office_desk1'));
+						this.counter.anchor.set(0, 1);
+						//this.counter.position.set(0, ypos);
+						this.container.addChild(this.counter);
+
+						this.cabinet = new PIXI.Sprite(getImage(Resource.SPRITES, 'cabinet_closed'));
+						this.cabinet.anchor.set(0, 1);
+						this.cabinet.position.set(220, -4);
+						this.container.addChild(this.cabinet);
+
+						this.player = null;
+			}
+
+			addPlayer(player) {
+						this.behind.addChild(player);
+						this.player = player;
+			}
+
+			removePlayer() {
+						if (this.player) {
+									this.behind.removeChild(this.player);
+									this.player = null;
+						}
+			}
+}
+
+class GameScreen {
+			constructor(controls) {
+						this.stage = new PIXI.Container();
+						this.process = new Process();
+						this.controls = controls;
+						this.timer = 0;
+						this.aisle = 0;
+			}
+
+			start() {
+						let img = getImage(Resource.OFFICE, 'office_carpet');
+						this.background = new PIXI.Sprite(img);
+						this.stage.addChild(this.background);
+
+						this.shadows = new PIXI.Sprite(getImage(Resource.OFFICE, 'office_shadows'));
+						this.stage.addChild(this.shadows);
+
+						this.wall = new PIXI.Sprite(getImage(Resource.OFFICE, 'office_wall'));
+						this.stage.addChild(this.wall);
+
+						this.aisleList = [];
+						for (let ypos of AISLE_YPOS_LIST) {
+									let aisle = new Aisle();
+									aisle.container.position.set(0, ypos);
+									this.stage.addChild(aisle.container);
+									this.aisleList.push(aisle);
+						}
+
+						this.terrance = new PIXI.Sprite(getImage(Resource.SPRITES, 'terrance_idle'));
+						this.terrance.anchor.set(0.5, 1);
+						this.terrance.position.set(210, 0);
+						this.aisleList[this.aisle].addPlayer(this.terrance);
+			}
+
+			getStage() {
+						return this.stage;
+			}
+
+			update(dt) {
+						this.timer += dt;
+
+						let nextAisle = -1;
+						if (this.controls.up.justPressed && this.aisle > 0) {
+									nextAisle = this.aisle - 1;
+						} else if (this.controls.down.justPressed && this.aisle < this.aisleList.length - 1) {
+									nextAisle = this.aisle + 1;
+						}
+
+						if (nextAisle != -1) {
+									this.aisleList[this.aisle].removePlayer();
+									this.aisleList[nextAisle].addPlayer(this.terrance);
+									this.aisle = nextAisle;
+						}
+			}
+
+			isDone() {
+						return false;
+			}
+}
+
+module.exports = GameScreen;
+
+},{"./process":194,"./resource":195,"./tween":197}],192:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -40902,7 +41189,7 @@ class LoadingScreen {
 
 module.exports = LoadingScreen;
 
-},{"./resource":192}],191:[function(require,module,exports){
+},{"./resource":195}],193:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -40930,6 +41217,8 @@ require("pixi-sound");
 
 var LoadingScreen = require("./loading");
 var TitleScreen = require("./title");
+var Controls = require("./controls");
+var GameScreen = require("./game");
 
 /* Globals */
 
@@ -40948,54 +41237,81 @@ class Game {
 		this.pixiApp = null;
 		this.screens = {};
 		this.screen = null;
+		this.controls = new Controls.KeyboardControls();
+		this.controls.attachKeyboardEvents();
 	}
 
 	start() {
-		PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 		// TODO - enable the ticker?
 		//PIXI.ticker.shared.autoStart = false;
 		//PIXI.ticker.shared.stop();
 
-		let rect = getLargestRect(this.container, ASPECT_RATIO);
+		//PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+		PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.NEAREST;
+
+		//let rect = getLargestRect(this.container, ASPECT_RATIO);
+
+		let rect = this.container.getBoundingClientRect();
+		let scale = Math.min(rect.width / GAME_WIDTH, rect.height / GAME_HEIGHT);
+
+		//scale = Math.floor(scale);
+		//if (scale <= 0) scale = 1;
+
 		this.pixiApp = new PIXI.Application({
-			width: rect.width,
-			height: rect.height,
-			backgroundColor: 0xffffff,
-			antialias: false
+			width: GAME_WIDTH * scale,
+			height: GAME_HEIGHT * scale,
+			backgroundColor: 0xe0e0a0,
+			//resolution: 1,
+			//preserveDrawingBuffer: true,
+			//antialias: false,
+			forceCanvas: true,
+			roundPixels: true
 		});
 		this.pixiApp.renderer.plugins.interaction.destroy();
 		this.container.appendChild(this.pixiApp.view);
 
-		this.pixiApp.stage.scale.set(rect.width / GAME_WIDTH);
+		this.pixiApp.stage.scale.set(scale);
 
 		this.screens = {
 			loading: new LoadingScreen(),
-			title: new TitleScreen()
+			title: new TitleScreen(this.controls),
+			game: new GameScreen(this.controls)
 		};
 		this.screen = this.screens.loading;
 		this.screen.start();
 
 		// Start the ticker, which will drive the render loop
 		PIXI.ticker.shared.add(() => {
-			this.update(PIXI.ticker.shared.elapsedMS);
+			this.update(PIXI.ticker.shared.elapsedMS / 1000.0);
 		});
+		//this.redraw();
 	}
+
+	/*
+ redraw() {
+ this.update(1/60.0);
+ requestAnimationFrame(() => {
+  this.redraw();
+ });
+ }*/
 
 	update(dt) {
 		if (this.screen) {
 			this.screen.update(dt);
 			this.pixiApp.render();
 		}
+		this.controls.update(dt);
 
 		// If the screen is done, figure out where to go next
 		if (this.screen.isDone()) {
 			let screen = null;
 			if (this.screen === this.screens.loading) {
-				// Title screen
+				// Show the title screen
 				screen = this.screens.title;
+				//screen = this.screens.game;
 			} else if (this.screen === this.screens.title) {
 				// Game play
-				// ...
+				screen = this.screens.game;
 			}
 			this.screen = null;
 
@@ -41049,13 +41365,85 @@ module.exports.resize = function () {
 	game.resize();
 };
 
-},{"./loading":190,"./title":194,"pixi-sound":26,"pixi.js":142}],192:[function(require,module,exports){
+},{"./controls":190,"./game":191,"./loading":192,"./title":196,"pixi-sound":26,"pixi.js":142}],194:[function(require,module,exports){
+/* officetemper - A game about temp work
+ * Copyright (C) 2017  Peter Rogers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class Process {
+	constructor() {
+		this.callbacks = [];
+	}
+
+	// Adds a callback function or object (which defines an update method)
+	// This returns a promise that resolves when the callback is finished.
+	// (ie returns false on some future call)
+	add(func) {
+		return new Promise(resolve => {
+			this.callbacks.push(dt => {
+				// The callback will run on every call to update (below),
+				// until it returns false - where we remove it from the
+				// callback list.
+				let result = null;
+
+				if (func.update) result = func.update(dt);else result = func(dt);
+
+				if (!result) {
+					resolve();
+					return false;
+				}
+				return true;
+			});
+		});
+	}
+
+	// Returns a promise that resolves after the given amount of (game) time
+	// has elapsed.
+	wait(delay) {
+		let timer = delay;
+		return this.add(function (dt) {
+			timer -= dt;
+			return timer > 0;
+		});
+	}
+
+	update(dt) {
+		let n = 0;
+		while (n < this.callbacks.length) {
+			let func = this.callbacks[n];
+			if (!func(dt)) {
+				let last = this.callbacks.pop();
+				if (func !== last) this.callbacks[n] = last;
+			} else {
+				n++;
+			}
+		}
+	}
+}
+
+module.exports = Process;
+
+},{}],195:[function(require,module,exports){
 
 module.exports = {};
 
 module.exports.ALL = {
     SPRITES: 'sprites.json',
     TITLE: 'title-text.png',
+    OFFICE: 'office.json',
     SND_TEST: 'powerup1.wav'
 };
 
@@ -41065,10 +41453,11 @@ for (let key in module.exports.ALL) {
 
 module.exports.getImage = function (sheet, name) {
     let img = null;
+    let res = PIXI.loader.resources[sheet];
     if (name === undefined) {
-        img = PIXI.loader.resources[sheet].texture;
+        img = res.texture;
     } else {
-        img = PIXI.loader.resources[sheet].textures[name];
+        img = res.textures[name];
     }
     if (!img) {
         console.log("WARNING: can't find texture: " + sheet + "/" + name);
@@ -41076,7 +41465,7 @@ module.exports.getImage = function (sheet, name) {
     return img;
 };
 
-},{}],193:[function(require,module,exports){
+},{}],196:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41094,142 +41483,217 @@ module.exports.getImage = function (sheet, name) {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TimerList {
-   constructor() {
-      this.timers = [];
-   }
-
-   create(callback, delay, arg) {
-      let tm = new Timer(callback, delay, arg);
-      this.timers.push(tm);
-   }
-
-   update(dt) {
-      let n = 0;
-      while (n < this.timers.length) {
-         let timer = this.timers[n];
-         if (!timer.update(dt)) {
-            let last = this.timers.pop();
-            if (timer !== last) this.timers[n] = last;
-         } else {
-            n++;
-         }
-      }
-   }
-
-   wait(delay) {
-      return new Promise((resolve, reject) => {
-         this.create(resolve, delay, "HELLO WORLD");
-      });
-   }
-}
-
-class Timer {
-   constructor(callback, delay, arg) {
-      this.callback = callback;
-      this.delay = delay;
-      this.arg = arg;
-   }
-
-   update(dt) {
-      this.delay -= dt;
-      if (this.delay <= 0) {
-         this.callback(this.arg);
-         return false;
-      }
-      return true;
-   }
-}
-
-module.exports = TimerList;
-
-},{}],194:[function(require,module,exports){
-/* officetemper - A game about temp work
- * Copyright (C) 2017  Peter Rogers
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-var TimerList = require("./timer");
+var Tween = require("./tween");
+var Process = require("./process");
 var Resource = require("./resource");
 var getImage = Resource.getImage;
 
-const SCALE = 1.35;
+const SCALE = 1.3;
+
+class Test {
+	constructor() {
+		this.counter = 0;
+	}
+
+	update(dt) {
+		this.counter++;
+		console.log(this.counter);
+		return this.counter < 10;
+	}
+}
 
 class TitleScreen {
-			constructor() {
-						this.stage = new PIXI.Container();
-						this.timers = new TimerList();
+	constructor(controls) {
+		this.stage = new PIXI.Container();
+		this.process = new Process();
+		this.controls = controls;
+		this.done = false;
+	}
+
+	start() {
+		let img = getImage(Resource.TITLE);
+		img.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR;
+		img.baseTexture.dispose();
+
+		console.log("TITLE");
+		this.timer = 0;
+		this.terranceX = 210;
+		this.terranceY = 110;
+		this.terrance = new PIXI.Sprite(getImage(Resource.SPRITES, "terrance_idle"));
+		this.terrance.anchor.set(0.5, 1);
+		this.terrance.scale.set(SCALE);
+		this.terrance.position.set(this.terranceX + 50, this.terranceY);
+		this.stage.addChild(this.terrance);
+
+		this.sweaterX = 40;
+		this.sweaterY = 110;
+		this.sweaterGuy = new PIXI.Sprite(getImage(Resource.SPRITES, "sweater_drink1"));
+		this.sweaterGuy.anchor.set(0.5, 1);
+		this.sweaterGuy.scale.set(SCALE);
+		this.sweaterGuy.position.set(this.sweaterX - 50, this.sweaterY);
+		this.stage.addChild(this.sweaterGuy);
+
+		this.title = new PIXI.Sprite(getImage(Resource.TITLE));
+		this.title.scale.set(0.2);
+		this.title.anchor.set(0.5, 0.5);
+		this.title.position.set(125, 80);
+
+		Promise.resolve().then(() => {
+			return this.process.wait(1);
+		}).then(() => {
+			this.stage.addChild(this.title);
+		}).then(() => {
+			return this.process.wait(1);
+		}).then(() => {
+			// Have terrance and sweater guy slide in from the left and right
+			let t1 = new Tween(this.terrance, {
+				src: [this.terranceX + 50, this.terranceY],
+				dest: [this.terranceX, this.terranceY],
+				func: Tween.LinearSlowdown,
+				duration: 0.5
+			});
+			let t2 = new Tween(this.sweaterGuy, {
+				src: [this.sweaterX - 50, this.sweaterY],
+				dest: [this.sweaterX, this.sweaterY],
+				func: Tween.LinearSlowdown,
+				duration: 0.5
+			});
+			return [this.process.add(t1), this.process.add(t2)];
+		}).then(() => {
+			return this.process.wait(1);
+		}).then(() => {
+			console.log("DONE");
+
+			// Terrance gets frazzled, sweater guy drinks coffee
+			this.process.add(dt => {
+				let x = this.terranceX + 0.5 * Math.cos(this.timer * 75);
+				let y = this.terranceY + 0.25 * Math.sin(this.timer * 50);
+				this.terrance.texture = getImage(Resource.SPRITES, "terrance_frazzled");
+				this.terrance.position.set(x, y);
+				return true;
+			});
+
+			let frame = 0;
+			this.process.add(dt => {
+				let frames = [getImage(Resource.SPRITES, "sweater_drink2"), getImage(Resource.SPRITES, "sweater_drink1"), getImage(Resource.SPRITES, "sweater_drink1")];
+				frame += 0.75 * dt;
+				this.sweaterGuy.texture = frames[(frame | 0) % frames.length];
+				return true;
+			});
+		}).then(() => {
+			let x1 = -10;
+			let x2 = 14;
+			let x3 = 0;
+			const paperPos = [[x1, -15, -3], [x2, -15, 6], [x3, 0, 5], [x2 + 10, 0, -5], [x1 - 1, -15, -10.5], [x2, -15, -1], [x3, 0, -2], [x1, -15, -17.5], [x3 + 1, 0, -10]];
+
+			let papers = [];
+
+			let lst = [];
+			for (let n = 0; n < paperPos.length; n++) {
+				let img = getImage(Resource.SPRITES, "paperstack_1");
+				let paper = new PIXI.Sprite(img);
+				paper.scale.set(SCALE);
+				paper.anchor.set(0.5, 1);
+
+				this.stage.addChild(paper);
+
+				let dx = paperPos[n][0];
+				//let dy = paperPos[n][1];
+				let stop = paperPos[n][2];
+				let tween = new Tween(paper, {
+					src: [this.terranceX + dx, stop * 5],
+					dest: [this.terranceX + dx, this.terranceY + stop],
+					func: Tween.Linear,
+					duration: 0.5
+				});
+				lst.push(this.process.add(tween));
 			}
+			return lst;
+		});
+	}
 
-			createPaperStack() {
-						let img = getImage(Resource.SPRITES, "paperstack_1");
-						let papers = new PIXI.Sprite(img);
-						papers.scale.set(SCALE);
-						return papers;
-						//.stage.addChild(this.papers);
-			}
+	update(dt) {
+		this.process.update(dt);
+		this.timer += dt;
 
-			start() {
+		if (this.controls.primary.justPressed) {
+			this.done = true;
+		}
+	}
 
-						console.log("TITLE");
-						this.timer = 0;
-						this.terranceX = 220;
-						this.terranceY = 110;
-						this.terrance = new PIXI.Sprite(getImage(Resource.SPRITES, "terrance_idle"));
-						this.terrance.anchor.set(0.5, 1);
-						this.terrance.scale.set(SCALE);
-						this.terrance.position.set(this.terranceX, this.terranceY);
-						this.stage.addChild(this.terrance);
+	getStage() {
+		return this.stage;
+	}
 
-						this.sweaterGuy = new PIXI.Sprite(getImage(Resource.SPRITES, "sweater_drink1"));
-						this.sweaterGuy.anchor.set(0.5, 1);
-						this.sweaterGuy.scale.set(SCALE);
-						this.sweaterGuy.position.set(30, 110);
-						this.stage.addChild(this.sweaterGuy);
-
-						this.title = new PIXI.Sprite(getImage(Resource.TITLE));
-						this.title.scale.set(0.5);
-						this.title.anchor.set(0.5, 0.5);
-						this.title.position.set(125, 80);
-						this.stage.addChild(this.title);
-
-						this.timers.wait(1000).then(() => {
-									console.log("DONE!");
-						});
-			}
-
-			update(dt) {
-						this.timers.update(dt);
-
-						this.timer += dt;
-						/*
-      this.terrance.position.set(
-          this.terranceX + 0.75*Math.cos(this.timer/20),
-          this.terranceY + 0.5*Math.sin(this.timer/15));*/
-			}
-
-			getStage() {
-						return this.stage;
-			}
-
-			isDone() {
-						return false;
-			}
+	isDone() {
+		return this.done;
+	}
 }
 
 module.exports = TitleScreen;
 
-},{"./resource":192,"./timer":193}]},{},[191])(191)
+},{"./process":194,"./resource":195,"./tween":197}],197:[function(require,module,exports){
+/* officetemper - A game about temp work
+ * Copyright (C) 2017  Peter Rogers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class Tween {
+    constructor(sprite, args) {
+        this.sprite = sprite;
+        //this.src = [sprite.position.x, sprite.position.y];
+        this.src = args.src;
+        this.dest = args.dest;
+        this.func = args.func;
+        this.duration = args.duration;
+        this.elapsed = 0;
+    }
+
+    update(dt) {
+        this.elapsed += dt;
+        let param = this.elapsed / this.duration;
+        if (param > 1) param = 1;
+
+        let pos = this.func(param, this.src, this.dest);
+        this.sprite.position.set(pos[0], pos[1]);
+
+        /*this.sprite.position.set(
+            this.src[0] + dx,
+            this.src[1] + dy);*/
+        if (param >= 1) {
+            return false;
+        }
+        return true;
+    }
+}
+
+Tween.Linear = function (param, src, dest) {
+    //param = Math.pow(param, 0.25);
+    let dx = param * (dest[0] - src[0]);
+    let dy = param * (dest[1] - src[1]);
+    return [src[0] + dx, src[1] + dy];
+};
+
+Tween.LinearSlowdown = function (param, src, dest) {
+    param = Math.pow(param, 0.25);
+    let dx = param * (dest[0] - src[0]);
+    let dy = param * (dest[1] - src[1]);
+    return [src[0] + dx, src[1] + dy];
+};
+
+module.exports = Tween;
+
+},{}]},{},[193])(193)
 });
