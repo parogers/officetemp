@@ -50,6 +50,10 @@ class Aisle
 	this.player = null;
     }
 
+    get sprite() {
+	return this.container;
+    }
+
     getY() {
 	return this.container.position.y;
     }
@@ -83,6 +87,14 @@ class Cabinet
     }
 }
 
+class Document
+{
+    constructor() {
+	this.sprite = new PIXI.Sprite(
+	    getImage(Resource.SPRITES, 'paperstack_1'));
+    }
+}
+
 class GameScreen
 {
     constructor(controls) {
@@ -107,8 +119,8 @@ class GameScreen
 	this.aisleList = [];
 	for (let ypos of AISLE_YPOS_LIST) {
 	    let aisle = new Aisle();
-	    aisle.container.position.set(0, ypos);
-	    this.stage.addChild(aisle.container);
+	    aisle.sprite.position.set(0, ypos);
+	    this.stage.addChild(aisle.sprite);
 	    this.aisleList.push(aisle);
 	}
 	this.player = new Player(this.controls, this.aisleList);

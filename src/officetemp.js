@@ -41055,6 +41055,10 @@ class Aisle {
 						this.player = null;
 			}
 
+			get sprite() {
+						return this.container;
+			}
+
 			getY() {
 						return this.container.position.y;
 			}
@@ -41086,6 +41090,12 @@ class Cabinet {
 			}
 }
 
+class Document {
+			constructor() {
+						this.sprite = new PIXI.Sprite(getImage(Resource.SPRITES, 'paperstack_1'));
+			}
+}
+
 class GameScreen {
 			constructor(controls) {
 						this.stage = new PIXI.Container();
@@ -41109,8 +41119,8 @@ class GameScreen {
 						this.aisleList = [];
 						for (let ypos of AISLE_YPOS_LIST) {
 									let aisle = new Aisle();
-									aisle.container.position.set(0, ypos);
-									this.stage.addChild(aisle.container);
+									aisle.sprite.position.set(0, ypos);
+									this.stage.addChild(aisle.sprite);
 									this.aisleList.push(aisle);
 						}
 						this.player = new Player(this.controls, this.aisleList);
@@ -41233,9 +41243,9 @@ const GAME_WIDTH = 250;
 const GAME_HEIGHT = 150;
 const ASPECT_RATIO = GAME_WIDTH / GAME_HEIGHT;
 
-var game = null;
+var app = null;
 
-class Game {
+class Application {
 	constructor(container) {
 		if (typeof container == 'string') {
 			container = document.getElementById(container);
@@ -41313,8 +41323,8 @@ class Game {
 		if (this.screen.isDone()) {
 			let screen = null;
 			if (this.screen === this.screens.loading) {
-				//screen = this.screens.title;
-				screen = this.screens.game;
+				screen = this.screens.title;
+				//screen = this.screens.game;
 			} else if (this.screen === this.screens.title) {
 				screen = this.screens.game;
 			}
@@ -41361,13 +41371,13 @@ module.exports = {};
 
 /* Call to start the game */
 module.exports.start = function (container) {
-	game = new Game(container);
-	game.start();
+	app = new Application(container);
+	app.start();
 };
 
 /* Call to have the canvas automatically resize to fill it's container */
 module.exports.resize = function () {
-	game.resize();
+	app.resize();
 };
 
 },{"./controls":190,"./game":191,"./loading":192,"./title":197,"pixi-sound":26,"pixi.js":142}],194:[function(require,module,exports){
