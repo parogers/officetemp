@@ -17,31 +17,61 @@
 
 var Tween = require("./tween");
 var Resource = require("./resource");
+var Sprites = require("./sprites");
+var Thing = require("./thing");
 var getImage = Resource.getImage;
 
 var STATE = {
     IDLE: 0,
     MOVING: 1,
     SEARCHING: 2,
+    THROWING: 3,
 };
 
-class Player
+// Returns the stack size associated with the given search time
+function getStackSize(time)
 {
-    constructor(controls, aisleList) {
+    // The (cabinet) search times associated with each charge level
+    let chargeLevels = [
+	['large',  1],
+	['medium', 0.5],
+	['small',  0],
+    ];
+
+    for (let arg of chargeLevels)
+    {
+	let name = arg[0];
+	let cutoff = arg[1];
+	if (time >= cutoff) return name;
+    }
+    return chargeLevels[chargeLevels.length-1];
+}
+
+class Player extends Thing
+{
+    constructor(controls) {
+	super();
 	this.sprite = new PIXI.Sprite(
 	    getImage(Resource.SPRITES, 'terrance_idle'));
 	this.sprite.anchor.set(0.5, 1);
 	this.state = STATE.IDLE;
 	this.lastState = -1;
-	this.aisleList = aisleList;
 	this.aisle = 0;
 	this.timer = 0;
+	this.chargeTime = 0;
 	this.nextAisle = -1;
 	this.controls = controls;
+	this.gameScreen = null;
+    }
+
+    spawn(gameScreen) {
+	this.gameScreen = gameScreen;
+	this.aisle = 0;
+	this.getAisle().cabinetArea.addChild(this.sprite);
     }
 
     getAisle() {
-	return this.aisleList[this.aisle];
+	return this.gameScreen.getAisle(this.aisle);
     }
 
     setImage(name) {
@@ -68,14 +98,14 @@ class Player
 		this.nextAisle = this.aisle-1;
 	    }
 	    if (this.controls.down.justPressed &&
-		this.aisle < this.aisleList.length-1)
+		this.aisle < this.gameScreen.getNumAisles()-1)
 	    {
 		this.nextAisle = this.aisle+1;
 	    }
 	    if (this.nextAisle != -1)
 	    {
-		let dy = (this.aisleList[this.aisle].getY() -
-			  this.aisleList[this.nextAisle].getY());
+		let dy = (this.gameScreen.getAisle(this.aisle).getY() -
+			  this.gameScreen.getAisle(this.nextAisle).getY());
 		this.tween = new Tween(this.sprite, {
 		    src: [this.sprite.position.x, this.sprite.position.y],
 		    dest: [this.sprite.position.x, this.sprite.position.y-dy],
@@ -95,9 +125,9 @@ class Player
 	    // The player is moving between aisles
 	    if (!this.tween.update(dt))
 	    {
-		this.aisleList[this.aisle].removePlayerSprite();
-		this.aisleList[this.nextAisle].addPlayerSprite(this.sprite);
+		this.getAisle().cabinetArea.removeChild(this.sprite);
 		this.aisle = this.nextAisle;
+		this.getAisle().cabinetArea.addChild(this.sprite);
 		this.tween = null;
 		this.state = STATE.IDLE;
 		this.sprite.position.y = 0;
@@ -114,14 +144,48 @@ class Player
 		// Open the cabinet
 		this.getAisle().cabinet.setOpen(true);
 		// Have the player searching for a minimum amount of time
-		this.timer = 0.25;
+		this.timer = 0.15;
+		this.chargeTime = 0;
 	    }
+
+	    if (this.timer <= 0) {
+		// Start the "speed charge" after an initial delay
+		this.chargeTime += dt;
+	    }
+	    
 	    this.timer -= dt;
 	    if (!this.controls.right.held && this.timer <= 0)
 	    {
-		this.state = STATE.IDLE;
-		// Close the cabinet
+		// Close the cabinet and throw the paper
 		this.getAisle().cabinet.setOpen(false);
+
+		let size = getStackSize(this.chargeTime);
+
+		// The speed relates to how long the player searched the
+		// cabinet.
+		let paper = new Sprites.PaperStack(size, {
+		    speed: -100,
+		});
+		this.gameScreen.addThing(paper);
+
+		paper.sprite.position.set(
+		    this.getAisle().width, -paper.height);
+		this.getAisle().onCounter.addChild(paper.sprite);
+		this.state = STATE.THROWING;
+	    }
+	}
+	else if (this.state == STATE.THROWING)
+	{
+	    if (stateChanged) {
+		// Show the throw pose for a bit before going idle again
+		this.timer = 0.1;
+		this.setImage('terrance_throw');
+		this.sprite.position.x = 0;
+		this.sprite.scale.x = 1;
+	    }
+	    this.timer -= dt;
+	    if (this.timer <= 0) {
+		this.state = STATE.IDLE;
 	    }
 	}
     }

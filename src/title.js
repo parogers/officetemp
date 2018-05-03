@@ -151,7 +151,7 @@ class TitleScreen
 	    let lst = [];
 	    for (let n = 0; n < paperPos.length; n++)
 	    {
-		let img = getImage(Resource.SPRITES, "paperstack_1");
+		let img = getImage(Resource.SPRITES, "paperstack_medium");
 		let paper = new PIXI.Sprite(img);
 		paper.scale.set(SCALE);
 		paper.anchor.set(0.5, 1);

@@ -40840,6 +40840,75 @@ module.exports = {
 };
 
 },{}],190:[function(require,module,exports){
+/* officetemper - A game about temp work
+ * Copyright (C) 2017  Peter Rogers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var Resource = require("./resource");
+var Sprites = require("./sprites");
+var getImage = Resource.getImage;
+
+class Aisle {
+   constructor() {
+      // The container holds everything in this aisle
+      this.container = new PIXI.Container();
+      // Things that are behind the counter
+      this.behindCounter = new PIXI.Container();
+      this.behindCounter.position.set(0, -5);
+      this.container.addChild(this.behindCounter);
+
+      this.counter = new PIXI.Sprite(getImage(Resource.OFFICE, 'office_desk1'));
+      this.counter.anchor.set(0, 1);
+      //this.counter.position.set(0, ypos);
+      this.container.addChild(this.counter);
+
+      this.cabinetArea = new PIXI.Container();
+      this.cabinetArea.position.set(205, -5);
+      this.container.addChild(this.cabinetArea);
+
+      // The counter (top) is referenced to its bottom edge
+      this.onCounter = new PIXI.Container();
+      this.onCounter.position.set(0, -20);
+      this.container.addChild(this.onCounter);
+
+      this.cabinet = new Sprites.Cabinet();
+      this.cabinet.sprite.position.set(220, -4);
+      this.container.addChild(this.cabinet.sprite);
+
+      this.player = null;
+   }
+
+   get sprite() {
+      return this.container;
+   }
+
+   getY() {
+      return this.container.position.y;
+   }
+
+   spawn() {}
+
+   get width() {
+      return this.counter.width;
+   }
+}
+
+module.exports = Aisle;
+
+},{"./resource":197,"./sprites":198}],191:[function(require,module,exports){
 /* APDUNGEON - A dungeon crawler demo written in javascript + pixi.js
  * Copyright (C) 2017  Peter Rogers (peter.rogers@gmail.com)
  *
@@ -41004,7 +41073,7 @@ module.exports = {};
 module.exports.ManualControls = ManualControls;
 module.exports.KeyboardControls = KeyboardControls;
 
-},{}],191:[function(require,module,exports){
+},{}],192:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41026,91 +41095,36 @@ var Tween = require("./tween");
 var Process = require("./process");
 var Resource = require("./resource");
 var Player = require("./player");
+var Sprites = require("./sprites");
+var Aisle = require("./aisle");
 var getImage = Resource.getImage;
 
 var AISLE_YPOS_LIST = [72, 111, 150];
 
-class Aisle {
-			constructor() {
-						// The container holds everything in this aisle
-						this.container = new PIXI.Container();
-						// Things that are behind the counter
-						this.behindCounter = new PIXI.Container();
-						this.behindCounter.position.set(0, -5);
-						this.container.addChild(this.behindCounter);
-
-						this.counter = new PIXI.Sprite(getImage(Resource.OFFICE, 'office_desk1'));
-						this.counter.anchor.set(0, 1);
-						//this.counter.position.set(0, ypos);
-						this.container.addChild(this.counter);
-
-						this.cabinet = new Cabinet();
-						this.cabinet.sprite.position.set(220, -4);
-						this.container.addChild(this.cabinet.sprite);
-
-						this.cabinetArea = new PIXI.Container();
-						this.cabinetArea.position.set(205, -5);
-						this.container.addChild(this.cabinetArea);
-
-						this.player = null;
-			}
-
-			get sprite() {
-						return this.container;
-			}
-
-			getY() {
-						return this.container.position.y;
-			}
-
-			addPlayerSprite(player) {
-						this.cabinetArea.addChild(player);
-						this.player = player;
-			}
-
-			removePlayerSprite() {
-						if (this.player) {
-									this.cabinetArea.removeChild(this.player);
-									this.player = null;
-						}
-			}
-}
-
-class Cabinet {
-			constructor() {
-						this.sprite = new PIXI.Sprite();
-						this.sprite.anchor.set(0, 1);
-						this.setOpen(false);
-			}
-
-			setOpen(b) {
-						let img = null;
-						if (b) img = 'cabinet_open';else img = 'cabinet_closed';
-						this.sprite.texture = getImage(Resource.SPRITES, img);
-			}
-}
-
-class Document {
-			constructor() {
-						this.sprite = new PIXI.Sprite(getImage(Resource.SPRITES, 'paperstack_1'));
-			}
-}
-
 class GameScreen {
 			constructor(controls) {
 						this.stage = new PIXI.Container();
-						this.process = new Process();
+						//this.process = new Process();
 						this.controls = controls;
 						this.timer = 0;
 						this.aisle = 0;
 						this.player = null;
+						this.things = [];
+			}
+
+			getAisle(n) {
+						return this.aisleList[n];
+			}
+
+			getNumAisles() {
+						return this.aisleList.length;
 			}
 
 			start() {
-						let img = getImage(Resource.OFFICE, 'office_carpet');
-						this.stage.addChild(new PIXI.Sprite(img));
+						this.background = getImage(Resource.OFFICE, 'office_carpet');
+						this.stage.addChild(new PIXI.Sprite(this.background));
 
-						img = getImage(Resource.OFFICE, 'office_shadows');
+						let img = getImage(Resource.OFFICE, 'office_shadows');
 						this.stage.addChild(new PIXI.Sprite(img));
 
 						img = getImage(Resource.OFFICE, 'office_wall');
@@ -41123,17 +41137,41 @@ class GameScreen {
 									this.stage.addChild(aisle.sprite);
 									this.aisleList.push(aisle);
 						}
-						this.player = new Player(this.controls, this.aisleList);
-						this.aisleList[this.aisle].addPlayerSprite(this.player.sprite);
+						this.player = new Player(this.controls);
+						this.addThing(this.player);
+			}
+
+			addThing(thing) {
+						this.things.push(thing);
+						thing.spawn(this);
+			}
+
+			removeThing(thing) {
+						let i = this.things.indexOf(thing);
+						if (i != -1) {
+									this.things[i] = this.things[this.things.length - 1];
+									this.things.pop();
+									thing.despawn();
+						}
 			}
 
 			getStage() {
 						return this.stage;
 			}
 
+			get width() {
+						return this.background.width;
+			}
+
+			get height() {
+						return this.background.height;
+			}
+
 			update(dt) {
 						this.timer += dt;
-						this.player.update(dt);
+						for (let thing of this.things) {
+									if (thing.update) thing.update(dt);
+						}
 			}
 
 			isDone() {
@@ -41143,7 +41181,7 @@ class GameScreen {
 
 module.exports = GameScreen;
 
-},{"./player":194,"./process":195,"./resource":196,"./tween":198}],192:[function(require,module,exports){
+},{"./aisle":190,"./player":195,"./process":196,"./resource":197,"./sprites":198,"./tween":201}],193:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41206,7 +41244,7 @@ class LoadingScreen {
 
 module.exports = LoadingScreen;
 
-},{"./resource":196}],193:[function(require,module,exports){
+},{"./resource":197}],194:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41380,7 +41418,7 @@ module.exports.resize = function () {
 	app.resize();
 };
 
-},{"./controls":190,"./game":191,"./loading":192,"./title":197,"pixi-sound":26,"pixi.js":142}],194:[function(require,module,exports){
+},{"./controls":191,"./game":192,"./loading":193,"./title":200,"pixi-sound":26,"pixi.js":142}],195:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41400,29 +41438,53 @@ module.exports.resize = function () {
 
 var Tween = require("./tween");
 var Resource = require("./resource");
+var Sprites = require("./sprites");
+var Thing = require("./thing");
 var getImage = Resource.getImage;
 
 var STATE = {
 	IDLE: 0,
 	MOVING: 1,
-	SEARCHING: 2
+	SEARCHING: 2,
+	THROWING: 3
 };
 
-class Player {
-	constructor(controls, aisleList) {
+// Returns the stack size associated with the given search time
+function getStackSize(time) {
+	// The (cabinet) search times associated with each charge level
+	let chargeLevels = [['large', 1], ['medium', 0.5], ['small', 0]];
+
+	for (let arg of chargeLevels) {
+		let name = arg[0];
+		let cutoff = arg[1];
+		if (time >= cutoff) return name;
+	}
+	return chargeLevels[chargeLevels.length - 1];
+}
+
+class Player extends Thing {
+	constructor(controls) {
+		super();
 		this.sprite = new PIXI.Sprite(getImage(Resource.SPRITES, 'terrance_idle'));
 		this.sprite.anchor.set(0.5, 1);
 		this.state = STATE.IDLE;
 		this.lastState = -1;
-		this.aisleList = aisleList;
 		this.aisle = 0;
 		this.timer = 0;
+		this.chargeTime = 0;
 		this.nextAisle = -1;
 		this.controls = controls;
+		this.gameScreen = null;
+	}
+
+	spawn(gameScreen) {
+		this.gameScreen = gameScreen;
+		this.aisle = 0;
+		this.getAisle().cabinetArea.addChild(this.sprite);
 	}
 
 	getAisle() {
-		return this.aisleList[this.aisle];
+		return this.gameScreen.getAisle(this.aisle);
 	}
 
 	setImage(name) {
@@ -41445,11 +41507,11 @@ class Player {
 			if (this.controls.up.justPressed && this.aisle > 0) {
 				this.nextAisle = this.aisle - 1;
 			}
-			if (this.controls.down.justPressed && this.aisle < this.aisleList.length - 1) {
+			if (this.controls.down.justPressed && this.aisle < this.gameScreen.getNumAisles() - 1) {
 				this.nextAisle = this.aisle + 1;
 			}
 			if (this.nextAisle != -1) {
-				let dy = this.aisleList[this.aisle].getY() - this.aisleList[this.nextAisle].getY();
+				let dy = this.gameScreen.getAisle(this.aisle).getY() - this.gameScreen.getAisle(this.nextAisle).getY();
 				this.tween = new Tween(this.sprite, {
 					src: [this.sprite.position.x, this.sprite.position.y],
 					dest: [this.sprite.position.x, this.sprite.position.y - dy],
@@ -41466,9 +41528,9 @@ class Player {
 		} else if (this.state == STATE.MOVING) {
 			// The player is moving between aisles
 			if (!this.tween.update(dt)) {
-				this.aisleList[this.aisle].removePlayerSprite();
-				this.aisleList[this.nextAisle].addPlayerSprite(this.sprite);
+				this.getAisle().cabinetArea.removeChild(this.sprite);
 				this.aisle = this.nextAisle;
+				this.getAisle().cabinetArea.addChild(this.sprite);
 				this.tween = null;
 				this.state = STATE.IDLE;
 				this.sprite.position.y = 0;
@@ -41483,13 +41545,44 @@ class Player {
 				// Open the cabinet
 				this.getAisle().cabinet.setOpen(true);
 				// Have the player searching for a minimum amount of time
-				this.timer = 0.25;
+				this.timer = 0.15;
+				this.chargeTime = 0;
 			}
+
+			if (this.timer <= 0) {
+				// Start the "speed charge" after an initial delay
+				this.chargeTime += dt;
+			}
+
 			this.timer -= dt;
 			if (!this.controls.right.held && this.timer <= 0) {
-				this.state = STATE.IDLE;
-				// Close the cabinet
+				// Close the cabinet and throw the paper
 				this.getAisle().cabinet.setOpen(false);
+
+				let size = getStackSize(this.chargeTime);
+
+				// The speed relates to how long the player searched the
+				// cabinet.
+				let paper = new Sprites.PaperStack(size, {
+					speed: -100
+				});
+				this.gameScreen.addThing(paper);
+
+				paper.sprite.position.set(this.getAisle().width, -paper.height);
+				this.getAisle().onCounter.addChild(paper.sprite);
+				this.state = STATE.THROWING;
+			}
+		} else if (this.state == STATE.THROWING) {
+			if (stateChanged) {
+				// Show the throw pose for a bit before going idle again
+				this.timer = 0.1;
+				this.setImage('terrance_throw');
+				this.sprite.position.x = 0;
+				this.sprite.scale.x = 1;
+			}
+			this.timer -= dt;
+			if (this.timer <= 0) {
+				this.state = STATE.IDLE;
 			}
 		}
 	}
@@ -41497,7 +41590,7 @@ class Player {
 
 module.exports = Player;
 
-},{"./resource":196,"./tween":198}],195:[function(require,module,exports){
+},{"./resource":197,"./sprites":198,"./thing":199,"./tween":201}],196:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41568,7 +41661,7 @@ class Process {
 
 module.exports = Process;
 
-},{}],196:[function(require,module,exports){
+},{}],197:[function(require,module,exports){
 
 module.exports = {};
 
@@ -41602,7 +41695,112 @@ module.exports.getImage = function (sheet, name) {
    return img;
 };
 
-},{}],197:[function(require,module,exports){
+},{}],198:[function(require,module,exports){
+/* officetemper - A game about temp work
+ * Copyright (C) 2017  Peter Rogers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var Resource = require("./resource");
+var Sprites = require("./sprites");
+var Thing = require("./thing");
+var getImage = Resource.getImage;
+
+class Cabinet extends Thing {
+   constructor() {
+      super();
+      this.sprite = new PIXI.Sprite();
+      this.sprite.anchor.set(0, 1);
+      this.setOpen(false);
+   }
+
+   setOpen(b) {
+      let img = null;
+      if (b) img = 'cabinet_open';else img = 'cabinet_closed';
+      this.sprite.texture = getImage(Resource.SPRITES, img);
+   }
+
+   spawn(gameScreen) {}
+}
+
+class PaperStack extends Thing {
+   constructor(size, args) {
+      super();
+      this.sprite = new PIXI.Sprite(getImage(Resource.SPRITES, 'paperstack_' + size));
+      this.speed = args && args.speed || 100;
+   }
+
+   spawn(gameScreen) {
+      this.gameScreen = gameScreen;
+   }
+
+   update(dt) {
+      this.sprite.position.x += dt * this.speed;
+
+      if (this.sprite.position.x + this.sprite.width < 0 || this.sprite.position.x > this.gameScreen.width) {
+         this.gameScreen.removeThing(this);
+      }
+   }
+}
+
+module.exports = {
+   PaperStack: PaperStack,
+   Cabinet: Cabinet
+};
+
+},{"./resource":197,"./sprites":198,"./thing":199}],199:[function(require,module,exports){
+/* officetemper - A game about temp work
+ * Copyright (C) 2017  Peter Rogers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class Thing {
+   update(dt) {}
+
+   spawn(screen) {}
+
+   despawn() {
+      if (this.sprite && this.sprite.parent) {
+         this.sprite.parent.removeChild(this.sprite);
+      }
+   }
+
+   get width() {
+      return this.sprite.width;
+   }
+
+   get height() {
+      return this.sprite.height;
+   }
+}
+
+module.exports = Thing;
+
+},{}],200:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41727,7 +41925,7 @@ class TitleScreen {
 
 			let lst = [];
 			for (let n = 0; n < paperPos.length; n++) {
-				let img = getImage(Resource.SPRITES, "paperstack_1");
+				let img = getImage(Resource.SPRITES, "paperstack_medium");
 				let paper = new PIXI.Sprite(img);
 				paper.scale.set(SCALE);
 				paper.anchor.set(0.5, 1);
@@ -41769,7 +41967,7 @@ class TitleScreen {
 
 module.exports = TitleScreen;
 
-},{"./process":195,"./resource":196,"./tween":198}],198:[function(require,module,exports){
+},{"./process":196,"./resource":197,"./tween":201}],201:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41828,5 +42026,5 @@ Tween.LinearSlowdown = function (param, src, dest) {
 
 module.exports = Tween;
 
-},{}]},{},[193])(193)
+},{}]},{},[194])(194)
 });
