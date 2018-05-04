@@ -75,7 +75,7 @@ class Player extends Thing
     }
 
     setImage(name) {
-	this.sprite.texture = getImage(Resource.SPRITES, name);
+	this.sprite.texture = getImage(Resource.SPRITES, 'terrance_' + name);
     }
 
     update(dt)
@@ -88,7 +88,7 @@ class Player extends Thing
 		// Done searching
 		this.sprite.scale.x = 1;
 		this.sprite.position.x = 0;
-		this.setImage('terrance_idle');
+		this.setImage('idle');
 	    }
 
 	    // Handle up/down movement
@@ -137,7 +137,7 @@ class Player extends Thing
 	{
 	    if (stateChanged) {
 		// The player is searching the filing cabinet
-		this.setImage('terrance_search');
+		this.setImage('search');
 		this.sprite.position.x = 14;
 		this.sprite.position.y = -1;
 		this.sprite.scale.x = -1;
@@ -159,18 +159,15 @@ class Player extends Thing
 		// Close the cabinet and throw the paper
 		this.getAisle().cabinet.setOpen(false);
 
-		let size = getStackSize(this.chargeTime);
-
 		// The speed relates to how long the player searched the
 		// cabinet.
-		let paper = new Sprites.PaperStack(size, {
-		    speed: -100,
+		let speed = 100; // ...
+		
+		let paper = new Sprites.PaperStack(this.getAisle(), {
+		    size: 'small',
+		    velx: -speed,
 		});
 		this.gameScreen.addThing(paper);
-
-		paper.sprite.position.set(
-		    this.getAisle().width, -paper.height);
-		this.getAisle().onCounter.addChild(paper.sprite);
 		this.state = STATE.THROWING;
 	    }
 	}
@@ -179,7 +176,7 @@ class Player extends Thing
 	    if (stateChanged) {
 		// Show the throw pose for a bit before going idle again
 		this.timer = 0.1;
-		this.setImage('terrance_throw');
+		this.setImage('throw');
 		this.sprite.position.x = 0;
 		this.sprite.scale.x = 1;
 	    }
@@ -190,5 +187,7 @@ class Player extends Thing
 	}
     }
 };
+
+Player.Testing = 100;
 
 module.exports = Player;

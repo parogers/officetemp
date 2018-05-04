@@ -41,6 +41,10 @@ class GameScreen
 	return this.aisleList[n];
     }
 
+    getAisleEnd() {
+	return this.aisleList[0].width;
+    }
+
     getNumAisles() {
 	return this.aisleList.length;
     }
@@ -64,6 +68,9 @@ class GameScreen
 	}
 	this.player = new Player(this.controls);
 	this.addThing(this.player);
+
+	let guy = new Sprites.SuitGuy(this.aisleList[0]);
+	this.addThing(guy);
     }
 
     addThing(thing) {

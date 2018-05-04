@@ -42,30 +42,128 @@ class Cabinet extends Thing
 
 class PaperStack extends Thing
 {
-    constructor(size, args) {
+    constructor(aisle, args) {
 	super();
+	this.aisle = aisle;
+	this.velx = (args && args.velx) || 100;
+	this.size = (args && args.size) || 'small';
+	this.falling = false;
+	this.vely = 0;
+
 	this.sprite = new PIXI.Sprite(
-	    getImage(Resource.SPRITES, 'paperstack_' + size));
-	this.speed = (args && args.speed) || 100;
+	    getImage(Resource.SPRITES, 'paperstack_' + this.size));
     }
 
     spawn(gameScreen) {
 	this.gameScreen = gameScreen;
+	this.aisle.onCounter.addChild(this.sprite);
+	this.sprite.position.set(this.aisle.width, -this.height);
     }
 
     update(dt)
     {
-	this.sprite.position.x += dt*this.speed;
+	if (this.falling) {
+	    // Falling off the screen
+	    this.vely += 200*dt;
+	    this.sprite.position.x += this.velx*dt/2;
+	    this.sprite.position.y += this.vely*dt;
 
-	if (this.sprite.position.x + this.sprite.width < 0 ||
-	    this.sprite.position.x > this.gameScreen.width)
-	{
-	    this.gameScreen.removeThing(this);
+	    if (this.sprite.position.y > this.aisle.counter.height/2) {
+		// Hit the floor
+		this.gameScreen.removeThing(this);
+		// ...
+	    }
+	    
+	} else {
+	    // Sliding across the counter top
+	    let rightEdge = this.sprite.position.x + this.sprite.width;
+	    this.sprite.position.x += dt*this.velx;
+	    if (this.velx > 0 && rightEdge > this.gameScreen.getAisleEnd())
+	    {
+		// Fell off the counter top (being returned to the player)
+		this.falling = true;
+	    }
+	    if (this.velx < 0 && rightEdge < 0)
+	    {
+		// Fell off the counter (being thrown by the player)
+		this.gameScreen.removeThing(this);
+	    }
 	}
     }
 }
 
+class SuitGuy extends Thing
+{
+    constructor(aisle) {
+	super();
+	let img = getImage(Resource.SPRITES, 'bluesuit_idle');
+	this.sprite = new PIXI.Sprite(img);
+	this.sprite.anchor.set(0.5, 1);
+	this.state = SuitGuy.STATES.ADVANCING;
+	this.lastState = -1;
+	this.aisle = aisle;
+	this.speed = 30;
+	this.frame = 0;
+	this.timer = 0;
+    }
+
+    spawn(gameScreen) {
+	this.aisle.behindCounter.addChild(this.sprite);
+	this.sprite.position.y = 2;
+    }
+
+    setImage(name) {
+	let img = getImage(Resource.SPRITES, 'bluesuit_' + name);
+	this.sprite.texture = img;
+    }
+
+    update(dt) {
+	let stateChanged = (this.state !== this.lastState);
+	this.lastState = this.state;
+	
+	if (this.state === SuitGuy.STATES.ADVANCING) {
+	    if (stateChanged) {
+		this.setImage('throw');
+		this.timer = 0.5;
+	    }
+	    this.sprite.position.x += dt*this.speed;
+	    this.timer -= dt;
+	    if (this.timer <= 0) {
+		this.state = SuitGuy.STATES.PAUSING;
+	    }
+	}
+	else if (this.state === SuitGuy.STATES.SIGNING) {
+	}
+	else if (this.state === SuitGuy.STATES.PUSHED) {
+	}
+	else if (this.state === SuitGuy.STATES.PAUSING) {
+	    if (stateChanged) {
+		this.timer = 2;
+	    }
+	    
+	    let frames = ['throw', 'fist'];
+	    this.frame += 2*dt;
+
+	    let img = frames[(this.frame|0) % frames.length];
+	    this.setImage(img);
+	    
+	    this.timer -= dt;
+	    if (this.timer <= 0) {
+		this.state = SuitGuy.STATES.ADVANCING;
+	    }
+	}
+    }
+}
+
+SuitGuy.STATES = {
+    ADVANCING: 0,
+    SIGNING: 1,
+    PUSHED: 2,
+    PAUSING: 3,
+};
+
 module.exports = {
     PaperStack: PaperStack,
     Cabinet: Cabinet,
+    SuitGuy: SuitGuy,
 };
