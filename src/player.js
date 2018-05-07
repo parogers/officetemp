@@ -139,7 +139,7 @@ class Player extends Thing
 		// The player is searching the filing cabinet
 		this.setImage('search');
 		this.sprite.position.x = 14;
-		this.sprite.position.y = -1;
+		this.sprite.position.y = 0;
 		this.sprite.scale.x = -1;
 		// Open the cabinet
 		this.getAisle().cabinet.setOpen(true);

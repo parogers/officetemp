@@ -40862,48 +40862,65 @@ var Sprites = require("./sprites");
 var getImage = Resource.getImage;
 
 class Aisle {
-   constructor() {
-      // The container holds everything in this aisle
-      this.container = new PIXI.Container();
-      // Things that are behind the counter
-      this.behindCounter = new PIXI.Container();
-      this.behindCounter.position.set(0, -5);
-      this.container.addChild(this.behindCounter);
+			constructor() {
+						// The container holds everything in this aisle
+						this.container = new PIXI.Container();
+						// Things that are behind the counter
+						this.behindCounter = new PIXI.Container();
+						this.behindCounter.position.set(0, -4);
+						this.container.addChild(this.behindCounter);
 
-      this.counter = new PIXI.Sprite(getImage(Resource.OFFICE, 'office_desk1'));
-      this.counter.anchor.set(0, 1);
-      //this.counter.position.set(0, ypos);
-      this.container.addChild(this.counter);
+						this.counter = new PIXI.Sprite(getImage(Resource.OFFICE, 'office_desk1'));
+						this.counter.anchor.set(0, 1);
+						//this.counter.position.set(0, ypos);
+						this.container.addChild(this.counter);
 
-      this.cabinetArea = new PIXI.Container();
-      this.cabinetArea.position.set(205, -5);
-      this.container.addChild(this.cabinetArea);
+						this.inFrontCounter = new PIXI.Container();
+						this.inFrontCounter.position.set(0, this.behindCounter.position.y);
+						this.container.addChild(this.inFrontCounter);
 
-      // The counter (top) is referenced to its bottom edge
-      this.onCounter = new PIXI.Container();
-      this.onCounter.position.set(0, -20);
-      this.container.addChild(this.onCounter);
+						this.cabinetArea = new PIXI.Container();
+						this.cabinetArea.position.set(205, -3);
+						this.container.addChild(this.cabinetArea);
 
-      this.cabinet = new Sprites.Cabinet();
-      this.cabinet.sprite.position.set(220, -4);
-      this.container.addChild(this.cabinet.sprite);
+						// The counter (top) is referenced to its bottom edge
+						this.onCounter = new PIXI.Container();
+						this.onCounter.position.set(0, -20);
+						this.container.addChild(this.onCounter);
 
-      this.player = null;
-   }
+						this.cabinet = new Sprites.Cabinet();
+						this.cabinet.sprite.position.set(220, -1);
+						this.container.addChild(this.cabinet.sprite);
+						this.papers = [];
+			}
 
-   get sprite() {
-      return this.container;
-   }
+			get sprite() {
+						return this.container;
+			}
 
-   getY() {
-      return this.container.position.y;
-   }
+			getY() {
+						return this.container.position.y;
+			}
 
-   spawn() {}
+			spawn() {}
 
-   get width() {
-      return this.counter.width;
-   }
+			get width() {
+						return this.counter.width;
+			}
+
+			addPaper(paper) {
+						this.papers.push(paper);
+						this.onCounter.addChild(paper.sprite);
+			}
+
+			removePaper(paper) {
+						let i = this.papers.indexOf(paper);
+						if (i !== -1) {
+									this.papers[i] = this.papers[this.papers.length - 1];
+									this.papers.pop();
+									this.onCounter.removeChild(paper.sprite);
+						}
+			}
 }
 
 module.exports = Aisle;
@@ -41096,6 +41113,7 @@ var Process = require("./process");
 var Resource = require("./resource");
 var Player = require("./player");
 var Sprites = require("./sprites");
+var SuitGuy = require('./suitguy');
 var Aisle = require("./aisle");
 var getImage = Resource.getImage;
 
@@ -41144,7 +41162,7 @@ class GameScreen {
 						this.player = new Player(this.controls);
 						this.addThing(this.player);
 
-						let guy = new Sprites.SuitGuy(this.aisleList[0]);
+						let guy = new SuitGuy(this.aisleList[1]);
 						this.addThing(guy);
 			}
 
@@ -41188,7 +41206,7 @@ class GameScreen {
 
 module.exports = GameScreen;
 
-},{"./aisle":190,"./player":195,"./process":196,"./resource":197,"./sprites":198,"./tween":201}],193:[function(require,module,exports){
+},{"./aisle":190,"./player":195,"./process":196,"./resource":197,"./sprites":198,"./suitguy":199,"./tween":202}],193:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41425,7 +41443,7 @@ module.exports.resize = function () {
 	app.resize();
 };
 
-},{"./controls":191,"./game":192,"./loading":193,"./title":200,"pixi-sound":26,"pixi.js":142}],195:[function(require,module,exports){
+},{"./controls":191,"./game":192,"./loading":193,"./title":201,"pixi-sound":26,"pixi.js":142}],195:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41547,7 +41565,7 @@ class Player extends Thing {
 				// The player is searching the filing cabinet
 				this.setImage('search');
 				this.sprite.position.x = 14;
-				this.sprite.position.y = -1;
+				this.sprite.position.y = 0;
 				this.sprite.scale.x = -1;
 				// Open the cabinet
 				this.getAisle().cabinet.setOpen(true);
@@ -41597,7 +41615,7 @@ Player.Testing = 100;
 
 module.exports = Player;
 
-},{"./resource":197,"./sprites":198,"./thing":199,"./tween":201}],196:[function(require,module,exports){
+},{"./resource":197,"./sprites":198,"./thing":200,"./tween":202}],196:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41756,8 +41774,16 @@ class PaperStack extends Thing {
 
 			spawn(gameScreen) {
 						this.gameScreen = gameScreen;
-						this.aisle.onCounter.addChild(this.sprite);
+						this.aisle.addPaper(this);
 						this.sprite.position.set(this.aisle.width, -this.height);
+			}
+
+			despawn() {
+						this.aisle.removePaper(this);
+			}
+
+			areSigned() {
+						return this.velx > 0;
 			}
 
 			update(dt) {
@@ -41788,77 +41814,177 @@ class PaperStack extends Thing {
 			}
 }
 
+module.exports = {
+			PaperStack: PaperStack,
+			Cabinet: Cabinet
+};
+
+},{"./resource":197,"./sprites":198,"./thing":200}],199:[function(require,module,exports){
+/* officetemper - A game about temp work
+ * Copyright (C) 2017  Peter Rogers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var Thing = require('./thing');
+var Resource = require('./resource');
+var getImage = Resource.getImage;
+
 class SuitGuy extends Thing {
-			constructor(aisle) {
-						super();
-						let img = getImage(Resource.SPRITES, 'bluesuit_idle');
-						this.sprite = new PIXI.Sprite(img);
-						this.sprite.anchor.set(0.5, 1);
+	constructor(aisle) {
+		super();
+		let img = getImage(Resource.SPRITES, 'bluesuit_idle');
+		this.sprite = new PIXI.Sprite(img);
+		this.sprite.anchor.set(0.5, 1);
+		this.speechContainer = new PIXI.Container();
+		this.speechContainer.position.set(15, -34);
+		this.sprite.addChild(this.speechContainer);
+
+		this.state = SuitGuy.STATES.PAUSING;
+		this.lastState = -1;
+		this.aisle = aisle;
+		this.speed = 25;
+		this.frame = 0;
+		this.timer = 0;
+		// How many fist pumps to do before advancing
+		this.fistCount = 3;
+		// Pause time between raising/lowering the fist
+		this.fistDelay = 0.25;
+	}
+
+	spawn(gameScreen) {
+		this.aisle.behindCounter.addChild(this.sprite);
+		this.gameScreen = gameScreen;
+		this.sprite.position.x = 30;
+	}
+
+	setImage(name) {
+		let img = getImage(Resource.SPRITES, 'bluesuit_' + name);
+		this.sprite.texture = img;
+	}
+
+	update(dt) {
+		let stateChanged = this.state !== this.lastState;
+		this.lastState = this.state;
+
+		// Check for any papers to sign
+		for (let paper of this.aisle.papers) {
+			if (paper.areSigned() || paper.sprite.x > this.sprite.x || paper.sprite.x + paper.sprite.width < this.sprite.x) {
+				continue;
+			}
+			if (this.state === SuitGuy.STATES.ADVANCING || this.state === SuitGuy.STATES.PAUSING) {
+				// Sign the papers
+				this.gameScreen.removeThing(paper);
+				this.state = SuitGuy.STATES.SLIDING_BACK;
+				// Move out in front of the counter (only the top-half
+				// of the body is rendered), so we can sign the papers
+				// on the desk.
+				this.setImage('sign1');
+				this.aisle.inFrontCounter.addChild(this.sprite);
+			} else {
+				// Bounce the paper to the floor
+				paper.velx *= -1;
+				paper.falling = true;
+			}
+			return;
+		}
+
+		if (this.state === SuitGuy.STATES.ADVANCING) {
+			// Move forward a little bit
+			if (stateChanged) {
+				this.setImage('fist');
+				this.timer = 0.5;
+			}
+			this.sprite.position.x += dt * this.speed;
+			// Have the suit guy bounce up and down to emulate walking.
+			// These numbers are largely magic and just chosen to look good.
+			this.sprite.position.y = -0.75 * Math.abs(Math.sin(this.timer * 10));
+			this.timer -= dt;
+			if (this.timer <= 0) {
+				this.sprite.position.y = 0;
+				this.state = SuitGuy.STATES.PAUSING;
+			}
+		} else if (this.state === SuitGuy.STATES.SIGNING) {
+			if (stateChanged) {
+				this.timer = 0.5;
+				this.frame = 0;
+				// Suit guy talks money while signing
+				let img = getImage(Resource.SPRITES, 'speech_dollars');
+				let balloon = new PIXI.Sprite(img);
+				balloon.anchor.set(0.5, 1);
+				this.speechContainer.addChild(balloon);
+				this.counter = 8;
+			}
+			this.timer -= dt;
+			if (this.timer <= 0) {
+				this.frame = (this.frame + 1) % 2;
+				if (this.frame === 0) this.setImage('sign2');else if (this.frame === 1) this.setImage('sign3');
+				this.timer = 0.15;
+			}
+			this.counter -= dt;
+			if (this.counter <= 0) {
+				this.state = SuitGuy.STATES.ADVANCING;
+				this.aisle.behindCounter.addChild(this.sprite);
+				this.speechContainer.removeChildren();
+			}
+		} else if (this.state === SuitGuy.STATES.SLIDING_BACK) {
+			if (stateChanged) {
+				this.timer = 0.5;
+			}
+			this.timer -= dt;
+			this.sprite.position.x -= 75 * dt;
+			if (this.timer <= 0) {
+				this.state = SuitGuy.STATES.SIGNING;
+			}
+		} else if (this.state === SuitGuy.STATES.PAUSING) {
+			if (stateChanged) {
+				this.timer = 0;
+				this.frame = 0;
+				this.counter = this.fistCount;;
+			}
+
+			this.timer -= dt;
+			if (this.timer <= 0) {
+				this.timer = this.fistDelay;
+				if (this.frame == 0) {
+					this.setImage('throw');
+					this.frame++;
+				} else if (this.frame == 1) {
+					this.setImage('fist');
+					this.frame++;
+				} else {
+					this.frame = 0;
+					this.counter--;
+					if (this.counter <= 0) {
 						this.state = SuitGuy.STATES.ADVANCING;
-						this.lastState = -1;
-						this.aisle = aisle;
-						this.speed = 30;
-						this.frame = 0;
-						this.timer = 0;
+					}
+				}
 			}
-
-			spawn(gameScreen) {
-						this.aisle.behindCounter.addChild(this.sprite);
-						this.sprite.position.y = 2;
-			}
-
-			setImage(name) {
-						let img = getImage(Resource.SPRITES, 'bluesuit_' + name);
-						this.sprite.texture = img;
-			}
-
-			update(dt) {
-						let stateChanged = this.state !== this.lastState;
-						this.lastState = this.state;
-
-						if (this.state === SuitGuy.STATES.ADVANCING) {
-									if (stateChanged) {
-												this.setImage('throw');
-												this.timer = 0.5;
-									}
-									this.sprite.position.x += dt * this.speed;
-									this.timer -= dt;
-									if (this.timer <= 0) {
-												this.state = SuitGuy.STATES.PAUSING;
-									}
-						} else if (this.state === SuitGuy.STATES.SIGNING) {} else if (this.state === SuitGuy.STATES.PUSHED) {} else if (this.state === SuitGuy.STATES.PAUSING) {
-									if (stateChanged) {
-												this.timer = 2;
-									}
-
-									let frames = ['throw', 'fist'];
-									this.frame += 2 * dt;
-
-									let img = frames[(this.frame | 0) % frames.length];
-									this.setImage(img);
-
-									this.timer -= dt;
-									if (this.timer <= 0) {
-												this.state = SuitGuy.STATES.ADVANCING;
-									}
-						}
-			}
+		}
+	}
 }
 
 SuitGuy.STATES = {
-			ADVANCING: 0,
-			SIGNING: 1,
-			PUSHED: 2,
-			PAUSING: 3
+	ADVANCING: 0,
+	SIGNING: 1,
+	SLIDING_BACK: 2,
+	PAUSING: 3
 };
 
-module.exports = {
-			PaperStack: PaperStack,
-			Cabinet: Cabinet,
-			SuitGuy: SuitGuy
-};
+module.exports = SuitGuy;
 
-},{"./resource":197,"./sprites":198,"./thing":199}],199:[function(require,module,exports){
+},{"./resource":197,"./thing":200}],200:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41898,7 +42024,7 @@ class Thing {
 
 module.exports = Thing;
 
-},{}],200:[function(require,module,exports){
+},{}],201:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -42065,7 +42191,7 @@ class TitleScreen {
 
 module.exports = TitleScreen;
 
-},{"./process":196,"./resource":197,"./tween":201}],201:[function(require,module,exports){
+},{"./process":196,"./resource":197,"./tween":202}],202:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *

@@ -20,6 +20,7 @@ var Process = require("./process");
 var Resource = require("./resource");
 var Player = require("./player");
 var Sprites = require("./sprites");
+var SuitGuy = require('./suitguy');
 var Aisle = require("./aisle");
 var getImage = Resource.getImage;
 
@@ -69,7 +70,7 @@ class GameScreen
 	this.player = new Player(this.controls);
 	this.addThing(this.player);
 
-	let guy = new Sprites.SuitGuy(this.aisleList[0]);
+	let guy = new SuitGuy(this.aisleList[1]);
 	this.addThing(guy);
     }
 

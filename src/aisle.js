@@ -26,7 +26,7 @@ class Aisle
 	this.container = new PIXI.Container();
 	// Things that are behind the counter
 	this.behindCounter = new PIXI.Container();
-	this.behindCounter.position.set(0, -5);
+	this.behindCounter.position.set(0, -4);
 	this.container.addChild(this.behindCounter);
 
 	this.counter = new PIXI.Sprite(
@@ -35,8 +35,12 @@ class Aisle
 	//this.counter.position.set(0, ypos);
 	this.container.addChild(this.counter);
 
+	this.inFrontCounter = new PIXI.Container();
+	this.inFrontCounter.position.set(0, this.behindCounter.position.y);
+	this.container.addChild(this.inFrontCounter);
+
 	this.cabinetArea = new PIXI.Container();
-	this.cabinetArea.position.set(205, -5);
+	this.cabinetArea.position.set(205, -3);
 	this.container.addChild(this.cabinetArea);
 
 	// The counter (top) is referenced to its bottom edge
@@ -45,10 +49,9 @@ class Aisle
 	this.container.addChild(this.onCounter);
 
 	this.cabinet = new Sprites.Cabinet();
-	this.cabinet.sprite.position.set(220, -4);
+	this.cabinet.sprite.position.set(220, -1);
 	this.container.addChild(this.cabinet.sprite);
-
-	this.player = null;
+	this.papers = [];
     }
 
     get sprite() {
@@ -64,6 +67,20 @@ class Aisle
 
     get width() {
 	return this.counter.width;
+    }
+
+    addPaper(paper) {
+	this.papers.push(paper);
+	this.onCounter.addChild(paper.sprite);
+    }
+
+    removePaper(paper) {
+	let i = this.papers.indexOf(paper);
+	if (i !== -1) {
+	    this.papers[i] = this.papers[this.papers.length-1];
+	    this.papers.pop();
+	    this.onCounter.removeChild(paper.sprite);
+	}
     }
 }
 
