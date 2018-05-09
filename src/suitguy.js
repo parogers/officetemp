@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var Sprites = require("./sprites");
 var Thing = require('./thing');
 var Resource = require('./resource');
 var getImage = Resource.getImage;
@@ -123,9 +124,19 @@ class SuitGuy extends Thing
 	    }
 	    this.counter -= dt;
 	    if (this.counter <= 0) {
+		// Done signing the paper. Throw it back and continue
+		// advancing.
 		this.state = SuitGuy.STATES.ADVANCING;
 		this.aisle.behindCounter.addChild(this.sprite);
 		this.speechContainer.removeChildren();
+
+	    	let speed = 50;
+		let paper = new Sprites.PaperStack(this.aisle, {
+		    size: 'small',
+		    velx: speed,
+		});
+		paper.sprite.position.set(this.sprite.position.x+1, 0);
+		this.gameScreen.addThing(paper);
 	    }
 	}
 	else if (this.state === SuitGuy.STATES.SLIDING_BACK) {
@@ -136,6 +147,10 @@ class SuitGuy extends Thing
 	    this.sprite.position.x -= 75*dt;
 	    if (this.timer <= 0) {
 		this.state = SuitGuy.STATES.SIGNING;
+	    }
+	    if (this.sprite.position.x < 0) {
+		// Knocked off the screen
+		// ...
 	    }
 	}
 	else if (this.state === SuitGuy.STATES.PAUSING) {

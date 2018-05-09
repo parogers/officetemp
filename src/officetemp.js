@@ -41586,12 +41586,12 @@ class Player extends Thing {
 
 				// The speed relates to how long the player searched the
 				// cabinet.
-				let speed = 100; // ...
-
+				let speed = 100; // ...		
 				let paper = new Sprites.PaperStack(this.getAisle(), {
 					size: 'small',
 					velx: -speed
 				});
+				paper.sprite.position.set(this.getAisle().width, 0);
 				this.gameScreen.addThing(paper);
 				this.state = STATE.THROWING;
 			}
@@ -41760,6 +41760,30 @@ class Cabinet extends Thing {
 			spawn(gameScreen) {}
 }
 
+class Scenery extends Thing {
+			constructor(frames, fps) {
+						super();
+						this.frames = frames;
+						this.fps = fps;
+						this.frame = 0;
+						this.sprite = new PIXI.Sprite(this.frames[0]);
+						this.sprite.anchor.set(0.5, 0.5);
+			}
+
+			spawn(screen) {
+						this.screen = screen;
+			}
+
+			update(dt) {
+						if ((this.frame | 0) > this.frames.length - 1) {
+									this.screen.removeThing(this);
+						} else {
+									this.sprite.texture = this.frames[this.frame | 0];
+									this.frame += this.fps * dt;
+						}
+			}
+}
+
 class PaperStack extends Thing {
 			constructor(aisle, args) {
 						super();
@@ -41767,15 +41791,17 @@ class PaperStack extends Thing {
 						this.velx = args && args.velx || 100;
 						this.size = args && args.size || 'small';
 						this.falling = false;
+						this.exploding = false;
 						this.vely = 0;
+						this.frame = 0;
 
 						this.sprite = new PIXI.Sprite(getImage(Resource.SPRITES, 'paperstack_' + this.size));
+						this.sprite.anchor.set(0, 1);
 			}
 
 			spawn(gameScreen) {
 						this.gameScreen = gameScreen;
 						this.aisle.addPaper(this);
-						this.sprite.position.set(this.aisle.width, -this.height);
 			}
 
 			despawn() {
@@ -41789,14 +41815,16 @@ class PaperStack extends Thing {
 			update(dt) {
 						if (this.falling) {
 									// Falling off the screen
-									this.vely += 200 * dt;
+									this.vely += 300 * dt;
 									this.sprite.position.x += this.velx * dt / 2;
 									this.sprite.position.y += this.vely * dt;
 
-									if (this.sprite.position.y > this.aisle.counter.height / 2) {
-												// Hit the floor
+									if (this.sprite.position.y > this.aisle.counter.height) {
+												let explosion = new Scenery([getImage(Resource.SPRITES, 'explode_1'), getImage(Resource.SPRITES, 'explode_2')], 10);
+												this.gameScreen.addThing(explosion);
+												this.aisle.onCounter.addChild(explosion.sprite);
+												explosion.sprite.position.set(this.sprite.position.x + 5, this.sprite.position.y - 5);
 												this.gameScreen.removeThing(this);
-												// ...
 									}
 						} else {
 									// Sliding across the counter top
@@ -41837,6 +41865,7 @@ module.exports = {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var Sprites = require("./sprites");
 var Thing = require('./thing');
 var Resource = require('./resource');
 var getImage = Resource.getImage;
@@ -41934,9 +41963,19 @@ class SuitGuy extends Thing {
 			}
 			this.counter -= dt;
 			if (this.counter <= 0) {
+				// Done signing the paper. Throw it back and continue
+				// advancing.
 				this.state = SuitGuy.STATES.ADVANCING;
 				this.aisle.behindCounter.addChild(this.sprite);
 				this.speechContainer.removeChildren();
+
+				let speed = 50;
+				let paper = new Sprites.PaperStack(this.aisle, {
+					size: 'small',
+					velx: speed
+				});
+				paper.sprite.position.set(this.sprite.position.x + 1, 0);
+				this.gameScreen.addThing(paper);
 			}
 		} else if (this.state === SuitGuy.STATES.SLIDING_BACK) {
 			if (stateChanged) {
@@ -41946,6 +41985,10 @@ class SuitGuy extends Thing {
 			this.sprite.position.x -= 75 * dt;
 			if (this.timer <= 0) {
 				this.state = SuitGuy.STATES.SIGNING;
+			}
+			if (this.sprite.position.x < 0) {
+				// Knocked off the screen
+				// ...
 			}
 		} else if (this.state === SuitGuy.STATES.PAUSING) {
 			if (stateChanged) {
@@ -41984,7 +42027,7 @@ SuitGuy.STATES = {
 
 module.exports = SuitGuy;
 
-},{"./resource":197,"./thing":200}],200:[function(require,module,exports){
+},{"./resource":197,"./sprites":198,"./thing":200}],200:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *

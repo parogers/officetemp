@@ -40,6 +40,31 @@ class Cabinet extends Thing
     }
 }
 
+class Scenery extends Thing
+{
+    constructor(frames, fps) {
+	super();
+	this.frames = frames;
+	this.fps = fps;
+	this.frame = 0;
+	this.sprite = new PIXI.Sprite(this.frames[0]);
+	this.sprite.anchor.set(0.5, 0.5);
+    }
+
+    spawn(screen) {
+	this.screen = screen;
+    }
+
+    update(dt) {
+	if ((this.frame|0) > this.frames.length-1) {
+	    this.screen.removeThing(this);
+	} else {
+	    this.sprite.texture = this.frames[this.frame|0];
+	    this.frame += this.fps * dt;
+	}
+    }
+}
+
 class PaperStack extends Thing
 {
     constructor(aisle, args) {
@@ -48,16 +73,18 @@ class PaperStack extends Thing
 	this.velx = (args && args.velx) || 100;
 	this.size = (args && args.size) || 'small';
 	this.falling = false;
+	this.exploding = false;
 	this.vely = 0;
+	this.frame = 0;
 
 	this.sprite = new PIXI.Sprite(
 	    getImage(Resource.SPRITES, 'paperstack_' + this.size));
+	this.sprite.anchor.set(0, 1);
     }
 
     spawn(gameScreen) {
 	this.gameScreen = gameScreen;
 	this.aisle.addPaper(this);
-	this.sprite.position.set(this.aisle.width, -this.height);
     }
 
     despawn() {
@@ -70,19 +97,27 @@ class PaperStack extends Thing
 
     update(dt)
     {
-	if (this.falling) {
+	if (this.falling)
+	{
 	    // Falling off the screen
-	    this.vely += 200*dt;
+	    this.vely += 300*dt;
 	    this.sprite.position.x += this.velx*dt/2;
 	    this.sprite.position.y += this.vely*dt;
 
-	    if (this.sprite.position.y > this.aisle.counter.height/2) {
-		// Hit the floor
+	    if (this.sprite.position.y > this.aisle.counter.height) {
+		let explosion = new Scenery([
+		    getImage(Resource.SPRITES, 'explode_1'),
+		    getImage(Resource.SPRITES, 'explode_2')], 10);
+		this.gameScreen.addThing(explosion);
+		this.aisle.onCounter.addChild(explosion.sprite);
+		explosion.sprite.position.set(
+		    this.sprite.position.x+5,
+		    this.sprite.position.y-5);
 		this.gameScreen.removeThing(this);
-		// ...
 	    }
-	    
-	} else {
+	}
+	else
+	{
 	    // Sliding across the counter top
 	    let rightEdge = this.sprite.position.x + this.sprite.width;
 	    this.sprite.position.x += dt*this.velx;

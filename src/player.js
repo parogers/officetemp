@@ -161,12 +161,12 @@ class Player extends Thing
 
 		// The speed relates to how long the player searched the
 		// cabinet.
-		let speed = 100; // ...
-		
+		let speed = 100; // ...		
 		let paper = new Sprites.PaperStack(this.getAisle(), {
 		    size: 'small',
 		    velx: -speed,
 		});
+		paper.sprite.position.set(this.getAisle().width, 0);
 		this.gameScreen.addThing(paper);
 		this.state = STATE.THROWING;
 	    }
