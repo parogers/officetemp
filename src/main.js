@@ -96,7 +96,15 @@ class Application
 	PIXI.ticker.shared.add(() => {
 	    this.update(PIXI.ticker.shared.elapsedMS/1000.0);
 	});
-	//this.redraw();
+
+	// Have the ticker start/stop when the window receives/loses
+	// focus. (eg player clicks to another tab/returns)
+	window.addEventListener('focus', () => {
+	    PIXI.ticker.shared.start();
+	});
+	window.addEventListener('blur', () => {
+	    PIXI.ticker.shared.stop();
+	});
     }
 
     /*

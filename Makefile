@@ -1,15 +1,11 @@
 # Makefile
 
-BUNDLE=officetemp
 XCF2ATLAS=../xcf2atlas/xcf2atlas.py
-MEDIA=src/media
+MEDIA=www/media
 
-.PHONY: media watch
+.PHONY: media
 
-all: media watch
-
-watch:
-	cd src && watchify -v -t babelify -s $(BUNDLE) main.js -o $(BUNDLE).js
+all: media
 
 media:
 	$(XCF2ATLAS) --image=$(MEDIA)/sprites.png --json=$(MEDIA)/sprites.json rawdata/sprites/*.xcf --max-width=400
@@ -20,13 +16,3 @@ media:
 
 	./tools/genblockfont.py rawdata/boxy_bold_font_rev.xcf $(MEDIA)/boxybold
 	./tools/genblockfont.py --char-spacing=1 rawdata/led_font.xcf $(MEDIA)/ledfont
-
-#dist:
-#	test -d dist || mkdir dist 2> /dev/null
-#	uglifyjs $(BUNDLE).js > dist/$(BUNDLE)-dist.js
-#	cp page.js style.css *.md dist
-#	cp -R contrib dist
-#	cp -R media dist
-#	cat index.html | sed 's/apdungeon.js/apdungeon-dist.js/' > dist/index.html
-#	@echo ""
-#	@echo "*** Distribution files stored in 'dist' ***"
