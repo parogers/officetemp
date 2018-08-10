@@ -41,6 +41,7 @@ def get_char_info(img, chars, char_height):
     # Now parse out the character widths from the image
     CharInfo = collections.namedtuple('charinfo', (
         'x', 'y', 'width', 'height', 'char'))
+    infoByLetter = {}
     lst = []
     x = 1
     y = 1
@@ -49,13 +50,28 @@ def get_char_info(img, chars, char_height):
             x = 1
             y += char_height+1
             continue
-        # Measure this character width
+        # Measure the character width
         width = 0
         while not is_col_clear(img, x+width, y, y+char_height):
             width += 1
         info = CharInfo(x, y, width, char_height, char)
         lst.append(info)
         x += width + 1
+        infoByLetter[char] = info
+
+    # Fix the width for the space character, since the above method will
+    # always report the space as having zero width.
+    try:
+        space = infoByLetter[' ']
+    except KeyError:
+        pass
+    else:
+        lst.remove(space)
+        lst.append(CharInfo(
+            space.x, space.y,
+            infoByLetter['J'].width,
+            char_height, space.char))
+        
     return lst
 
 def get_char_height(img):
@@ -83,6 +99,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('src', help='Source XCF file')
     parser.add_argument('dest', help='Output PNG/FNT file')
+    parser.add_argument('--char-spacing', nargs=1, help="Pixel spacing between characters", default=[0])
 
     args = parser.parse_args(sys.argv[1:])
 
@@ -144,7 +161,7 @@ if __name__ == '__main__':
             'height' : str(info.height),
             'xoffset' : '0',
             'yoffset' : '0',
-            'xadvance' : str(info.width+1),
+            'xadvance' : str(info.width+int(args.char_spacing[0])),
             'page' : '0',
             'chnl' : '0',
             'letter' : info.char

@@ -16,7 +16,10 @@ media:
 
 	$(XCF2ATLAS) --image=$(MEDIA)/office.png --json=$(MEDIA)/office.json rawdata/office.xcf
 
-	inkscape --export-png=$(MEDIA)/title-text.png --export-area-page -z rawdata/title-text.svg 
+	inkscape --export-png=$(MEDIA)/title-text.png --export-area-page -z rawdata/title-text.svg
+
+	./tools/genblockfont.py rawdata/boxy_bold_font_rev.xcf $(MEDIA)/boxybold
+	./tools/genblockfont.py --char-spacing=1 rawdata/led_font.xcf $(MEDIA)/ledfont
 
 #dist:
 #	test -d dist || mkdir dist 2> /dev/null

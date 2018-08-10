@@ -23,6 +23,7 @@ var Sprites = require("./sprites");
 var SuitGuy = require('./suitguy');
 var Aisle = require("./aisle");
 var getImage = Resource.getImage;
+var LEDSign = require("./ledsign");
 
 var AISLE_YPOS_LIST = [72, 111, 150];
 
@@ -72,6 +73,14 @@ class GameScreen
 
 	let guy = new SuitGuy(this.aisleList[1]);
 	this.addThing(guy);
+
+	this.ledSign = new LEDSign();
+	this.addThing(this.ledSign);
+
+	this.ledSign.addMessage("HELLO WORLD");
+	this.ledSign.addMessage("THIS IS ANOTHER THING", {
+	    separator: " *** "
+	});
     }
 
     addThing(thing) {

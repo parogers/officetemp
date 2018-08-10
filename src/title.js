@@ -165,7 +165,7 @@ class TitleScreen
 		    src: [this.terranceX + dx, stop*5],
 		    dest: [this.terranceX + dx, this.terranceY + stop],
 		    interpolate: Tween.Linear,
-		    duration: 0.5,
+		    duration: 0.5 - stop*0.008,
 		});
 		lst.push(this.process.add(tween));
 	    }

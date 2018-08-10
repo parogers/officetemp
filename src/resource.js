@@ -5,6 +5,8 @@ module.exports.ALL = {
     SPRITES: 'sprites.json',
     TITLE: 'title-text.png',
     OFFICE: 'office.json',
+    GAME_FONT: 'boxybold.fnt',
+    LED_FONT: 'ledfont.fnt',
     SND_TEST: 'powerup1.wav',
 };
 

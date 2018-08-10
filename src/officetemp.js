@@ -40925,7 +40925,7 @@ class Aisle {
 
 module.exports = Aisle;
 
-},{"./resource":197,"./sprites":198}],191:[function(require,module,exports){
+},{"./resource":198,"./sprites":199}],191:[function(require,module,exports){
 /* APDUNGEON - A dungeon crawler demo written in javascript + pixi.js
  * Copyright (C) 2017  Peter Rogers (peter.rogers@gmail.com)
  *
@@ -41116,6 +41116,7 @@ var Sprites = require("./sprites");
 var SuitGuy = require('./suitguy');
 var Aisle = require("./aisle");
 var getImage = Resource.getImage;
+var LEDSign = require("./ledsign");
 
 var AISLE_YPOS_LIST = [72, 111, 150];
 
@@ -41164,6 +41165,14 @@ class GameScreen {
 
 						let guy = new SuitGuy(this.aisleList[1]);
 						this.addThing(guy);
+
+						this.ledSign = new LEDSign();
+						this.addThing(this.ledSign);
+
+						this.ledSign.addMessage("HELLO WORLD");
+						this.ledSign.addMessage("THIS IS ANOTHER THING", {
+									separator: " *** "
+						});
 			}
 
 			addThing(thing) {
@@ -41206,7 +41215,96 @@ class GameScreen {
 
 module.exports = GameScreen;
 
-},{"./aisle":190,"./player":195,"./process":196,"./resource":197,"./sprites":198,"./suitguy":199,"./tween":202}],193:[function(require,module,exports){
+},{"./aisle":190,"./ledsign":193,"./player":196,"./process":197,"./resource":198,"./sprites":199,"./suitguy":200,"./tween":203}],193:[function(require,module,exports){
+/* officetemper - A game about temp work
+ * Copyright (C) 2017  Peter Rogers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var Thing = require("./thing");
+var Resource = require("./resource");
+
+class LEDSign extends Thing {
+			constructor() {
+						super();
+						this.scrollSpeed = 10;
+						this.sprite = new PIXI.Container();
+
+						let img = Resource.getImage(Resource.OFFICE, 'office_sign');
+						this.bg = new PIXI.Sprite(img);
+						this.bg.anchor.set(0, 0);
+						this.sprite.addChild(this.bg);
+
+						this.textSprites = [];
+
+						this.textContainer = new PIXI.Container();
+						this.textContainer.position.set(6, 4.25);
+						this.sprite.addChild(this.textContainer);
+			}
+
+			spawn(screen) {
+						screen.stage.addChild(this.sprite);
+						this.sprite.position.set(8, 0);
+			}
+
+			update(dt) {
+						// Note that the graphics clipping mask is given in global/screen
+						// coordinates. (ie after scaling)
+						// TODO - optimize this so that the clipping mask is only updated
+						// when the bounds actually change
+						let rect = this.bg.getBounds();
+						let scale = rect.width / this.bg.width;
+
+						this.textContainer.mask = new PIXI.Graphics().drawRect(rect.x + scale * 4, rect.y, rect.width - scale * 9, rect.height);
+
+						// Messages constantly scroll to the left
+						for (let text of this.textContainer.children) {
+									text.position.x -= this.scrollSpeed * dt;
+						}
+						// Remove elements as they scroll off the display
+						let first = this.textContainer.children[0];
+						if (first && first.position.x + first.width < 0) {
+									this.textContainer.removeChild(first);
+						}
+			}
+
+			addMessage(msg, opts) {
+						let separator = opts && opts.separator || ' ';
+
+						if (this.textContainer.children.length > 0) {
+									msg = separator + msg;
+						}
+						console.log(">" + msg);
+
+						let text = new PIXI.extras.BitmapText(msg, {
+									font: {
+												'name': 'ledfont',
+												'size': 6
+									}
+						});
+						// Append the message to the end of the list
+						for (let other of this.textContainer.children) {
+									text.position.x += other.width;
+						}
+						this.textContainer.addChild(text);
+			}
+}
+
+module.exports = LEDSign;
+
+},{"./resource":198,"./thing":201}],194:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41269,7 +41367,7 @@ class LoadingScreen {
 
 module.exports = LoadingScreen;
 
-},{"./resource":197}],194:[function(require,module,exports){
+},{"./resource":198}],195:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41443,7 +41541,7 @@ module.exports.resize = function () {
 	app.resize();
 };
 
-},{"./controls":191,"./game":192,"./loading":193,"./title":201,"pixi-sound":26,"pixi.js":142}],195:[function(require,module,exports){
+},{"./controls":191,"./game":192,"./loading":194,"./title":202,"pixi-sound":26,"pixi.js":142}],196:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41615,7 +41713,7 @@ Player.Testing = 100;
 
 module.exports = Player;
 
-},{"./resource":197,"./sprites":198,"./thing":200,"./tween":202}],196:[function(require,module,exports){
+},{"./resource":198,"./sprites":199,"./thing":201,"./tween":203}],197:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41686,7 +41784,7 @@ class Process {
 
 module.exports = Process;
 
-},{}],197:[function(require,module,exports){
+},{}],198:[function(require,module,exports){
 
 module.exports = {};
 
@@ -41694,6 +41792,8 @@ module.exports.ALL = {
    SPRITES: 'sprites.json',
    TITLE: 'title-text.png',
    OFFICE: 'office.json',
+   GAME_FONT: 'boxybold.fnt',
+   LED_FONT: 'ledfont.fnt',
    SND_TEST: 'powerup1.wav'
 };
 
@@ -41720,7 +41820,7 @@ module.exports.getImage = function (sheet, name) {
    return img;
 };
 
-},{}],198:[function(require,module,exports){
+},{}],199:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -41847,7 +41947,7 @@ module.exports = {
 			Cabinet: Cabinet
 };
 
-},{"./resource":197,"./sprites":198,"./thing":200}],199:[function(require,module,exports){
+},{"./resource":198,"./sprites":199,"./thing":201}],200:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -42027,7 +42127,7 @@ SuitGuy.STATES = {
 
 module.exports = SuitGuy;
 
-},{"./resource":197,"./sprites":198,"./thing":200}],200:[function(require,module,exports){
+},{"./resource":198,"./sprites":199,"./thing":201}],201:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -42067,7 +42167,7 @@ class Thing {
 
 module.exports = Thing;
 
-},{}],201:[function(require,module,exports){
+},{}],202:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -42206,7 +42306,7 @@ class TitleScreen {
 					src: [this.terranceX + dx, stop * 5],
 					dest: [this.terranceX + dx, this.terranceY + stop],
 					interpolate: Tween.Linear,
-					duration: 0.5
+					duration: 0.5 - stop * 0.008
 				});
 				lst.push(this.process.add(tween));
 			}
@@ -42234,7 +42334,7 @@ class TitleScreen {
 
 module.exports = TitleScreen;
 
-},{"./process":196,"./resource":197,"./tween":202}],202:[function(require,module,exports){
+},{"./process":197,"./resource":198,"./tween":203}],203:[function(require,module,exports){
 /* officetemper - A game about temp work
  * Copyright (C) 2017  Peter Rogers
  *
@@ -42293,5 +42393,5 @@ Tween.LinearSlowdown = function (param, src, dest) {
 
 module.exports = Tween;
 
-},{}]},{},[194])(194)
+},{}]},{},[195])(195)
 });
