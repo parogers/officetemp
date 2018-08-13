@@ -27,15 +27,19 @@ class LoadingScreen
 
     start() {
 	PIXI.loader.defaultQueryString = "nocache=" + (new Date()).getTime();
-
+	
 	for (let key in Resource.ALL) {
 	    /* Store the resources by path (minus the base path) */
 	    let path = this.mediaPath + "/" + Resource.ALL[key];
 	    PIXI.loader.add(Resource.ALL[key], path);
 	    console.log(Resource.ALL[key] + " => " + path);
 	}
-	PIXI.loader.onError.add((arg) => {
+	PIXI.loader.onError.add(arg => {
 	    console.log("ERROR: " + arg);
+	});
+
+	PIXI.loader.onLoad.add(arg => {
+	    console.log("PROGRESS: " + (arg.progress|0));
 	});
 	PIXI.loader.load(() => {
 	    console.log("Done loading assets");

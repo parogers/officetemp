@@ -18,10 +18,10 @@
 /* Imports */
 
 /* Note: once imported the PIXI module is available everywhere */
-require("pixi.js");
+//require("pixi.js");
 /* This patches the standard PIXI module with a loader that understands 
  * sound files. It also adds an API under PIXI.sound.* */
-require("pixi-sound");
+//require("pixi-sound");
 
 var LoadingScreen = require("./loading");
 var TitleScreen = require("./title");
