@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Tween = require("./tween");
 var Process = require("./process");
 var Resource = require("./resource");
 var Player = require("./player");

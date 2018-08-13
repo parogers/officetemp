@@ -294,7 +294,6 @@
           * along with this program.  If not, see <http://www.gnu.org/licenses/>.
           */
 
-									var Tween = require("./tween");
 									var Process = require("./process");
 									var Resource = require("./resource");
 									var Player = require("./player");
@@ -400,7 +399,7 @@
 									}
 
 									module.exports = GameScreen;
-						}, { "./aisle": 1, "./ledsign": 4, "./player": 7, "./process": 8, "./resource": 9, "./sprites": 10, "./suitguy": 11, "./tween": 14 }], 4: [function (require, module, exports) {
+						}, { "./aisle": 1, "./ledsign": 4, "./player": 7, "./process": 8, "./resource": 9, "./sprites": 10, "./suitguy": 11 }], 4: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
