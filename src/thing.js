@@ -30,11 +30,13 @@ class Thing
     }
 
     get width() {
-	return this.sprite.width;
+	if (this.sprite) return this.sprite.width;
+	return 0;
     }
 
     get height() {
-	return this.sprite.height;
+	if (this.sprite) return this.sprite.height;
+	return 0;
     }
 }
 

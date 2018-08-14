@@ -758,13 +758,6 @@
 									var Thing = require("./thing");
 									var getImage = Resource.getImage;
 
-									var STATE = {
-												IDLE: 0,
-												MOVING: 1,
-												SEARCHING: 2,
-												THROWING: 3
-									};
-
 									// Returns the stack size associated with the given search time
 									function getStackSize(time) {
 												// The (cabinet) search times associated with each charge level
@@ -783,7 +776,7 @@
 															super();
 															this.sprite = new PIXI.Sprite(getImage(Resource.SPRITES, 'terrance_idle'));
 															this.sprite.anchor.set(0.5, 1);
-															this.state = STATE.IDLE;
+															this.state = Player.STATES.IDLE;
 															this.lastState = -1;
 															this.aisle = 0;
 															this.timer = 0;
@@ -810,7 +803,7 @@
 												update(dt) {
 															let stateChanged = this.lastState != this.state;
 															this.lastState = this.state;
-															if (this.state == STATE.IDLE) {
+															if (this.state == Player.STATES.IDLE) {
 																		if (stateChanged) {
 																					// Done searching
 																					this.sprite.scale.x = 1;
@@ -834,24 +827,24 @@
 																								duration: 0.1,
 																								interpolate: Tween.Linear
 																					});
-																					this.state = STATE.MOVING;
+																					this.state = Player.STATES.MOVING;
 																					return;
 																		}
 																		// Handle searching
 																		if (this.controls.right.justPressed) {
-																					this.state = STATE.SEARCHING;
+																					this.state = Player.STATES.SEARCHING;
 																		}
-															} else if (this.state == STATE.MOVING) {
+															} else if (this.state == Player.STATES.MOVING) {
 																		// The player is moving between aisles
 																		if (!this.tween.update(dt)) {
 																					this.getAisle().cabinetArea.removeChild(this.sprite);
 																					this.aisle = this.nextAisle;
 																					this.getAisle().cabinetArea.addChild(this.sprite);
 																					this.tween = null;
-																					this.state = STATE.IDLE;
+																					this.state = Player.STATES.IDLE;
 																					this.sprite.position.y = 0;
 																		}
-															} else if (this.state == STATE.SEARCHING) {
+															} else if (this.state == Player.STATES.SEARCHING) {
 																		if (stateChanged) {
 																					// The player is searching the filing cabinet
 																					this.setImage('search');
@@ -884,9 +877,9 @@
 																					});
 																					paper.sprite.position.set(this.getAisle().width, 0);
 																					this.gameScreen.addThing(paper);
-																					this.state = STATE.THROWING;
+																					this.state = Player.STATES.THROWING;
 																		}
-															} else if (this.state == STATE.THROWING) {
+															} else if (this.state == Player.STATES.THROWING) {
 																		if (stateChanged) {
 																					// Show the throw pose for a bit before going idle again
 																					this.timer = 0.1;
@@ -896,13 +889,18 @@
 																		}
 																		this.timer -= dt;
 																		if (this.timer <= 0) {
-																					this.state = STATE.IDLE;
+																					this.state = Player.STATES.IDLE;
 																		}
 															}
 												}
 									};
 
-									Player.Testing = 100;
+									Player.STATES = {
+												IDLE: 0,
+												MOVING: 1,
+												SEARCHING: 2,
+												THROWING: 3
+									};
 
 									module.exports = Player;
 						}, { "./resource": 9, "./sprites": 10, "./thing": 12, "./tween": 14 }], 8: [function (require, module, exports) {
@@ -1345,11 +1343,13 @@
 												}
 
 												get width() {
-															return this.sprite.width;
+															if (this.sprite) return this.sprite.width;
+															return 0;
 												}
 
 												get height() {
-															return this.sprite.height;
+															if (this.sprite) return this.sprite.height;
+															return 0;
 												}
 									}
 
@@ -1378,18 +1378,6 @@
 									var getImage = Resource.getImage;
 
 									const SCALE = 1.3;
-
-									class Test {
-												constructor() {
-															this.counter = 0;
-												}
-
-												update(dt) {
-															this.counter++;
-															console.log(this.counter);
-															return this.counter < 10;
-												}
-									}
 
 									class TitleScreen {
 												constructor(controls) {

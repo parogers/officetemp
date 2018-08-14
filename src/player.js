@@ -21,13 +21,6 @@ var Sprites = require("./sprites");
 var Thing = require("./thing");
 var getImage = Resource.getImage;
 
-var STATE = {
-    IDLE: 0,
-    MOVING: 1,
-    SEARCHING: 2,
-    THROWING: 3,
-};
-
 // Returns the stack size associated with the given search time
 function getStackSize(time)
 {
@@ -54,7 +47,7 @@ class Player extends Thing
 	this.sprite = new PIXI.Sprite(
 	    getImage(Resource.SPRITES, 'terrance_idle'));
 	this.sprite.anchor.set(0.5, 1);
-	this.state = STATE.IDLE;
+	this.state = Player.STATES.IDLE;
 	this.lastState = -1;
 	this.aisle = 0;
 	this.timer = 0;
@@ -82,7 +75,7 @@ class Player extends Thing
     {
 	let stateChanged = (this.lastState != this.state);
 	this.lastState = this.state;
-	if (this.state == STATE.IDLE)
+	if (this.state == Player.STATES.IDLE)
 	{
 	    if (stateChanged) {
 		// Done searching
@@ -112,15 +105,15 @@ class Player extends Thing
 		    duration: 0.1,
 		    interpolate: Tween.Linear,
 		});
-		this.state = STATE.MOVING;
+		this.state = Player.STATES.MOVING;
 		return;
 	    }
 	    // Handle searching
 	    if (this.controls.right.justPressed) {
-		this.state = STATE.SEARCHING;
+		this.state = Player.STATES.SEARCHING;
 	    }
 	}
-	else if (this.state == STATE.MOVING)
+	else if (this.state == Player.STATES.MOVING)
 	{
 	    // The player is moving between aisles
 	    if (!this.tween.update(dt))
@@ -129,11 +122,11 @@ class Player extends Thing
 		this.aisle = this.nextAisle;
 		this.getAisle().cabinetArea.addChild(this.sprite);
 		this.tween = null;
-		this.state = STATE.IDLE;
+		this.state = Player.STATES.IDLE;
 		this.sprite.position.y = 0;
 	    }
 	}
-	else if (this.state == STATE.SEARCHING)
+	else if (this.state == Player.STATES.SEARCHING)
 	{
 	    if (stateChanged) {
 		// The player is searching the filing cabinet
@@ -168,10 +161,10 @@ class Player extends Thing
 		});
 		paper.sprite.position.set(this.getAisle().width, 0);
 		this.gameScreen.addThing(paper);
-		this.state = STATE.THROWING;
+		this.state = Player.STATES.THROWING;
 	    }
 	}
-	else if (this.state == STATE.THROWING)
+	else if (this.state == Player.STATES.THROWING)
 	{
 	    if (stateChanged) {
 		// Show the throw pose for a bit before going idle again
@@ -182,12 +175,17 @@ class Player extends Thing
 	    }
 	    this.timer -= dt;
 	    if (this.timer <= 0) {
-		this.state = STATE.IDLE;
+		this.state = Player.STATES.IDLE;
 	    }
 	}
     }
 };
 
-Player.Testing = 100;
+Player.STATES = {
+    IDLE: 0,
+    MOVING: 1,
+    SEARCHING: 2,
+    THROWING: 3,
+};
 
 module.exports = Player;

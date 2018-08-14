@@ -22,19 +22,6 @@ var getImage = Resource.getImage;
 
 const SCALE = 1.3;
 
-class Test
-{
-    constructor() {
-	this.counter = 0;
-    }
-    
-    update(dt) {
-	this.counter++;
-	console.log(this.counter);
-	return this.counter < 10;
-    }
-}
-
 class TitleScreen
 {
     constructor(controls) {
