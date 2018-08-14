@@ -18,7 +18,7 @@ Main source code is licensed under GPLv3 (see LICENSE.md for details)
 
 Graphics are released Copyright (Peter Rogers) CC-BY-SA. For details see:
 
-	https://creativecommons.org/licenses/by-sa/4.0/
+    https://creativecommons.org/licenses/by-sa/4.0/
 
 The font used (Boxy Bold Font) is by Clint Bellanger and was released
 under public domain license. The font is found here:
