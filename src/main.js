@@ -23,12 +23,11 @@
  * sound files. It also adds an API under PIXI.sound.* */
 //require("pixi-sound");
 
-var LoadingScreen = require("./loading");
-var TitleScreen = require("./title");
-var Controls = require("./controls");
-var GameScreen = require("./game");
-
-/* Globals */
+const LoadingScreen = require("./loading");
+const TitleScreen = require("./title");
+const Controls = require("./controls");
+const GameScreen = require("./game");
+const NextScreen = require('./next');
 
 const GAME_WIDTH = 250;
 const GAME_HEIGHT = 150;
@@ -88,6 +87,7 @@ class Application
 	    loading: new LoadingScreen(),
 	    title: new TitleScreen(this.controls),
 	    game: new GameScreen(this.controls),
+	    nextLevel: new NextScreen(),
 	}
 	this.screen = this.screens.loading;
 	this.screen.start();
@@ -107,14 +107,6 @@ class Application
 	});
     }
 
-    /*
-    redraw() {
-	this.update(1/60.0);
-	requestAnimationFrame(() => {
-	    this.redraw();
-	});
-    }*/
-
     // Called from the render loop (which is handled via PIXI ticker)
     update(dt)
     {
@@ -127,22 +119,29 @@ class Application
 	// If the screen is done, figure out where to go next
 	if (this.screen.isDone())
 	{
-	    let screen = null;
 	    if (this.screen === this.screens.loading) {
-		screen = this.screens.title;
-		//screen = this.screens.game;
+		this.setScreen(this.screens.title);
 	    }
 	    else if (this.screen === this.screens.title) {
-		screen = this.screens.game;
+		this.setScreen(this.screens.nextLevel);
+
+	    } else if (this.screen === this.screens.nextLevel) {
+		this.setScreen(this.screens.game);
+
+	    } else {
+		this.setScreen(null);
 	    }
-	    this.screen = null;
-	    
-	    if (screen) {
-		screen.start();
-		this.pixiApp.stage.removeChildren();
-		this.pixiApp.stage.addChild(screen.getStage());
-		this.screen = screen;
-	    }
+	}
+    }
+
+    setScreen(screen)
+    {
+	// TODO - eventually handle screen transitions here
+	this.screen = screen;
+	if (this.screen) {
+	    this.screen.start();
+	    this.pixiApp.stage.removeChildren();
+	    this.pixiApp.stage.addChild(this.screen.getStage());
 	}
     }
 

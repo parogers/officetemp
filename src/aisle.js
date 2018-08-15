@@ -15,13 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Resource = require("./resource");
-var Sprites = require("./sprites");
-var getImage = Resource.getImage;
+const Thing = require('./thing');
+const Sprites = require("./sprites");
+const Resource = require('./resource');
+const { getImage } = require('./resource');
 
-class Aisle
+class Aisle extends Thing
 {
-    constructor() {
+    constructor()
+    {
+	super();
 	// The container holds everything in this aisle
 	this.container = new PIXI.Container();
 	// Things that are behind the counter

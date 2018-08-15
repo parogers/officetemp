@@ -71,8 +71,6 @@ class LEDSign extends Thing
 	if (this.textContainer.children.length > 0) {
 	    msg = separator + msg;
 	}
-	console.log(">" + msg);
-	
 	let text = new PIXI.extras.BitmapText(
 	    msg, {
 		font : {

@@ -1,24 +1,40 @@
+/* officetemper - A game about temp work
+ * Copyright (C) 2017  Peter Rogers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-var fs = require('fs');
-var gulp = require('gulp');
-var concat = require('gulp-concat');
-var browserify = require('browserify');
-var source = require('vinyl-source-stream');
-var babel = require('gulp-babel');
-var buffer = require('vinyl-buffer');
-var { spawn } = require('child_process');
+const fs = require('fs');
+const gulp = require('gulp');
+const concat = require('gulp-concat');
+const browserify = require('browserify');
+const source = require('vinyl-source-stream');
+const babel = require('gulp-babel');
+const buffer = require('vinyl-buffer');
+const { spawn } = require('child_process');
 
-var genblockfont_path = './tools/genblockfont.py';
-var xcf2atlas_path = '../xcf2atlas/xcf2atlas.py';
-var inkscape_path = 'inkscape';
+const genblockfont_path = './tools/genblockfont.py';
+const xcf2atlas_path = '../xcf2atlas/xcf2atlas.py';
+const inkscape_path = 'inkscape';
 
-var src_media_path = './rawdata';
-var dest_media_path = './www/media';
+const src_media_path = './rawdata';
+const dest_media_path = './www/media';
 
 gulp.task('default', ['js', 'watch'])
 
 gulp.task('js', function() {
-    var opts = {
+    let opts = {
 	'standalone' : 'officetemp',
     };
     return browserify('src/main.js', opts)

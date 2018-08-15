@@ -45,12 +45,14 @@
           * along with this program.  If not, see <http://www.gnu.org/licenses/>.
           */
 
-									var Resource = require("./resource");
-									var Sprites = require("./sprites");
-									var getImage = Resource.getImage;
+									const Thing = require('./thing');
+									const Sprites = require("./sprites");
+									const Resource = require('./resource');
+									const { getImage } = require('./resource');
 
-									class Aisle {
+									class Aisle extends Thing {
 												constructor() {
+															super();
 															// The container holds everything in this aisle
 															this.container = new PIXI.Container();
 															// Things that are behind the counter
@@ -112,7 +114,7 @@
 									}
 
 									module.exports = Aisle;
-						}, { "./resource": 9, "./sprites": 10 }], 2: [function (require, module, exports) {
+						}, { "./resource": 10, "./sprites": 11, "./thing": 13 }], 2: [function (require, module, exports) {
 									/* APDUNGEON - A dungeon crawler demo written in javascript + pixi.js
           * Copyright (C) 2017  Peter Rogers (peter.rogers@gmail.com)
           *
@@ -294,16 +296,16 @@
           * along with this program.  If not, see <http://www.gnu.org/licenses/>.
           */
 
-									var Process = require("./process");
-									var Resource = require("./resource");
-									var Player = require("./player");
-									var Sprites = require("./sprites");
-									var SuitGuy = require('./suitguy');
-									var Aisle = require("./aisle");
-									var getImage = Resource.getImage;
-									var LEDSign = require("./ledsign");
+									const Process = require("./process");
+									const Resource = require("./resource");
+									const Player = require("./player");
+									const Sprites = require("./sprites");
+									const SuitGuy = require('./suitguy');
+									const Aisle = require("./aisle");
+									const getImage = Resource.getImage;
+									const LEDSign = require("./ledsign");
 
-									var AISLE_YPOS_LIST = [72, 111, 150];
+									const AISLE_YPOS_LIST = [72, 111, 150];
 
 									class GameScreen {
 												constructor(controls) {
@@ -341,7 +343,7 @@
 															this.aisleList = [];
 															for (let ypos of AISLE_YPOS_LIST) {
 																		let aisle = new Aisle();
-																		aisle.sprite.position.set(0, ypos);
+																		aisle.position.set(0, ypos);
 																		this.stage.addChild(aisle.sprite);
 																		this.aisleList.push(aisle);
 															}
@@ -352,6 +354,7 @@
 															this.addThing(guy);
 
 															this.ledSign = new LEDSign();
+															this.ledSign.position.set(8, 0);
 															this.addThing(this.ledSign);
 
 															this.ledSign.addMessage("HELLO WORLD");
@@ -399,7 +402,7 @@
 									}
 
 									module.exports = GameScreen;
-						}, { "./aisle": 1, "./ledsign": 4, "./player": 7, "./process": 8, "./resource": 9, "./sprites": 10, "./suitguy": 11 }], 4: [function (require, module, exports) {
+						}, { "./aisle": 1, "./ledsign": 4, "./player": 8, "./process": 9, "./resource": 10, "./sprites": 11, "./suitguy": 12 }], 4: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
@@ -417,8 +420,8 @@
           * along with this program.  If not, see <http://www.gnu.org/licenses/>.
           */
 
-									var Thing = require("./thing");
-									var Resource = require("./resource");
+									const Thing = require("./thing");
+									const { getSprite } = require("./resource");
 
 									class LEDSign extends Thing {
 												constructor() {
@@ -426,7 +429,7 @@
 															this.scrollSpeed = 10;
 															this.sprite = new PIXI.Container();
 
-															let img = Resource.getImage(Resource.OFFICE, 'office_sign');
+															let img = getSprite('office_sign');
 															this.bg = new PIXI.Sprite(img);
 															this.bg.anchor.set(0, 0);
 															this.sprite.addChild(this.bg);
@@ -440,7 +443,6 @@
 
 												spawn(screen) {
 															screen.stage.addChild(this.sprite);
-															this.sprite.position.set(8, 0);
 												}
 
 												update(dt) {
@@ -470,8 +472,6 @@
 															if (this.textContainer.children.length > 0) {
 																		msg = separator + msg;
 															}
-															console.log(">" + msg);
-
 															let text = new PIXI.extras.BitmapText(msg, {
 																		font: {
 																					'name': 'ledfont',
@@ -487,7 +487,7 @@
 									}
 
 									module.exports = LEDSign;
-						}, { "./resource": 9, "./thing": 12 }], 5: [function (require, module, exports) {
+						}, { "./resource": 10, "./thing": 13 }], 5: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
@@ -553,7 +553,7 @@
 									};
 
 									module.exports = LoadingScreen;
-						}, { "./resource": 9 }], 6: [function (require, module, exports) {
+						}, { "./resource": 10 }], 6: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
@@ -579,12 +579,11 @@
           * sound files. It also adds an API under PIXI.sound.* */
 									//require("pixi-sound");
 
-									var LoadingScreen = require("./loading");
-									var TitleScreen = require("./title");
-									var Controls = require("./controls");
-									var GameScreen = require("./game");
-
-									/* Globals */
+									const LoadingScreen = require("./loading");
+									const TitleScreen = require("./title");
+									const Controls = require("./controls");
+									const GameScreen = require("./game");
+									const NextScreen = require('./next');
 
 									const GAME_WIDTH = 250;
 									const GAME_HEIGHT = 150;
@@ -639,7 +638,8 @@
 															this.screens = {
 																		loading: new LoadingScreen(),
 																		title: new TitleScreen(this.controls),
-																		game: new GameScreen(this.controls)
+																		game: new GameScreen(this.controls),
+																		nextLevel: new NextScreen()
 															};
 															this.screen = this.screens.loading;
 															this.screen.start();
@@ -659,14 +659,7 @@
 															});
 												}
 
-												/*
-            redraw() {
-            this.update(1/60.0);
-            requestAnimationFrame(() => {
-             this.redraw();
-            });
-            }*/
-
+												// Called from the render loop (which is handled via PIXI ticker)
 												update(dt) {
 															if (this.screen) {
 																		this.screen.update(dt);
@@ -676,21 +669,25 @@
 
 															// If the screen is done, figure out where to go next
 															if (this.screen.isDone()) {
-																		let screen = null;
 																		if (this.screen === this.screens.loading) {
-																					screen = this.screens.title;
-																					//screen = this.screens.game;
+																					this.setScreen(this.screens.title);
 																		} else if (this.screen === this.screens.title) {
-																					screen = this.screens.game;
+																					this.setScreen(this.screens.nextLevel);
+																		} else if (this.screen === this.screens.nextLevel) {
+																					this.setScreen(this.screens.game);
+																		} else {
+																					this.setScreen(null);
 																		}
-																		this.screen = null;
+															}
+												}
 
-																		if (screen) {
-																					screen.start();
-																					this.pixiApp.stage.removeChildren();
-																					this.pixiApp.stage.addChild(screen.getStage());
-																					this.screen = screen;
-																		}
+												setScreen(screen) {
+															// TODO - eventually handle screen transitions here
+															this.screen = screen;
+															if (this.screen) {
+																		this.screen.start();
+																		this.pixiApp.stage.removeChildren();
+																		this.pixiApp.stage.addChild(this.screen.getStage());
 															}
 												}
 
@@ -734,7 +731,7 @@
 									module.exports.resize = function () {
 												app.resize();
 									};
-						}, { "./controls": 2, "./game": 3, "./loading": 5, "./title": 13 }], 7: [function (require, module, exports) {
+						}, { "./controls": 2, "./game": 3, "./loading": 5, "./next": 7, "./title": 14 }], 7: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
@@ -752,11 +749,73 @@
           * along with this program.  If not, see <http://www.gnu.org/licenses/>.
           */
 
-									var Tween = require("./tween");
-									var Resource = require("./resource");
-									var Sprites = require("./sprites");
-									var Thing = require("./thing");
-									var getImage = Resource.getImage;
+									const { getSprite } = require('./resource');
+
+									class NextScreen {
+												constructor() {
+															this.timer = 3;
+												}
+
+												start() {
+															// TODO - lots of magic numbers here
+															this.stage = new PIXI.Container();
+															this.stage.scale.set(1.5);
+
+															let bg = new PIXI.Sprite(getSprite('colours_black'));
+															bg.scale.set(6, 4);
+															this.stage.addChild(bg);
+
+															let portrait = new PIXI.Sprite(getSprite('portraits_terrance'));
+															portrait.position.set(65, 30);
+															this.stage.addChild(portrait);
+
+															let msg = 'GET READY!';
+															let text = new PIXI.extras.BitmapText(msg, {
+																		font: {
+																					'name': 'boxybold',
+																					'size': 6
+																		}
+															});
+															text.position.set(53, 62);
+															this.stage.addChild(text);
+												}
+
+												update(dt) {
+															this.timer -= dt;
+												}
+
+												getStage() {
+															return this.stage;
+												}
+
+												isDone() {
+															return this.timer <= 0;
+												}
+									}
+
+									module.exports = NextScreen;
+						}, { "./resource": 10 }], 8: [function (require, module, exports) {
+									/* officetemper - A game about temp work
+          * Copyright (C) 2017  Peter Rogers
+          *
+          * This program is free software: you can redistribute it and/or modify
+          * it under the terms of the GNU General Public License as published by
+          * the Free Software Foundation, either version 3 of the License, or
+          * (at your option) any later version.
+          *
+          * This program is distributed in the hope that it will be useful,
+          * but WITHOUT ANY WARRANTY; without even the implied warranty of
+          * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+          * GNU General Public License for more details.
+          *
+          * You should have received a copy of the GNU General Public License
+          * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+          */
+
+									const Tween = require("./tween");
+									const Sprites = require("./sprites");
+									const Thing = require("./thing");
+									const { getSprite } = require('./resource');
 
 									// Returns the stack size associated with the given search time
 									function getStackSize(time) {
@@ -774,7 +833,7 @@
 									class Player extends Thing {
 												constructor(controls) {
 															super();
-															this.sprite = new PIXI.Sprite(getImage(Resource.SPRITES, 'terrance_idle'));
+															this.sprite = new PIXI.Sprite(getSprite('terrance_idle'));
 															this.sprite.anchor.set(0.5, 1);
 															this.state = Player.STATES.IDLE;
 															this.lastState = -1;
@@ -797,7 +856,7 @@
 												}
 
 												setImage(name) {
-															this.sprite.texture = getImage(Resource.SPRITES, 'terrance_' + name);
+															this.sprite.texture = getSprite('terrance_' + name);
 												}
 
 												update(dt) {
@@ -903,7 +962,7 @@
 									};
 
 									module.exports = Player;
-						}, { "./resource": 9, "./sprites": 10, "./thing": 12, "./tween": 14 }], 8: [function (require, module, exports) {
+						}, { "./resource": 10, "./sprites": 11, "./thing": 13, "./tween": 15 }], 9: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
@@ -973,7 +1032,7 @@
 									}
 
 									module.exports = Process;
-						}, {}], 9: [function (require, module, exports) {
+						}, {}], 10: [function (require, module, exports) {
 
 									module.exports = {};
 
@@ -990,7 +1049,11 @@
 												module.exports[key] = module.exports.ALL[key];
 									}
 
-									module.exports.getImage = function (sheet, name) {
+									function getSprite(name) {
+												return getImage(module.exports.SPRITES, name);
+									}
+
+									function getImage(sheet, name) {
 												let img = null;
 												let res = PIXI.loader.resources[sheet];
 												if (!res) {
@@ -1007,8 +1070,11 @@
 															console.log("WARNING: can't find texture: " + sheet + "/" + name);
 												}
 												return img;
-									};
-						}, {}], 10: [function (require, module, exports) {
+									}
+
+									module.exports.getImage = getImage;
+									module.exports.getSprite = getSprite;
+						}, {}], 11: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
@@ -1026,10 +1092,10 @@
           * along with this program.  If not, see <http://www.gnu.org/licenses/>.
           */
 
-									var Resource = require("./resource");
-									var Sprites = require("./sprites");
-									var Thing = require("./thing");
-									var getImage = Resource.getImage;
+									const Resource = require("./resource");
+									const Sprites = require("./sprites");
+									const Thing = require("./thing");
+									const getImage = Resource.getImage;
 
 									class Cabinet extends Thing {
 												constructor() {
@@ -1134,7 +1200,7 @@
 												PaperStack: PaperStack,
 												Cabinet: Cabinet
 									};
-						}, { "./resource": 9, "./sprites": 10, "./thing": 12 }], 11: [function (require, module, exports) {
+						}, { "./resource": 10, "./sprites": 11, "./thing": 13 }], 12: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
@@ -1152,10 +1218,10 @@
           * along with this program.  If not, see <http://www.gnu.org/licenses/>.
           */
 
-									var Sprites = require("./sprites");
-									var Thing = require('./thing');
-									var Resource = require('./resource');
-									var getImage = Resource.getImage;
+									const Sprites = require("./sprites");
+									const Thing = require('./thing');
+									const Resource = require('./resource');
+									const { getImage } = require('./resource');
 
 									class SuitGuy extends Thing {
 												constructor(aisle) {
@@ -1313,7 +1379,7 @@
 									};
 
 									module.exports = SuitGuy;
-						}, { "./resource": 9, "./sprites": 10, "./thing": 12 }], 12: [function (require, module, exports) {
+						}, { "./resource": 10, "./sprites": 11, "./thing": 13 }], 13: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
@@ -1351,10 +1417,14 @@
 															if (this.sprite) return this.sprite.height;
 															return 0;
 												}
+
+												get position() {
+															return this.sprite.position;
+												}
 									}
 
 									module.exports = Thing;
-						}, {}], 13: [function (require, module, exports) {
+						}, {}], 14: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
@@ -1372,10 +1442,10 @@
           * along with this program.  If not, see <http://www.gnu.org/licenses/>.
           */
 
-									var Tween = require("./tween");
-									var Process = require("./process");
-									var Resource = require("./resource");
-									var getImage = Resource.getImage;
+									const Tween = require("./tween");
+									const Process = require("./process");
+									const Resource = require("./resource");
+									const { getImage, getSprite } = require('./resource');
 
 									const SCALE = 1.3;
 
@@ -1392,11 +1462,10 @@
 															img.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR;
 															img.baseTexture.dispose();
 
-															console.log("TITLE");
 															this.timer = 0;
 															this.terranceX = 210;
 															this.terranceY = 110;
-															this.terrance = new PIXI.Sprite(getImage(Resource.SPRITES, "terrance_idle"));
+															this.terrance = new PIXI.Sprite(getSprite("terrance_idle"));
 															this.terrance.anchor.set(0.5, 1);
 															this.terrance.scale.set(SCALE);
 															this.terrance.position.set(this.terranceX + 50, this.terranceY);
@@ -1404,7 +1473,7 @@
 
 															this.sweaterX = 40;
 															this.sweaterY = 110;
-															this.sweaterGuy = new PIXI.Sprite(getImage(Resource.SPRITES, "sweater_drink1"));
+															this.sweaterGuy = new PIXI.Sprite(getSprite("sweater_drink1"));
 															this.sweaterGuy.anchor.set(0.5, 1);
 															this.sweaterGuy.scale.set(SCALE);
 															this.sweaterGuy.position.set(this.sweaterX - 50, this.sweaterY);
@@ -1415,6 +1484,7 @@
 															this.title.anchor.set(0.5, 0.5);
 															this.title.position.set(125, 80);
 
+															// Use a promise chain to handle the intro animation
 															Promise.resolve().then(() => {
 																		return this.process.wait(1);
 															}).then(() => {
@@ -1445,14 +1515,14 @@
 																		this.process.add(dt => {
 																					let x = this.terranceX + 0.5 * Math.cos(this.timer * 75);
 																					let y = this.terranceY + 0.25 * Math.sin(this.timer * 50);
-																					this.terrance.texture = getImage(Resource.SPRITES, "terrance_frazzled");
+																					this.terrance.texture = getSprite("terrance_frazzled");
 																					this.terrance.position.set(x, y);
 																					return true;
 																		});
 
 																		let frame = 0;
 																		this.process.add(dt => {
-																					let frames = [getImage(Resource.SPRITES, "sweater_drink2"), getImage(Resource.SPRITES, "sweater_drink1"), getImage(Resource.SPRITES, "sweater_drink1")];
+																					let frames = [getSprite("sweater_drink2"), getSprite("sweater_drink1"), getSprite("sweater_drink1")];
 																					frame += 0.75 * dt;
 																					this.sweaterGuy.texture = frames[(frame | 0) % frames.length];
 																					return true;
@@ -1467,7 +1537,7 @@
 
 																		let lst = [];
 																		for (let n = 0; n < paperPos.length; n++) {
-																					let img = getImage(Resource.SPRITES, "paperstack_medium");
+																					let img = getSprite("paperstack_medium");
 																					let paper = new PIXI.Sprite(img);
 																					paper.scale.set(SCALE);
 																					paper.anchor.set(0.5, 1);
@@ -1508,7 +1578,7 @@
 									}
 
 									module.exports = TitleScreen;
-						}, { "./process": 8, "./resource": 9, "./tween": 14 }], 14: [function (require, module, exports) {
+						}, { "./process": 9, "./resource": 10, "./tween": 15 }], 15: [function (require, module, exports) {
 									/* officetemper - A game about temp work
           * Copyright (C) 2017  Peter Rogers
           *
