@@ -14,7 +14,11 @@ for (let key in module.exports.ALL) {
     module.exports[key] = module.exports.ALL[key];
 }
 
-module.exports.getImage = function(sheet, name) {
+function getSprite(name) {
+    return getImage(module.exports.SPRITES, name);
+}
+
+function getImage(sheet, name) {
     let img = null;
     let res = PIXI.loader.resources[sheet];
     if (!res) {
@@ -32,3 +36,6 @@ module.exports.getImage = function(sheet, name) {
     }
     return img;
 }
+
+module.exports.getImage = getImage;
+module.exports.getSprite = getSprite;

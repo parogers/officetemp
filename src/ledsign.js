@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Thing = require("./thing");
-var Resource = require("./resource");
+const Thing = require("./thing");
+const { getSprite } = require("./resource");
 
 class LEDSign extends Thing
 {
@@ -26,7 +26,7 @@ class LEDSign extends Thing
 	this.scrollSpeed = 10;
 	this.sprite = new PIXI.Container();
 	
-	let img = Resource.getImage(Resource.OFFICE, 'office_sign');
+	let img = getSprite('office_sign');
 	this.bg = new PIXI.Sprite(img);
 	this.bg.anchor.set(0, 0);
 	this.sprite.addChild(this.bg);
@@ -40,7 +40,6 @@ class LEDSign extends Thing
 
     spawn(screen) {
 	screen.stage.addChild(this.sprite);
-	this.sprite.position.set(8, 0);
     }
 
     update(dt) {

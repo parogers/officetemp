@@ -15,16 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Process = require("./process");
-var Resource = require("./resource");
-var Player = require("./player");
-var Sprites = require("./sprites");
-var SuitGuy = require('./suitguy');
-var Aisle = require("./aisle");
-var getImage = Resource.getImage;
-var LEDSign = require("./ledsign");
+const Process = require("./process");
+const Resource = require("./resource");
+const Player = require("./player");
+const Sprites = require("./sprites");
+const SuitGuy = require('./suitguy');
+const Aisle = require("./aisle");
+const getImage = Resource.getImage;
+const LEDSign = require("./ledsign");
 
-var AISLE_YPOS_LIST = [72, 111, 150];
+const AISLE_YPOS_LIST = [72, 111, 150];
 
 class GameScreen
 {
@@ -63,7 +63,7 @@ class GameScreen
 	this.aisleList = [];
 	for (let ypos of AISLE_YPOS_LIST) {
 	    let aisle = new Aisle();
-	    aisle.sprite.position.set(0, ypos);
+	    aisle.position.set(0, ypos);
 	    this.stage.addChild(aisle.sprite);
 	    this.aisleList.push(aisle);
 	}
@@ -74,6 +74,7 @@ class GameScreen
 	this.addThing(guy);
 
 	this.ledSign = new LEDSign();
+	this.ledSign.position.set(8, 0);
 	this.addThing(this.ledSign);
 
 	this.ledSign.addMessage("HELLO WORLD");

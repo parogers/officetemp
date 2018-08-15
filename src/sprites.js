@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Resource = require("./resource");
-var Sprites = require("./sprites");
-var Thing = require("./thing");
-var getImage = Resource.getImage;
+const Resource = require("./resource");
+const Sprites = require("./sprites");
+const Thing = require("./thing");
+const getImage = Resource.getImage;
 
 class Cabinet extends Thing
 {

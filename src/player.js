@@ -15,11 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Tween = require("./tween");
-var Resource = require("./resource");
-var Sprites = require("./sprites");
-var Thing = require("./thing");
-var getImage = Resource.getImage;
+const Tween = require("./tween");
+const Sprites = require("./sprites");
+const Thing = require("./thing");
+const { getSprite } = require('./resource');
 
 // Returns the stack size associated with the given search time
 function getStackSize(time)
@@ -44,8 +43,7 @@ class Player extends Thing
 {
     constructor(controls) {
 	super();
-	this.sprite = new PIXI.Sprite(
-	    getImage(Resource.SPRITES, 'terrance_idle'));
+	this.sprite = new PIXI.Sprite(getSprite('terrance_idle'));
 	this.sprite.anchor.set(0.5, 1);
 	this.state = Player.STATES.IDLE;
 	this.lastState = -1;
@@ -68,7 +66,7 @@ class Player extends Thing
     }
 
     setImage(name) {
-	this.sprite.texture = getImage(Resource.SPRITES, 'terrance_' + name);
+	this.sprite.texture = getSprite('terrance_' + name);
     }
 
     update(dt)

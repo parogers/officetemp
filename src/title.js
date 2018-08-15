@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Tween = require("./tween");
-var Process = require("./process");
-var Resource = require("./resource");
-var getImage = Resource.getImage;
+const Tween = require("./tween");
+const Process = require("./process");
+const Resource = require("./resource");
+const { getImage, getSprite } = require('./resource');
 
 const SCALE = 1.3;
 
@@ -36,12 +36,10 @@ class TitleScreen
 	img.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR;
 	img.baseTexture.dispose();
 	
-	console.log("TITLE");
 	this.timer = 0;
 	this.terranceX = 210;
 	this.terranceY = 110;
-	this.terrance = new PIXI.Sprite(
-	    getImage(Resource.SPRITES, "terrance_idle"));
+	this.terrance = new PIXI.Sprite(getSprite("terrance_idle"));
 	this.terrance.anchor.set(0.5, 1);
 	this.terrance.scale.set(SCALE);
 	this.terrance.position.set(this.terranceX + 50, this.terranceY);
@@ -49,8 +47,7 @@ class TitleScreen
 
 	this.sweaterX = 40;
 	this.sweaterY = 110;
-	this.sweaterGuy = new PIXI.Sprite(
-	    getImage(Resource.SPRITES, "sweater_drink1"));
+	this.sweaterGuy = new PIXI.Sprite(getSprite("sweater_drink1"));
 	this.sweaterGuy.anchor.set(0.5, 1);
 	this.sweaterGuy.scale.set(SCALE);
 	this.sweaterGuy.position.set(this.sweaterX-50, this.sweaterY);
@@ -61,6 +58,7 @@ class TitleScreen
 	this.title.anchor.set(0.5, 0.5);
 	this.title.position.set(125, 80);
 
+	// Use a promise chain to handle the intro animation
 	Promise.resolve().then(() => {
 	    return this.process.wait(1);
 
@@ -97,8 +95,7 @@ class TitleScreen
 	    this.process.add(dt => {
 		let x = this.terranceX + 0.5*Math.cos(this.timer*75);
 		let y = this.terranceY + 0.25*Math.sin(this.timer*50);
-		this.terrance.texture = getImage(
-		    Resource.SPRITES, "terrance_frazzled");
+		this.terrance.texture = getSprite("terrance_frazzled");
 		this.terrance.position.set(x, y);
 		return true;
 	    });
@@ -106,9 +103,9 @@ class TitleScreen
 	    let frame = 0;
 	    this.process.add(dt => {
 		let frames = [
-		    getImage(Resource.SPRITES, "sweater_drink2"),
-		    getImage(Resource.SPRITES, "sweater_drink1"),
-		    getImage(Resource.SPRITES, "sweater_drink1"),
+		    getSprite("sweater_drink2"),
+		    getSprite("sweater_drink1"),
+		    getSprite("sweater_drink1"),
 		];
 		frame += 0.75*dt;
 		this.sweaterGuy.texture = frames[(frame|0) % frames.length];
@@ -138,7 +135,7 @@ class TitleScreen
 	    let lst = [];
 	    for (let n = 0; n < paperPos.length; n++)
 	    {
-		let img = getImage(Resource.SPRITES, "paperstack_medium");
+		let img = getSprite("paperstack_medium");
 		let paper = new PIXI.Sprite(img);
 		paper.scale.set(SCALE);
 		paper.anchor.set(0.5, 1);

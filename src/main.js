@@ -115,7 +115,9 @@ class Application
 	});
     }*/
 
-    update(dt) {
+    // Called from the render loop (which is handled via PIXI ticker)
+    update(dt)
+    {
 	if (this.screen) {
 	    this.screen.update(dt);
 	    this.pixiApp.render();

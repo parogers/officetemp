@@ -38,6 +38,10 @@ class Thing
 	if (this.sprite) return this.sprite.height;
 	return 0;
     }
+
+    get position() {
+	return this.sprite.position;
+    }
 }
 
 module.exports = Thing;
