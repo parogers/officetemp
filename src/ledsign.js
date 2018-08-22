@@ -16,7 +16,7 @@
  */
 
 const Thing = require("./thing");
-const { getSprite } = require("./resource");
+const Resource = require('./resource');
 
 class LEDSign extends Thing
 {
@@ -26,7 +26,7 @@ class LEDSign extends Thing
 	this.scrollSpeed = 10;
 	this.sprite = new PIXI.Container();
 	
-	let img = getSprite('office_sign');
+	let img = Resource.getImage(Resource.OFFICE, 'office_sign');
 	this.bg = new PIXI.Sprite(img);
 	this.bg.anchor.set(0, 0);
 	this.sprite.addChild(this.bg);

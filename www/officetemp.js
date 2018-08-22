@@ -334,11 +334,32 @@
 															this.background = getImage(Resource.OFFICE, 'office_carpet');
 															this.stage.addChild(new PIXI.Sprite(this.background));
 
+															let sprite = null;
 															let img = getImage(Resource.OFFICE, 'office_shadows');
 															this.stage.addChild(new PIXI.Sprite(img));
 
 															img = getImage(Resource.OFFICE, 'office_wall');
 															this.stage.addChild(new PIXI.Sprite(img));
+
+															img = getImage(Resource.OFFICE, 'office_counter');
+															sprite = new PIXI.Sprite(img);
+															sprite.position.set(118, 15);
+															this.stage.addChild(sprite);
+
+															img = getImage(Resource.OFFICE, 'office_microwave');
+															sprite = new PIXI.Sprite(img);
+															sprite.position.set(126, 9);
+															this.stage.addChild(sprite);
+
+															img = getImage(Resource.OFFICE, 'office_counter2');
+															sprite = new PIXI.Sprite(img);
+															sprite.position.set(6, 15);
+															this.stage.addChild(sprite);
+
+															img = getImage(Resource.OFFICE, 'office_counter3');
+															sprite = new PIXI.Sprite(img);
+															sprite.position.set(187, 15);
+															this.stage.addChild(sprite);
 
 															this.aisleList = [];
 															for (let ypos of AISLE_YPOS_LIST) {
@@ -421,7 +442,7 @@
           */
 
 									const Thing = require("./thing");
-									const { getSprite } = require("./resource");
+									const Resource = require('./resource');
 
 									class LEDSign extends Thing {
 												constructor() {
@@ -429,7 +450,7 @@
 															this.scrollSpeed = 10;
 															this.sprite = new PIXI.Container();
 
-															let img = getSprite('office_sign');
+															let img = Resource.getImage(Resource.OFFICE, 'office_sign');
 															this.bg = new PIXI.Sprite(img);
 															this.bg.anchor.set(0, 0);
 															this.sprite.addChild(this.bg);

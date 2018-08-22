@@ -54,11 +54,32 @@ class GameScreen
 	this.background = getImage(Resource.OFFICE, 'office_carpet');
 	this.stage.addChild(new PIXI.Sprite(this.background));
 
+	let sprite = null;
 	let img = getImage(Resource.OFFICE, 'office_shadows');
 	this.stage.addChild(new PIXI.Sprite(img));
 
 	img = getImage(Resource.OFFICE, 'office_wall');
 	this.stage.addChild(new PIXI.Sprite(img));
+
+	img = getImage(Resource.OFFICE, 'office_counter');
+	sprite = new PIXI.Sprite(img);
+	sprite.position.set(118, 15);
+	this.stage.addChild(sprite);
+
+	img = getImage(Resource.OFFICE, 'office_microwave');
+	sprite = new PIXI.Sprite(img);
+	sprite.position.set(126, 9);
+	this.stage.addChild(sprite);
+
+	img = getImage(Resource.OFFICE, 'office_counter2');
+	sprite = new PIXI.Sprite(img);
+	sprite.position.set(6, 15);
+	this.stage.addChild(sprite);
+
+	img = getImage(Resource.OFFICE, 'office_counter3');
+	sprite = new PIXI.Sprite(img);
+	sprite.position.set(187, 15);
+	this.stage.addChild(sprite);
 
 	this.aisleList = [];
 	for (let ypos of AISLE_YPOS_LIST) {
