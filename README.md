@@ -4,6 +4,15 @@ Office Temper
 A tongue-in-cheek game about temp work. Written in Javascript. Uses PIXI
 for graphics and sound.
 
+Screenshots
+-----------
+
+<img src="https://github.com/parogers/officetemp/raw/master/screenshots/screenshot1.png" style="width: 200px; height: auto; border: solid 1px">
+
+<img src="https://github.com/parogers/officetemp/raw/master/screenshots/screenshot2.png" style="width: 200px; height: auto; border: solid 1px">
+
+<img src="https://github.com/parogers/officetemp/raw/master/screenshots/screenshot3.png" style="width: 200px; height: auto; border: solid 1px">
+
 Source
 ------
 
