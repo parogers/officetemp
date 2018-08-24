@@ -15,10 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Resource = require("./resource");
 const Sprites = require("./sprites");
 const Thing = require("./thing");
-const getImage = Resource.getImage;
+const { getSprite } = require('./resource');
 
 class Cabinet extends Thing
 {
@@ -33,7 +32,7 @@ class Cabinet extends Thing
 	let img = null;
 	if (b) img = 'cabinet_open';
 	else img = 'cabinet_closed';
-	this.sprite.texture = getImage(Resource.SPRITES, img);
+	this.sprite.texture = getSprite(img);
     }
 
     spawn(gameScreen) {
@@ -77,8 +76,7 @@ class PaperStack extends Thing
 	this.vely = 0;
 	this.frame = 0;
 
-	this.sprite = new PIXI.Sprite(
-	    getImage(Resource.SPRITES, 'paperstack_' + this.size));
+	this.sprite = new PIXI.Sprite(getSprite('paperstack_' + this.size));
 	this.sprite.anchor.set(0, 1);
     }
 
@@ -106,14 +104,15 @@ class PaperStack extends Thing
 
 	    if (this.sprite.position.y > this.aisle.counter.height) {
 		let explosion = new Scenery([
-		    getImage(Resource.SPRITES, 'explode_1'),
-		    getImage(Resource.SPRITES, 'explode_2')], 10);
+		    getSprite('explode_1'),
+		    getSprite('explode_2')], 10);
 		this.gameScreen.addThing(explosion);
 		this.aisle.onCounter.addChild(explosion.sprite);
 		explosion.sprite.position.set(
 		    this.sprite.position.x+5,
 		    this.sprite.position.y-5);
-		this.gameScreen.removeThing(this);
+		//this.gameScreen.removeThing(this);
+		return false;
 	    }
 	}
 	else
@@ -129,7 +128,8 @@ class PaperStack extends Thing
 	    if (this.velx < 0 && rightEdge < 0)
 	    {
 		// Fell off the counter (being thrown by the player)
-		this.gameScreen.removeThing(this);
+		//this.gameScreen.removeThing(this);
+		return false;
 	    }
 	}
     }

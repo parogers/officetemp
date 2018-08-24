@@ -106,15 +106,16 @@ class GameScreen
 
     addThing(thing) {
 	this.things.push(thing);
-	thing.spawn(this);
+	if (thing.spawn) thing.spawn(this);
     }
 
     removeThing(thing) {
 	let i = this.things.indexOf(thing);
 	if (i != -1) {
-	    this.things[i] = this.things[this.things.length-1];
-	    this.things.pop();
-	    thing.despawn();
+	    /*this.things[i] = this.things[this.things.length-1];
+	      this.things.pop();*/
+	    this.things.splice(i, 1);
+	    if (thing.despawn) thing.despawn();
 	}
     }
 
@@ -130,10 +131,18 @@ class GameScreen
 	return this.background.height;
     }
 
-    update(dt) {
+    update(dt)
+    {
 	this.timer += dt;
-	for (let thing of this.things) {
-	    if (thing.update) thing.update(dt);
+
+	let n = 0;
+	while(n < this.things.length) {
+	    let thing = this.things[n];
+	    if (thing.update && thing.update(dt) === false) {
+		this.removeThing(thing);
+	    } else {
+		n++;
+	    }
 	}
     }
 

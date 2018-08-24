@@ -97,13 +97,27 @@ class Player extends Thing
 	    {
 		let dy = (this.gameScreen.getAisle(this.aisle).getY() -
 			  this.gameScreen.getAisle(this.nextAisle).getY());
-		this.tween = new Tween(this.sprite, {
+		let tween = new Tween(this.sprite, {
 		    src: [this.sprite.position.x, this.sprite.position.y],
 		    dest: [this.sprite.position.x, this.sprite.position.y-dy],
 		    duration: 0.1,
 		    interpolate: Tween.Linear,
 		});
+
+		// Wait in a trap state until the tweening between isles
+		// is finished.
 		this.state = Player.STATES.MOVING;
+
+		tween.on('done', () => {
+		    this.getAisle().cabinetArea.removeChild(this.sprite);
+		    this.aisle = this.nextAisle;
+		    this.getAisle().cabinetArea.addChild(this.sprite);
+		    this.state = Player.STATES.IDLE;
+		    this.sprite.position.y = 0;
+		});
+
+		this.gameScreen.addThing(tween);
+		
 		return;
 	    }
 	    // Handle searching
@@ -114,15 +128,7 @@ class Player extends Thing
 	else if (this.state == Player.STATES.MOVING)
 	{
 	    // The player is moving between aisles
-	    if (!this.tween.update(dt))
-	    {
-		this.getAisle().cabinetArea.removeChild(this.sprite);
-		this.aisle = this.nextAisle;
-		this.getAisle().cabinetArea.addChild(this.sprite);
-		this.tween = null;
-		this.state = Player.STATES.IDLE;
-		this.sprite.position.y = 0;
-	    }
+	    // Nothing to do
 	}
 	else if (this.state == Player.STATES.SEARCHING)
 	{
@@ -152,7 +158,7 @@ class Player extends Thing
 
 		// The speed relates to how long the player searched the
 		// cabinet.
-		let speed = 100; // ...		
+		let speed = 100; // TODO - fix this
 		let paper = new Sprites.PaperStack(this.getAisle(), {
 		    size: 'small',
 		    velx: -speed,

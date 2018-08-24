@@ -15,9 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Tween
+const Thing = require('./thing');
+
+class Tween extends Thing
 {
-    constructor(target, args) {
+    constructor(target, args)
+    {
+	super();
 	this.target = target;
 	this.src = args.src;
 	this.dest = args.dest;
@@ -35,6 +39,7 @@ class Tween
 	this.target.position.set(pos[0], pos[1]);
 	
 	if (param >= 1) {
+	    this.events.emit('done');
 	    return false;
 	}
 	return true;

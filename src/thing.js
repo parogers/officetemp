@@ -15,8 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const EventEmitter = require('events');
+
 class Thing
 {
+    constructor() {
+	this.events = new EventEmitter();
+    }
+
+    get on() {
+	return this.events.on.bind(this.events);
+    }
+
     update(dt) {
     }
 
