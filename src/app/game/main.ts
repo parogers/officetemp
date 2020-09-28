@@ -25,13 +25,15 @@
  * sound files. It also adds an API under PIXI.sound.* */
 //require("pixi-sound");
 
-// const LoadingScreen = require("./loading");
-// const TitleScreen = require("./title");
 // const Controls = require("./controls");
 // const GameScreen = require("./game");
 // const NextScreen = require('./next');
 
 import { KeyboardControls } from './controls';
+
+import { TitleScreen } from './title';
+
+import { LoadingScreen } from './loading';
 
 declare const PIXI : any;
 
@@ -94,11 +96,9 @@ export class Application
 
         this.pixiApp.stage.scale.set(scale);
 
-        if (true) return;
-
         this.screens = {
-            // loading: new LoadingScreen(),
-            // title: new TitleScreen(this.controls),
+            loading: new LoadingScreen(),
+            title: new TitleScreen(this.controls),
             // game: new GameScreen(this.controls),
             // nextLevel: new NextScreen(),
         }
@@ -110,14 +110,14 @@ export class Application
             this.update(PIXI.ticker.shared.elapsedMS/1000.0);
         });
 
-        // Have the ticker start/stop when the window receives/loses
-        // focus. (eg player clicks to another tab/returns)
-        window.addEventListener('focus', () => {
-            PIXI.ticker.shared.start();
-        });
-        window.addEventListener('blur', () => {
-            PIXI.ticker.shared.stop();
-        });
+        // // Have the ticker start/stop when the window receives/loses
+        // // focus. (eg player clicks to another tab/returns)
+        // window.addEventListener('focus', () => {
+        //     PIXI.ticker.shared.start();
+        // });
+        // window.addEventListener('blur', () => {
+        //     PIXI.ticker.shared.stop();
+        // });
     }
 
     // Called from the render loop (which is handled via PIXI ticker)
