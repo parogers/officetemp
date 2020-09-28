@@ -16,7 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import { Component } from '@angular/core';
+
+import { Component, ViewChild } from '@angular/core';
+
+import { Application } from './game/main';
 
 @Component({
     selector: 'app-root',
@@ -25,5 +28,19 @@ import { Component } from '@angular/core';
 })
 export class AppComponent
 {
-    title = 'officetemper';
+    @ViewChild('gameArea', { static: true })
+    gameArea : any;
+
+    application : Application;
+
+    constructor()
+    {
+        this.application = new Application();
+    }
+
+    ngOnInit()
+    {
+        this.application.start(this.gameArea.nativeElement);
+    }
+
 }
