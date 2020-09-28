@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "officetemper"
+    }
+  },
+  "defaultProject": "officetemper",
+  "cli": {
+    "analytics": false
+  }
 }
