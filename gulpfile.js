@@ -31,8 +31,6 @@ const inkscape_path = 'inkscape';
 const src_media_path = './rawdata';
 const dest_media_path = './www/media';
 
-gulp.task('default', ['js', 'watch'])
-
 gulp.task('js', function() {
     let opts = {
 	'standalone' : 'officetemp',
@@ -124,11 +122,13 @@ gulp.task('build-media', function(cb) {
 });
 
 gulp.task('watch', function() {
-    gulp.watch('src/**/*.js', ['js']);
+    gulp.watch('src/**/*.js', gulp.series(['js']));
     gulp.watch(
 	['rawdata/office.xcf', 'rawdata/sprites/*.xcf', 'rawdata/*.svg'],
-	['build-media']);
+	gulp.series(['build-media']));
     gulp.watch(
 	'rawdata/fonts/*.xcf',
-	['build-fonts']);
+	gulp.series(['build-fonts']));
 });
+
+gulp.task('default', gulp.series(['js', 'watch']))
