@@ -17,6 +17,8 @@
  *
  */
 
+import { EventEmitter } from '@angular/core';
+
 import { Thing } from './thing';
 
 export class Tween extends Thing
@@ -27,6 +29,7 @@ export class Tween extends Thing
     interpolate : any;
     duration: number;
     elapsed : number;
+    done : boolean = false;
 
     constructor(target, args)
     {
@@ -49,6 +52,7 @@ export class Tween extends Thing
         this.target.position.set(pos[0], pos[1]);
 
         if (param >= 1) {
+            this.done = true;
             return false;
         }
         return true;

@@ -25,15 +25,15 @@
  * sound files. It also adds an API under PIXI.sound.* */
 //require("pixi-sound");
 
-// const Controls = require("./controls");
-// const GameScreen = require("./game");
-// const NextScreen = require('./next');
-
 import { KeyboardControls } from './controls';
 
 import { TitleScreen } from './title';
 
 import { LoadingScreen } from './loading';
+
+import { GameScreen } from './game';
+
+import { NextScreen } from './next';
 
 declare const PIXI : any;
 
@@ -99,8 +99,8 @@ export class Application
         this.screens = {
             loading: new LoadingScreen(),
             title: new TitleScreen(this.controls),
-            // game: new GameScreen(this.controls),
-            // nextLevel: new NextScreen(),
+            game: new GameScreen(this.controls),
+            nextLevel: new NextScreen(),
         }
         this.screen = this.screens.loading;
         this.screen.start();
