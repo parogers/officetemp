@@ -18,14 +18,31 @@
 const fs = require('fs');
 const gulp = require('gulp');
 const concat = require('gulp-concat');
+const browserify = require('browserify');
+const source = require('vinyl-source-stream');
+const babel = require('gulp-babel');
+const buffer = require('vinyl-buffer');
 const { spawn } = require('child_process');
 
 const genblockfont_path = './tools/genblockfont.py';
 const xcf2atlas_path = '../xcf2atlas/xcf2atlas.py';
 const inkscape_path = 'inkscape';
 
-const src_media_path = './docs/rawdata';
-const dest_media_path = './src/assets/media';
+const src_media_path = './rawdata';
+const dest_media_path = './www/media';
+
+gulp.task('js', function() {
+    let opts = {
+	'standalone' : 'officetemp',
+    };
+    return browserify('src/main.js', opts)
+	.bundle()
+	.on('error', function (err) { console.error(err); })
+	.pipe(source('www/officetemp.js'))
+	.pipe(buffer())
+	.pipe(babel())
+	.pipe(gulp.dest('.'));
+});
 
 gulp.task('build-fonts', function(cb) {
     function run_genblockfont(src, dest, spacing) {
@@ -42,7 +59,7 @@ gulp.task('build-fonts', function(cb) {
 	run_genblockfont(
 	    src_media_path + '/boxy_bold_font_rev.xcf',
 	    dest_media_path + '/boxybold'),
-
+	
 	run_genblockfont(
 	    src_media_path + '/led_font.xcf',
 	    dest_media_path + '/ledfont', 1),
@@ -51,12 +68,11 @@ gulp.task('build-fonts', function(cb) {
 
 gulp.task('build-media', function(cb) {
 
-    function run_inkscape(dest, src) 
-    {
+    function run_inkscape(dest, src) {
 	let args = [
-	    '--export-filename=' + dest,
+	    '--export-png=' + dest,
 	    '--export-area-page',
-	    src];
+	    '-z', src];
 	let cmd = spawn(inkscape_path, args, {stdio: 'inherit'});
 
 	return new Promise((resolve, reject) => {
@@ -66,12 +82,10 @@ gulp.task('build-media', function(cb) {
 	});
     }
 
-    function run_xcf2atlas(dest_image, dest_json, src_files) 
-    {
+    function run_xcf2atlas(dest_image, dest_json, src_files) {
 	let args = [
-	    '--export-image', dest_image,
-	    '--export-json', dest_json,
-        ]
+	    '--image=' + dest_image,
+	    '--json=' + dest_json]
 
 	args = args.concat(src_files)
 
@@ -108,12 +122,13 @@ gulp.task('build-media', function(cb) {
 });
 
 gulp.task('watch', function() {
+    gulp.watch('src/**/*.js', gulp.series(['js']));
     gulp.watch(
-	['docs/rawdata/office.xcf', 'docs/rawdata/sprites/*.xcf', 'docs/rawdata/*.svg'],
+	['rawdata/office.xcf', 'rawdata/sprites/*.xcf', 'rawdata/*.svg'],
 	gulp.series(['build-media']));
     gulp.watch(
-	'docs/rawdata/fonts/*.xcf',
+	'rawdata/fonts/*.xcf',
 	gulp.series(['build-fonts']));
 });
 
-gulp.task('default', gulp.series(['watch']))
+gulp.task('default', gulp.series(['js', 'watch']))
