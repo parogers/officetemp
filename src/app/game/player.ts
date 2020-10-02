@@ -25,13 +25,19 @@ import { getSprite } from './resource';
 
 declare const PIXI : any;
 
+const LEFT = 1;
+const RIGHT = -1;
+
 const STATES = {
     IDLE: 0,
     MOVING: 1,
     SEARCHING: 2,
     THROWING: 3,
-    RUNNING: 4,
+    RUNNING_DOWN: 4,
+    RUNNING_BACK: 5,
 };
+
+const RUN_SPEED = 75;
 
 // Returns the stack size associated with the given search time
 function getStackSize(time)
@@ -65,7 +71,8 @@ export class Player extends Thing
     gameScreen : any;
     movementTween : Tween;
 
-    constructor(controls) {
+    constructor(controls)
+    {
         super();
         this.sprite = new PIXI.Sprite(getSprite('terrance_idle'));
         this.sprite.anchor.set(0.5, 1);
@@ -77,6 +84,28 @@ export class Player extends Thing
         this.nextAisle = -1;
         this.controls = controls;
         this.gameScreen = null;
+
+        this.runAnim = new Sprites.Anim(
+            [
+                'terrance_run1',
+                'terrance_run1',
+                'terrance_run2',
+                'terrance_run3',
+                'terrance_run3',
+                'terrance_run2',
+            ],
+            12
+        );
+    }
+
+    set facing(dir : number)
+    {
+        this.sprite.scale.x = Math.sign(dir);
+    }
+
+    get facing()
+    {
+        return this.sprite.scale.x;
     }
 
     static get STATES() {
@@ -110,9 +139,9 @@ export class Player extends Thing
                 this.setImage('idle');
             }
 
-            // Handle running into an aisle
+            // Handle running into the aisle
             if (this.controls.left.justPressed) {
-                this.state = Player.STATES.RUNNING;
+                this.state = Player.STATES.RUNNING_DOWN;
                 return;
             }
 
@@ -216,17 +245,26 @@ export class Player extends Thing
                 this.state = Player.STATES.IDLE;
             }
         }
-        else if (this.state === Player.STATES.RUNNING)
+        else if (this.state === Player.STATES.RUNNING_DOWN)
         {
-            const fps = 10;
-            const frames = ['run1', 'run2'];
-            this.timer += dt;
-            this.setImage(frames[
-                ((this.timer*fps)|0) % 2
-            ]);
+            this.sprite.texture = this.runAnim.getFrame(dt);
+            this.sprite.position.x -= RUN_SPEED*dt;
 
             if (!this.controls.left.held)
             {
+                this.state = Player.STATES.RUNNING_BACK;
+            }
+        }
+        else if (this.state === Player.STATES.RUNNING_BACK)
+        {
+            this.facing = RIGHT;
+            this.sprite.texture = this.runAnim.getFrame(dt);
+            this.sprite.position.x += RUN_SPEED*dt;
+
+            if (this.sprite.position.x > 0)
+            {
+                this.facing = LEFT;
+                this.sprite.position.x = 0;
                 this.state = Player.STATES.IDLE;
             }
         }
