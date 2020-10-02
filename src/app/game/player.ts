@@ -100,7 +100,7 @@ export class Player extends Thing
     {
         let stateChanged = (this.lastState != this.state);
         this.lastState = this.state;
-        if (this.state == Player.STATES.IDLE)
+        if (this.state === Player.STATES.IDLE)
         {
             if (stateChanged) {
                 // Done searching
@@ -145,7 +145,7 @@ export class Player extends Thing
                 this.state = Player.STATES.SEARCHING;
             }
         }
-        else if (this.state == Player.STATES.MOVING)
+        else if (this.state === Player.STATES.MOVING)
         {
             // The player is moving between aisles
             if (this.movementTween.done)
@@ -157,7 +157,7 @@ export class Player extends Thing
                 this.sprite.position.y = 0;
             }
         }
-        else if (this.state == Player.STATES.SEARCHING)
+        else if (this.state === Player.STATES.SEARCHING)
         {
             if (stateChanged) {
                 // The player is searching the filing cabinet
@@ -195,7 +195,7 @@ export class Player extends Thing
                 this.state = Player.STATES.THROWING;
             }
         }
-        else if (this.state == Player.STATES.THROWING)
+        else if (this.state === Player.STATES.THROWING)
         {
             if (stateChanged) {
                 // Show the throw pose for a bit before going idle again
