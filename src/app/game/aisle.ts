@@ -61,7 +61,7 @@ export class Aisle extends Thing
         this.container.addChild(this.inFrontCounter);
 
         this.cabinetArea = new PIXI.Container();
-        this.cabinetArea.position.set(205, -1);
+        this.cabinetArea.position.set(205, 0);
         this.container.addChild(this.cabinetArea);
 
         // The counter (top) is referenced to its bottom edge

@@ -128,7 +128,7 @@ export class Player extends Thing
 
     update(dt)
     {
-        let stateChanged = (this.lastState != this.state);
+        let stateChanged = (this.lastState !== this.state);
         this.lastState = this.state;
         if (this.state === Player.STATES.IDLE)
         {
@@ -247,8 +247,19 @@ export class Player extends Thing
         }
         else if (this.state === Player.STATES.RUNNING_DOWN)
         {
-            this.sprite.texture = this.runAnim.getFrame(dt);
-            this.sprite.position.x -= RUN_SPEED*dt;
+            const aisleMinX = -190;
+            this.facing = LEFT;
+
+            if (this.sprite.position.x > aisleMinX)
+            {
+                this.sprite.position.x -= RUN_SPEED*dt;
+                this.sprite.texture = this.runAnim.getFrame(dt);
+            }
+            else
+            {
+                this.sprite.position.x = aisleMinX;
+                this.setImage('idle');
+            }
 
             if (!this.controls.left.held)
             {
@@ -261,7 +272,11 @@ export class Player extends Thing
             this.sprite.texture = this.runAnim.getFrame(dt);
             this.sprite.position.x += RUN_SPEED*dt;
 
-            if (this.sprite.position.x > 0)
+            if (this.controls.left.held)
+            {
+                this.state = Player.STATES.RUNNING_DOWN;
+            }
+            else if (this.sprite.position.x > 0)
             {
                 this.facing = LEFT;
                 this.sprite.position.x = 0;
