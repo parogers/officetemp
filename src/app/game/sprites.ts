@@ -17,12 +17,16 @@
 
 import { Thing } from './thing';
 
-import { getSprite } from './resource';
+import { getSprite, Texture } from './resource';
 
 declare const PIXI : any;
 
 export class Anim
 {
+    frames : Texture[];
+    fps : number;
+    timer : number;
+
     constructor(names : string[], fps : number)
     {
         this.frames = names.map(name => getSprite(name));
@@ -30,7 +34,7 @@ export class Anim
         this.timer = 0;
     }
 
-    getFrame(dt : number)
+    getFrame(dt : number) : Texture
     {
         this.timer += dt;
 
@@ -62,12 +66,13 @@ export class Cabinet extends Thing
 
 export class Scenery extends Thing
 {
-    frames : any;
+    frames : Texture[];
     fps : number;
     frame : number;
     screen : any;
 
-    constructor(frames, fps) {
+    constructor(frames : Texture[], fps : number)
+    {
         super();
         this.frames = frames;
         this.fps = fps;

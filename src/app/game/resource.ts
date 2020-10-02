@@ -17,6 +17,8 @@
  *
  */
 
+export type Texture = any;
+
 declare const PIXI : any;
 
 export const ALL = {
@@ -35,11 +37,11 @@ export const GAME_FONT = ALL.GAME_FONT;
 export const LED_FONT = ALL.LED_FONT;
 export const SND_TEST = ALL.SND_TEST;
 
-export function getSprite(name) {
+export function getSprite(name) : Texture {
     return getImage(SPRITES, name);
 }
 
-export function getImage(sheet, name=undefined) {
+export function getImage(sheet, name=undefined) : Texture {
     let img = null;
     let res = PIXI.loader.resources[sheet];
     if (!res) {
