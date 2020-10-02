@@ -192,11 +192,11 @@ export class SuitGuy extends Thing
             if (this.timer <= 0)
             {
                 this.timer = this.fistDelay;
-                if (this.frame == 0) {
+                if (this.frame === 0) {
                     this.setImage('throw');
                     this.frame++;
                 }
-                else if (this.frame == 1) {
+                else if (this.frame === 1) {
                     this.setImage('fist');
                     this.frame++;
                 }
