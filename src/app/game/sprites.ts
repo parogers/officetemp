@@ -66,12 +66,13 @@ export class Cabinet extends Thing
 
 export class Scenery extends Thing
 {
-    frames : any;
+    frames : Texture[];
     fps : number;
     frame : number;
     screen : any;
 
-    constructor(frames, fps) {
+    constructor(frames : Texture[], fps : number)
+    {
         super();
         this.frames = frames;
         this.fps = fps;
