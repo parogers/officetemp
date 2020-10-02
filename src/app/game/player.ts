@@ -21,7 +21,7 @@ import * as Sprites from './sprites';
 
 import { Thing } from './thing';
 
-import { getSprite } from './resource';
+import { getSprite, Texture } from './resource';
 
 declare const PIXI : any;
 
@@ -60,6 +60,11 @@ function getStackSize(time)
 
 class PlayerAppearance
 {
+    idle : Texture;
+    search : Texture;
+    throw : Texture;
+    running : Sprites.Anim;
+
     constructor()
     {
         this.idle = getSprite('terrance_idle');
@@ -91,6 +96,7 @@ export class Player extends Thing
     controls : any;
     gameScreen : any;
     movementTween : Tween;
+    appearance : PlayerAppearance;
 
     constructor(controls)
     {
