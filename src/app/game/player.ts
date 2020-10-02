@@ -25,12 +25,19 @@ import { getSprite } from './resource';
 
 declare const PIXI : any;
 
+const LEFT = 1;
+const RIGHT = -1;
+
 const STATES = {
     IDLE: 0,
     MOVING: 1,
     SEARCHING: 2,
     THROWING: 3,
+    RUNNING_DOWN: 4,
+    RUNNING_BACK: 5,
 };
+
+const RUN_SPEED = 75;
 
 // Returns the stack size associated with the given search time
 function getStackSize(time)
@@ -51,6 +58,27 @@ function getStackSize(time)
     return chargeLevels[chargeLevels.length-1];
 }
 
+class PlayerAppearance
+{
+    constructor()
+    {
+        this.idle = getSprite('terrance_idle');
+        this.search = getSprite('terrance_search');
+        this.throw = getSprite('terrance_throw');
+        this.running = new Sprites.Anim(
+            [
+                'terrance_run1',
+                'terrance_run1',
+                'terrance_run2',
+                'terrance_run3',
+                'terrance_run3',
+                'terrance_run2',
+            ],
+            12
+        );
+    }
+}
+
 export class Player extends Thing
 {
     sprite : any;
@@ -64,9 +92,11 @@ export class Player extends Thing
     gameScreen : any;
     movementTween : Tween;
 
-    constructor(controls) {
+    constructor(controls)
+    {
         super();
-        this.sprite = new PIXI.Sprite(getSprite('terrance_idle'));
+        this.appearance = new PlayerAppearance();
+        this.sprite = new PIXI.Sprite(this.appearance.idle);
         this.sprite.anchor.set(0.5, 1);
         this.state = Player.STATES.IDLE;
         this.lastState = -1;
@@ -76,6 +106,16 @@ export class Player extends Thing
         this.nextAisle = -1;
         this.controls = controls;
         this.gameScreen = null;
+    }
+
+    set facing(dir : number)
+    {
+        this.sprite.scale.x = Math.sign(dir);
+    }
+
+    get facing()
+    {
+        return this.sprite.scale.x;
     }
 
     static get STATES() {
@@ -92,13 +132,9 @@ export class Player extends Thing
         return this.gameScreen.getAisle(this.aisle);
     }
 
-    setImage(name) {
-        this.sprite.texture = getSprite('terrance_' + name);
-    }
-
     update(dt)
     {
-        let stateChanged = (this.lastState != this.state);
+        let stateChanged = (this.lastState !== this.state);
         this.lastState = this.state;
         if (this.state === Player.STATES.IDLE)
         {
@@ -106,7 +142,13 @@ export class Player extends Thing
                 // Done searching
                 this.sprite.scale.x = 1;
                 this.sprite.position.x = 0;
-                this.setImage('idle');
+                this.sprite.texture = this.appearance.idle;
+            }
+
+            // Handle running into the aisle
+            if (this.controls.left.justPressed) {
+                this.state = Player.STATES.RUNNING_DOWN;
+                return;
             }
 
             // Handle up/down movement
@@ -161,7 +203,7 @@ export class Player extends Thing
         {
             if (stateChanged) {
                 // The player is searching the filing cabinet
-                this.setImage('search');
+                this.sprite.texture = this.appearance.search;
                 this.sprite.position.x = 14;
                 this.sprite.position.y = 0;
                 this.sprite.scale.x = -1;
@@ -200,12 +242,50 @@ export class Player extends Thing
             if (stateChanged) {
                 // Show the throw pose for a bit before going idle again
                 this.timer = 0.1;
-                this.setImage('throw');
+                this.sprite.texture = this.appearance.throw;
                 this.sprite.position.x = 0;
                 this.sprite.scale.x = 1;
             }
             this.timer -= dt;
             if (this.timer <= 0) {
+                this.state = Player.STATES.IDLE;
+            }
+        }
+        else if (this.state === Player.STATES.RUNNING_DOWN)
+        {
+            const aisleMinX = -190;
+            this.facing = LEFT;
+
+            if (this.sprite.position.x > aisleMinX)
+            {
+                this.sprite.position.x -= RUN_SPEED*dt;
+                this.sprite.texture = this.appearance.running.getFrame(dt);
+            }
+            else
+            {
+                this.sprite.position.x = aisleMinX;
+                this.sprite.texture = this.appearance.idle;
+            }
+
+            if (!this.controls.left.held)
+            {
+                this.state = Player.STATES.RUNNING_BACK;
+            }
+        }
+        else if (this.state === Player.STATES.RUNNING_BACK)
+        {
+            this.facing = RIGHT;
+            this.sprite.texture = this.appearance.running.getFrame(dt);
+            this.sprite.position.x += RUN_SPEED*dt;
+
+            if (this.controls.left.held)
+            {
+                this.state = Player.STATES.RUNNING_DOWN;
+            }
+            else if (this.sprite.position.x > 0)
+            {
+                this.facing = LEFT;
+                this.sprite.position.x = 0;
                 this.state = Player.STATES.IDLE;
             }
         }

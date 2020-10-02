@@ -21,6 +21,24 @@ import { getSprite } from './resource';
 
 declare const PIXI : any;
 
+export class Anim
+{
+    constructor(names : string[], fps : number)
+    {
+        this.frames = names.map(name => getSprite(name));
+        this.fps = fps;
+        this.timer = 0;
+    }
+
+    getFrame(dt : number)
+    {
+        this.timer += dt;
+
+        const frame = ((this.timer*this.fps)|0) % this.frames.length;
+        return this.frames[frame];
+    }
+}
+
 export class Cabinet extends Thing
 {
     constructor()
