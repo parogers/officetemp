@@ -30,6 +30,7 @@ const STATES = {
     MOVING: 1,
     SEARCHING: 2,
     THROWING: 3,
+    RUNNING: 4,
 };
 
 // Returns the stack size associated with the given search time
@@ -107,6 +108,12 @@ export class Player extends Thing
                 this.sprite.scale.x = 1;
                 this.sprite.position.x = 0;
                 this.setImage('idle');
+            }
+
+            // Handle running into an aisle
+            if (this.controls.left.justPressed) {
+                this.state = Player.STATES.RUNNING;
+                return;
             }
 
             // Handle up/down movement
@@ -206,6 +213,20 @@ export class Player extends Thing
             }
             this.timer -= dt;
             if (this.timer <= 0) {
+                this.state = Player.STATES.IDLE;
+            }
+        }
+        else if (this.state === Player.STATES.RUNNING)
+        {
+            const fps = 10;
+            const frames = ['run1', 'run2'];
+            this.timer += dt;
+            this.setImage(frames[
+                ((this.timer*fps)|0) % 2
+            ]);
+
+            if (!this.controls.left.held)
+            {
                 this.state = Player.STATES.IDLE;
             }
         }
