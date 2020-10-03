@@ -18,7 +18,7 @@
 import * as Sprites from './sprites';
 import { Thing } from './thing';
 import * as Resource from './resource';
-import { getSprite, getImage, Texture } from './resource';
+import { getSprite, getImage, Texture, Anim } from './resource';
 
 declare const PIXI : any;
 
@@ -38,12 +38,12 @@ class SuitGuyAppearance
     fist : Texture;
     throw : Texture;
     idle : Texture;
+    signing : Anim;
 
     constructor()
     {
         this.sign1 = getSprite('bluesuit_sign1');
-        this.sign2 = getSprite('bluesuit_sign2');
-        this.sign3 = getSprite('bluesuit_sign3');
+        this.signingAnim = new Anim(['bluesuit_sign2', 'bluesuit_sign3'], 10);
         this.fist = getSprite('bluesuit_fist');
         this.throw = getSprite('bluesuit_throw');
         this.idle = getSprite('bluesuit_idle');
@@ -163,17 +163,8 @@ export class SuitGuy extends Thing
                 this.speechContainer.addChild(balloon);
                 this.counter = 8;
             }
-            this.timer -= dt;
-            if (this.timer <= 0)
-            {
-                this.frame = (this.frame + 1) % 2;
-                if (this.frame === 0) {
-                    this.sprite.texture = this.appearance.sign2;
-                } else if (this.frame === 1) {
-                    this.sprite.texture = this.appearance.sign3;
-                }
-                this.timer = 0.15;
-            }
+            this.sprite.texture = this.appearance.signingAnim.getFrame(dt);
+
             this.counter -= dt;
             if (this.counter <= 0)
             {
