@@ -109,7 +109,7 @@ export class PaperStack extends Thing
         this.aisle.removePaper(this);
     }
 
-    areSigned() {
+    get isSigned() : boolean {
         return this.velx > 0;
     }
 

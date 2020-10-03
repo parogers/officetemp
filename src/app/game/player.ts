@@ -233,13 +233,13 @@ export class Player extends Thing
 
                 // The speed relates to how long the player searched the
                 // cabinet.
-                let speed = 100; // TODO - fix this
+                let speed = 80; // TODO - fix this
                 let paper = new Sprites.PaperStack(this.getAisle(), {
                     size: 'small',
                     velx: -speed,
                 });
-                paper.sprite.position.set(this.getAisle().width, 0);
                 this.gameScreen.addThing(paper);
+                paper.sprite.position.set(this.getAisle().counterRightPos-8, 0);
                 this.state = Player.STATES.THROWING;
             }
         }
@@ -293,6 +293,26 @@ export class Player extends Thing
                 this.facing = LEFT;
                 this.sprite.position.x = 0;
                 this.state = Player.STATES.IDLE;
+            }
+        }
+        if (this.state === Player.STATES.RUNNING_DOWN ||
+            this.state === Player.STATES.RUNNING_BACK)
+        {
+            // Translate the player position, relative to the cabinet area,
+            // to the aile/counter area where the paper lives.
+            const playerCounterPosX = (
+                this.sprite.x +
+                this.getAisle().cabinetArea.x
+            );
+            for (let paper of this.getAisle().papers)
+            {
+                if (paper.isSigned &&
+                    playerCounterPosX >= paper.sprite.x &&
+                    playerCounterPosX <= paper.sprite.x + paper.width)
+                {
+                    this.gameScreen.removeThing(paper);
+                    break;
+                }
             }
         }
     }
