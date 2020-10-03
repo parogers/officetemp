@@ -92,13 +92,15 @@ export class SuitGuy extends Thing
         return STATES;
     }
 
-    spawn(gameScreen) {
+    spawn(gameScreen)
+    {
         this.aisle.behindCounter.addChild(this.sprite);
         this.gameScreen = gameScreen;
         this.sprite.position.x = 30;
     }
 
-    update(dt) {
+    update(dt)
+    {
         let stateChanged = (this.state !== this.lastState);
         this.lastState = this.state;
 
@@ -106,8 +108,8 @@ export class SuitGuy extends Thing
         for (let paper of this.aisle.papers)
         {
             if (paper.areSigned() ||
-            paper.sprite.x > this.sprite.x ||
-            paper.sprite.x + paper.sprite.width < this.sprite.x)
+                paper.sprite.x > this.sprite.x ||
+                paper.sprite.x + paper.sprite.width < this.sprite.x)
             {
                 continue;
             }
@@ -132,7 +134,8 @@ export class SuitGuy extends Thing
             return;
         }
 
-        if (this.state === SuitGuy.STATES.ADVANCING) {
+        if (this.state === SuitGuy.STATES.ADVANCING)
+        {
             // Move forward a little bit
             if (stateChanged) {
                 this.sprite.texture = this.appearance.fist;
@@ -148,7 +151,8 @@ export class SuitGuy extends Thing
                 this.state = SuitGuy.STATES.PAUSING;
             }
         }
-        else if (this.state === SuitGuy.STATES.SIGNING) {
+        else if (this.state === SuitGuy.STATES.SIGNING)
+        {
             if (stateChanged) {
                 this.timer = 0.5;
                 this.frame = 0;
@@ -160,7 +164,8 @@ export class SuitGuy extends Thing
                 this.counter = 8;
             }
             this.timer -= dt;
-            if (this.timer <= 0) {
+            if (this.timer <= 0)
+            {
                 this.frame = (this.frame + 1) % 2;
                 if (this.frame === 0) {
                     this.sprite.texture = this.appearance.sign2;
@@ -170,7 +175,8 @@ export class SuitGuy extends Thing
                 this.timer = 0.15;
             }
             this.counter -= dt;
-            if (this.counter <= 0) {
+            if (this.counter <= 0)
+            {
                 // Done signing the paper. Throw it back and continue
                 // advancing.
                 this.state = SuitGuy.STATES.ADVANCING;
@@ -186,7 +192,8 @@ export class SuitGuy extends Thing
                 this.gameScreen.addThing(paper);
             }
         }
-        else if (this.state === SuitGuy.STATES.SLIDING_BACK) {
+        else if (this.state === SuitGuy.STATES.SLIDING_BACK)
+        {
             if (stateChanged) {
                 this.timer = 0.5;
             }
@@ -200,7 +207,8 @@ export class SuitGuy extends Thing
                 // ...
             }
         }
-        else if (this.state === SuitGuy.STATES.PAUSING) {
+        else if (this.state === SuitGuy.STATES.PAUSING)
+        {
             if (stateChanged) {
                 this.timer = 0;
                 this.frame = 0;
