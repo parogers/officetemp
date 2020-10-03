@@ -38,12 +38,14 @@ class SuitGuyAppearance
     fist : Texture;
     throw : Texture;
     idle : Texture;
-    signing : Anim;
+    signingAnim : Anim;
+    angryAnim : Anim;
 
     constructor()
     {
         this.sign1 = getSprite('bluesuit_sign1');
         this.signingAnim = new Anim(['bluesuit_sign2', 'bluesuit_sign3'], 10);
+        this.angryAnim = new Anim(['bluesuit_angry1', 'bluesuit_angry2'], 6);
         this.fist = getSprite('bluesuit_fist');
         this.throw = getSprite('bluesuit_throw');
         this.idle = getSprite('bluesuit_idle');
@@ -96,7 +98,8 @@ export class SuitGuy extends Thing
     {
         this.aisle.behindCounter.addChild(this.sprite);
         this.gameScreen = gameScreen;
-        this.sprite.position.x = 30;
+        this.sprite.position.x = this.aisle.counterLeftPos + 12;
+        // this.sprite.position.x = this.aisle.counterRightPos-10;
     }
 
     update(dt)
@@ -149,6 +152,10 @@ export class SuitGuy extends Thing
             if (this.timer <= 0) {
                 this.sprite.position.y = 0;
                 this.state = SuitGuy.STATES.PAUSING;
+            }
+            if (this.sprite.position.x > this.aisle.counterRightPos)
+            {
+                this.state = SuitGuy.STATES.ANGRY;
             }
         }
         else if (this.state === SuitGuy.STATES.SIGNING)
@@ -230,7 +237,14 @@ export class SuitGuy extends Thing
         }
         else if (this.state === SuitGuy.STATES.ANGRY)
         {
-
+            if (stateChanged)
+            {
+                let img = getImage(Resource.SPRITES, 'speech_angry');
+                let balloon = new PIXI.Sprite(img);
+                balloon.anchor.set(0.5, 1);
+                this.speechContainer.addChild(balloon);
+            }
+            this.sprite.texture = this.appearance.angryAnim.getFrame(dt);
         }
     }
 }

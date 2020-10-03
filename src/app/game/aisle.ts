@@ -75,6 +75,16 @@ export class Aisle extends Thing
         this.papers = [];
     }
 
+    get counterLeftPos() : number
+    {
+        return 0;
+    }
+
+    get counterRightPos() : number
+    {
+        return 190;
+    }
+
     getY() {
         return this.container.position.y;
     }
