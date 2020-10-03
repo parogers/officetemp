@@ -21,7 +21,7 @@ import * as Sprites from './sprites';
 
 import { Thing } from './thing';
 
-import { getSprite, Texture } from './resource';
+import { getSprite, Texture, Anim } from './resource';
 
 declare const PIXI : any;
 
@@ -63,14 +63,14 @@ class PlayerAppearance
     idle : Texture;
     search : Texture;
     throw : Texture;
-    running : Sprites.Anim;
+    running : Anim;
 
     constructor()
     {
         this.idle = getSprite('terrance_idle');
         this.search = getSprite('terrance_search');
         this.throw = getSprite('terrance_throw');
-        this.running = new Sprites.Anim(
+        this.running = new Anim(
             [
                 'terrance_run1',
                 'terrance_run1',

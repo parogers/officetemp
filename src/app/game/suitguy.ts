@@ -18,17 +18,39 @@
 import * as Sprites from './sprites';
 import { Thing } from './thing';
 import * as Resource from './resource';
+import { getSprite, getImage, Texture, Anim } from './resource';
 
 declare const PIXI : any;
-
-const getImage = Resource.getImage;
 
 const STATES = {
     ADVANCING: 0,
     SIGNING: 1,
     SLIDING_BACK: 2,
     PAUSING: 3,
+    ANGRY: 4,
 };
+
+class SuitGuyAppearance
+{
+    sign1 : Texture;
+    sign2 : Texture;
+    sign3 : Texture;
+    fist : Texture;
+    throw : Texture;
+    idle : Texture;
+    signingAnim : Anim;
+    angryAnim : Anim;
+
+    constructor()
+    {
+        this.sign1 = getSprite('bluesuit_sign1');
+        this.signingAnim = new Anim(['bluesuit_sign2', 'bluesuit_sign3'], 10);
+        this.angryAnim = new Anim(['bluesuit_angry1', 'bluesuit_angry2'], 6);
+        this.fist = getSprite('bluesuit_fist');
+        this.throw = getSprite('bluesuit_throw');
+        this.idle = getSprite('bluesuit_idle');
+    }
+}
 
 export class SuitGuy extends Thing
 {
@@ -43,12 +65,13 @@ export class SuitGuy extends Thing
     counter : number;
     gameScreen : any;
     speechContainer : any;
+    appearance : SuitGuyAppearance;
 
     constructor(aisle)
     {
         super();
-        let img = getImage(Resource.SPRITES, 'bluesuit_idle');
-        this.sprite = new PIXI.Sprite(img);
+        this.appearance = new SuitGuyAppearance();
+        this.sprite = new PIXI.Sprite(this.appearance.idle);
         this.sprite.anchor.set(0.5, 1);
         this.speechContainer = new PIXI.Container();
         this.speechContainer.position.set(15, -34);
@@ -71,18 +94,16 @@ export class SuitGuy extends Thing
         return STATES;
     }
 
-    spawn(gameScreen) {
+    spawn(gameScreen)
+    {
         this.aisle.behindCounter.addChild(this.sprite);
         this.gameScreen = gameScreen;
-        this.sprite.position.x = 30;
+        this.sprite.position.x = this.aisle.counterLeftPos + 12;
+        // this.sprite.position.x = this.aisle.counterRightPos-10;
     }
 
-    setImage(name) {
-        let img = getImage(Resource.SPRITES, 'bluesuit_' + name);
-        this.sprite.texture = img;
-    }
-
-    update(dt) {
+    update(dt)
+    {
         let stateChanged = (this.state !== this.lastState);
         this.lastState = this.state;
 
@@ -90,8 +111,8 @@ export class SuitGuy extends Thing
         for (let paper of this.aisle.papers)
         {
             if (paper.areSigned() ||
-            paper.sprite.x > this.sprite.x ||
-            paper.sprite.x + paper.sprite.width < this.sprite.x)
+                paper.sprite.x > this.sprite.x ||
+                paper.sprite.x + paper.sprite.width < this.sprite.x)
             {
                 continue;
             }
@@ -104,7 +125,7 @@ export class SuitGuy extends Thing
                 // Move out in front of the counter (only the top-half
                 // of the body is rendered), so we can sign the papers
                 // on the desk.
-                this.setImage('sign1');
+                this.sprite.texture = this.appearance.sign1;
                 this.aisle.inFrontCounter.addChild(this.sprite);
             }
             else
@@ -116,10 +137,11 @@ export class SuitGuy extends Thing
             return;
         }
 
-        if (this.state === SuitGuy.STATES.ADVANCING) {
+        if (this.state === SuitGuy.STATES.ADVANCING)
+        {
             // Move forward a little bit
             if (stateChanged) {
-                this.setImage('fist');
+                this.sprite.texture = this.appearance.fist;
                 this.timer = 0.5;
             }
             this.sprite.position.x += dt*this.speed;
@@ -131,8 +153,13 @@ export class SuitGuy extends Thing
                 this.sprite.position.y = 0;
                 this.state = SuitGuy.STATES.PAUSING;
             }
+            if (this.sprite.position.x > this.aisle.counterRightPos)
+            {
+                this.state = SuitGuy.STATES.ANGRY;
+            }
         }
-        else if (this.state === SuitGuy.STATES.SIGNING) {
+        else if (this.state === SuitGuy.STATES.SIGNING)
+        {
             if (stateChanged) {
                 this.timer = 0.5;
                 this.frame = 0;
@@ -143,15 +170,11 @@ export class SuitGuy extends Thing
                 this.speechContainer.addChild(balloon);
                 this.counter = 8;
             }
-            this.timer -= dt;
-            if (this.timer <= 0) {
-                this.frame = (this.frame + 1) % 2;
-                if (this.frame === 0) this.setImage('sign2');
-                else if (this.frame === 1) this.setImage('sign3');
-                this.timer = 0.15;
-            }
+            this.sprite.texture = this.appearance.signingAnim.getFrame(dt);
+
             this.counter -= dt;
-            if (this.counter <= 0) {
+            if (this.counter <= 0)
+            {
                 // Done signing the paper. Throw it back and continue
                 // advancing.
                 this.state = SuitGuy.STATES.ADVANCING;
@@ -167,7 +190,8 @@ export class SuitGuy extends Thing
                 this.gameScreen.addThing(paper);
             }
         }
-        else if (this.state === SuitGuy.STATES.SLIDING_BACK) {
+        else if (this.state === SuitGuy.STATES.SLIDING_BACK)
+        {
             if (stateChanged) {
                 this.timer = 0.5;
             }
@@ -181,7 +205,8 @@ export class SuitGuy extends Thing
                 // ...
             }
         }
-        else if (this.state === SuitGuy.STATES.PAUSING) {
+        else if (this.state === SuitGuy.STATES.PAUSING)
+        {
             if (stateChanged) {
                 this.timer = 0;
                 this.frame = 0;
@@ -193,11 +218,11 @@ export class SuitGuy extends Thing
             {
                 this.timer = this.fistDelay;
                 if (this.frame === 0) {
-                    this.setImage('throw');
+                    this.sprite.texture = this.appearance.throw;
                     this.frame++;
                 }
                 else if (this.frame === 1) {
-                    this.setImage('fist');
+                    this.sprite.texture = this.appearance.fist;
                     this.frame++;
                 }
                 else
@@ -209,6 +234,17 @@ export class SuitGuy extends Thing
                     }
                 }
             }
+        }
+        else if (this.state === SuitGuy.STATES.ANGRY)
+        {
+            if (stateChanged)
+            {
+                let img = getImage(Resource.SPRITES, 'speech_angry');
+                let balloon = new PIXI.Sprite(img);
+                balloon.anchor.set(0.5, 1);
+                this.speechContainer.addChild(balloon);
+            }
+            this.sprite.texture = this.appearance.angryAnim.getFrame(dt);
         }
     }
 }
