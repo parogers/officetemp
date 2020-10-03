@@ -310,7 +310,7 @@ export class Player extends Thing
                     playerCounterPosX >= paper.sprite.x &&
                     playerCounterPosX <= paper.sprite.x + paper.width)
                 {
-                    this.gameScreen.removeThing(paper);
+                    paper.collected = true;
                     break;
                 }
             }
