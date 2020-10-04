@@ -110,7 +110,7 @@ export class SuitGuy extends Thing
         // Check for any papers to sign
         for (let paper of this.aisle.papers)
         {
-            if (paper.areSigned() ||
+            if (paper.isSigned ||
                 paper.sprite.x > this.sprite.x ||
                 paper.sprite.x + paper.sprite.width < this.sprite.x)
             {

@@ -56,10 +56,6 @@ export class Aisle extends Thing
         //this.counter.position.set(0, ypos);
         this.container.addChild(this.counter);
 
-        this.inFrontCounter = new PIXI.Container();
-        this.inFrontCounter.position.set(0, this.behindCounter.position.y);
-        this.container.addChild(this.inFrontCounter);
-
         this.cabinetArea = new PIXI.Container();
         this.cabinetArea.position.set(205, 0);
         this.container.addChild(this.cabinetArea);
@@ -68,6 +64,10 @@ export class Aisle extends Thing
         this.onCounter = new PIXI.Container();
         this.onCounter.position.set(0, -20);
         this.container.addChild(this.onCounter);
+
+        this.inFrontCounter = new PIXI.Container();
+        this.inFrontCounter.position.set(0, this.behindCounter.position.y);
+        this.container.addChild(this.inFrontCounter);
 
         this.cabinet = new Sprites.Cabinet();
         this.cabinet.sprite.position.set(220, -1);

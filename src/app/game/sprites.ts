@@ -81,6 +81,7 @@ export class PaperStack extends Thing
     size : number;
     falling : boolean;
     exploding : boolean;
+    collected : boolean;
     frame : number;
     sprite : any;
     gameScreen : any;
@@ -109,13 +110,24 @@ export class PaperStack extends Thing
         this.aisle.removePaper(this);
     }
 
-    areSigned() {
+    get isSigned() : boolean {
         return this.velx > 0;
     }
 
     update(dt)
     {
-        if (this.falling)
+        if (this.collected)
+        {
+            this.velx = 250;
+            this.vely = -100;
+            this.sprite.position.x += this.velx*dt/2;
+            this.sprite.position.y += this.vely*dt;
+
+            if (this.sprite.x > this.gameScreen.background.width) {
+                return false;
+            }
+        }
+        else if (this.falling)
         {
             // Falling off the screen
             this.vely += 300*dt;

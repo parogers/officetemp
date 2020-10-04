@@ -149,11 +149,17 @@ export class Player extends Thing
                 this.sprite.scale.x = 1;
                 this.sprite.position.x = 0;
                 this.sprite.texture = this.appearance.idle;
+                this.facing = LEFT;
             }
 
             // Handle running into the aisle
-            if (this.controls.left.justPressed) {
+            if (this.controls.left.justPressed)
+            {
                 this.state = Player.STATES.RUNNING_DOWN;
+                // Move the player in front of the counter
+                this.getAisle().inFrontCounter.addChild(this.sprite);
+                this.sprite.x = this.getAisle().counterRightPos + 20;
+                this.sprite.y = 4;
                 return;
             }
 
@@ -233,13 +239,13 @@ export class Player extends Thing
 
                 // The speed relates to how long the player searched the
                 // cabinet.
-                let speed = 100; // TODO - fix this
+                let speed = 80; // TODO - fix this
                 let paper = new Sprites.PaperStack(this.getAisle(), {
                     size: 'small',
                     velx: -speed,
                 });
-                paper.sprite.position.set(this.getAisle().width, 0);
                 this.gameScreen.addThing(paper);
+                paper.sprite.position.set(this.getAisle().counterRightPos-8, 0);
                 this.state = Player.STATES.THROWING;
             }
         }
@@ -259,7 +265,7 @@ export class Player extends Thing
         }
         else if (this.state === Player.STATES.RUNNING_DOWN)
         {
-            const aisleMinX = -190;
+            const aisleMinX = 10;
             this.facing = LEFT;
 
             if (this.sprite.position.x > aisleMinX)
@@ -288,11 +294,26 @@ export class Player extends Thing
             {
                 this.state = Player.STATES.RUNNING_DOWN;
             }
-            else if (this.sprite.position.x > 0)
+            else if (this.sprite.position.x > this.getAisle().counterRightPos + 16)
             {
-                this.facing = LEFT;
-                this.sprite.position.x = 0;
+                this.getAisle().cabinetArea.addChild(this.sprite);
+                this.sprite.x = 0;
+                this.sprite.y = 0;
                 this.state = Player.STATES.IDLE;
+            }
+        }
+        if (this.state === Player.STATES.RUNNING_DOWN ||
+            this.state === Player.STATES.RUNNING_BACK)
+        {
+            for (let paper of this.getAisle().papers)
+            {
+                if (paper.isSigned &&
+                    this.sprite.x >= paper.sprite.x &&
+                    this.sprite.x <= paper.sprite.x + paper.width)
+                {
+                    paper.collected = true;
+                    break;
+                }
             }
         }
     }
