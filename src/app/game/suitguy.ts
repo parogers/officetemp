@@ -126,7 +126,8 @@ export class SuitGuy extends Thing
                 // of the body is rendered), so we can sign the papers
                 // on the desk.
                 this.sprite.texture = this.appearance.sign1;
-                this.aisle.inFrontCounter.addChild(this.sprite);
+                this.sprite.y = 16;
+                this.aisle.onCounter.addChild(this.sprite);
             }
             else
             {
@@ -180,6 +181,7 @@ export class SuitGuy extends Thing
                 this.state = SuitGuy.STATES.ADVANCING;
                 this.aisle.behindCounter.addChild(this.sprite);
                 this.speechContainer.removeChildren();
+                this.sprite.y = 0;
 
                 let speed = 50;
                 let paper = new Sprites.PaperStack(this.aisle, {
