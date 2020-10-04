@@ -35,11 +35,9 @@ import { GameScreen } from './game';
 
 import { NextScreen } from './next';
 
-declare const PIXI : any;
+import { GAME_WIDTH, GAME_HEIGHT, ASPECT_RATIO } from './resource';
 
-const GAME_WIDTH = 300;
-const GAME_HEIGHT = 150;
-const ASPECT_RATIO = GAME_WIDTH/GAME_HEIGHT;
+declare const PIXI : any;
 
 var app = null;
 

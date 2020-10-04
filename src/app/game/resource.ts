@@ -21,6 +21,10 @@ export type Texture = any;
 
 declare const PIXI : any;
 
+export const GAME_WIDTH = 300;
+export const GAME_HEIGHT = 150;
+export const ASPECT_RATIO = GAME_WIDTH/GAME_HEIGHT;
+
 export const ALL = {
     SPRITES: 'sprites.json',
     TITLE: 'title-text.png',
