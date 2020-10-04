@@ -104,8 +104,8 @@ export class Application
         this.screen.start();
 
         // Start the ticker, which will drive the render loop
-        PIXI.ticker.shared.add(() => {
-            this.update(PIXI.ticker.shared.elapsedMS/1000.0);
+        PIXI.Ticker.shared.add(() => {
+            this.update(PIXI.Ticker.shared.elapsedMS/1000.0);
         });
 
         // // Have the ticker start/stop when the window receives/loses

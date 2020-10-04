@@ -48,7 +48,7 @@ export class NextScreen
         this.stage.addChild(portrait);
 
         let msg = 'GET READY!';
-        let text = new PIXI.extras.BitmapText(
+        let text = new PIXI.BitmapText(
             msg, {
                 font : {
                     'name' : 'boxybold',

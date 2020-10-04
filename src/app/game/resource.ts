@@ -47,7 +47,7 @@ export function getSprite(name) : Texture {
 
 export function getImage(sheet, name=undefined) : Texture {
     let img = null;
-    let res = PIXI.loader.resources[sheet];
+    let res = PIXI.Loader.shared.resources[sheet];
     if (!res) {
         console.log("WARNING: cannot find sheet " + sheet);
         return null;
