@@ -80,7 +80,7 @@ export class LEDSign extends Thing
         if (this.textContainer.children.length > 0) {
             msg = separator + msg;
         }
-        let text = new PIXI.extras.BitmapText(
+        let text = new PIXI.BitmapText(
             msg, {
                 font : {
                     'name' : 'ledfont',
