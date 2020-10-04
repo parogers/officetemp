@@ -106,7 +106,7 @@ export class Player extends Thing
         this.sprite.anchor.set(0.5, 1);
         this.state = Player.STATES.IDLE;
         this.lastState = -1;
-        this.aisle = 0;
+        this.aisleNumber = 0;
         this.timer = 0;
         this.chargeTime = 0;
         this.nextAisle = -1;
@@ -131,12 +131,12 @@ export class Player extends Thing
     spawn(gameScreen)
     {
         this.gameScreen = gameScreen;
-        this.aisle = 0;
-        this.getAisle().inFrontCounter.addChild(this.sprite);
+        this.aisleNumber = 0;
+        this.aisle.inFrontCounter.addChild(this.sprite);
     }
 
-    getAisle() {
-        return this.gameScreen.getAisle(this.aisle);
+    get aisle() {
+        return this.gameScreen.getAisle(this.aisleNumber);
     }
 
     update(dt)
@@ -148,7 +148,8 @@ export class Player extends Thing
             if (stateChanged) {
                 // Done searching
                 this.sprite.scale.x = 1;
-                this.sprite.x = this.getAisle().playerIdlePosX;
+                this.sprite.x = this.aisle.playerIdlePosX;
+                this.sprite.y = 0;
                 this.sprite.texture = this.appearance.idle;
                 this.facing = LEFT;
             }
@@ -158,26 +159,25 @@ export class Player extends Thing
             {
                 this.state = Player.STATES.RUNNING_DOWN;
                 // Move the player in front of the counter
-                this.getAisle().inFrontCounter.addChild(this.sprite);
-                this.sprite.x = this.getAisle().counterRightPos + 20;
+                this.aisle.inFrontCounter.addChild(this.sprite);
                 this.sprite.y = 4;
                 return;
             }
 
             // Handle up/down movement
             this.nextAisle = -1;
-            if (this.controls.up.justPressed && this.aisle > 0)
+            if (this.controls.up.justPressed && this.aisleNumber > 0)
             {
-                this.nextAisle = this.aisle-1;
+                this.nextAisle = this.aisleNumber - 1;
             }
             if (this.controls.down.justPressed &&
-                this.aisle < this.gameScreen.getNumAisles()-1)
+                this.aisleNumber < this.gameScreen.getNumAisles()-1)
             {
-                this.nextAisle = this.aisle+1;
+                this.nextAisle = this.aisleNumber + 1;
             }
             if (this.nextAisle != -1)
             {
-                let dy = (this.gameScreen.getAisle(this.aisle).getY() -
+                let dy = (this.gameScreen.getAisle(this.aisleNumber).getY() -
                 this.gameScreen.getAisle(this.nextAisle).getY());
 
                 this.movementTween = new Tween(this.sprite, {
@@ -205,11 +205,11 @@ export class Player extends Thing
             // The player is moving between aisles
             if (this.movementTween.done)
             {
-                this.getAisle().inFrontCounter.removeChild(this.sprite);
-                this.aisle = this.nextAisle;
-                this.getAisle().inFrontCounter.addChild(this.sprite);
+                this.aisle.inFrontCounter.removeChild(this.sprite);
+                this.aisleNumber = this.nextAisle;
+                this.aisle.inFrontCounter.addChild(this.sprite);
                 this.state = Player.STATES.IDLE;
-                this.sprite.x = this.getAisle().playerIdlePosX;
+                this.sprite.x = this.aisle.playerIdlePosX;
                 this.sprite.y = 0;
             }
         }
@@ -218,11 +218,11 @@ export class Player extends Thing
             if (stateChanged) {
                 // The player is searching the filing cabinet
                 this.sprite.texture = this.appearance.search;
-                this.sprite.x = this.getAisle().playerIdlePosX + 14;
+                this.sprite.x = this.aisle.playerIdlePosX + 14;
                 this.sprite.y = 0;
                 this.sprite.scale.x = -1;
                 // Open the cabinet
-                this.getAisle().cabinet.setOpen(true);
+                this.aisle.cabinet.setOpen(true);
                 // Have the player searching for a minimum amount of time
                 this.timer = 0.15;
                 this.chargeTime = 0;
@@ -237,17 +237,17 @@ export class Player extends Thing
             if (!this.controls.right.held && this.timer <= 0)
             {
                 // Close the cabinet and throw the paper
-                this.getAisle().cabinet.setOpen(false);
+                this.aisle.cabinet.setOpen(false);
 
                 // The speed relates to how long the player searched the
                 // cabinet.
                 let speed = 80; // TODO - fix this
-                let paper = new Sprites.PaperStack(this.getAisle(), {
+                let paper = new Sprites.PaperStack(this.aisle, {
                     size: 'small',
                     velx: -speed,
                 });
                 this.gameScreen.addThing(paper);
-                paper.sprite.position.set(this.getAisle().counterRightPos-8, 0);
+                paper.sprite.position.set(this.aisle.counterRightPos-8, 0);
                 this.state = Player.STATES.THROWING;
             }
         }
@@ -257,7 +257,7 @@ export class Player extends Thing
                 // Show the throw pose for a bit before going idle again
                 this.timer = 0.1;
                 this.sprite.texture = this.appearance.throw;
-                this.sprite.x = this.getAisle().playerIdlePosX;
+                this.sprite.x = this.aisle.playerIdlePosX;
                 this.sprite.scale.x = 1;
             }
             this.timer -= dt;
@@ -296,16 +296,16 @@ export class Player extends Thing
             {
                 this.state = Player.STATES.RUNNING_DOWN;
             }
-            else if (this.sprite.position.x > this.getAisle().playerIdlePosX-1)
+            else if (this.sprite.position.x > this.aisle.playerIdlePosX-1)
             {
-                this.getAisle().inFrontCounter.addChild(this.sprite);
+                this.aisle.inFrontCounter.addChild(this.sprite);
                 this.state = Player.STATES.IDLE;
             }
         }
         if (this.state === Player.STATES.RUNNING_DOWN ||
             this.state === Player.STATES.RUNNING_BACK)
         {
-            for (let paper of this.getAisle().papers)
+            for (let paper of this.aisle.papers)
             {
                 if (paper.isSigned &&
                     this.sprite.x >= paper.sprite.x &&
