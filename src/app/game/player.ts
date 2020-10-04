@@ -128,10 +128,11 @@ export class Player extends Thing
         return STATES;
     }
 
-    spawn(gameScreen) {
+    spawn(gameScreen)
+    {
         this.gameScreen = gameScreen;
         this.aisle = 0;
-        this.getAisle().cabinetArea.addChild(this.sprite);
+        this.getAisle().inFrontCounter.addChild(this.sprite);
     }
 
     getAisle() {
@@ -147,7 +148,7 @@ export class Player extends Thing
             if (stateChanged) {
                 // Done searching
                 this.sprite.scale.x = 1;
-                this.sprite.position.x = 0;
+                this.sprite.x = this.getAisle().playerIdlePosX;
                 this.sprite.texture = this.appearance.idle;
                 this.facing = LEFT;
             }
@@ -204,11 +205,12 @@ export class Player extends Thing
             // The player is moving between aisles
             if (this.movementTween.done)
             {
-                this.getAisle().cabinetArea.removeChild(this.sprite);
+                this.getAisle().inFrontCounter.removeChild(this.sprite);
                 this.aisle = this.nextAisle;
-                this.getAisle().cabinetArea.addChild(this.sprite);
+                this.getAisle().inFrontCounter.addChild(this.sprite);
                 this.state = Player.STATES.IDLE;
-                this.sprite.position.y = 0;
+                this.sprite.x = this.getAisle().playerIdlePosX;
+                this.sprite.y = 0;
             }
         }
         else if (this.state === Player.STATES.SEARCHING)
@@ -216,8 +218,8 @@ export class Player extends Thing
             if (stateChanged) {
                 // The player is searching the filing cabinet
                 this.sprite.texture = this.appearance.search;
-                this.sprite.position.x = 14;
-                this.sprite.position.y = 0;
+                this.sprite.x = this.getAisle().playerIdlePosX + 14;
+                this.sprite.y = 0;
                 this.sprite.scale.x = -1;
                 // Open the cabinet
                 this.getAisle().cabinet.setOpen(true);
@@ -255,7 +257,7 @@ export class Player extends Thing
                 // Show the throw pose for a bit before going idle again
                 this.timer = 0.1;
                 this.sprite.texture = this.appearance.throw;
-                this.sprite.position.x = 0;
+                this.sprite.x = this.getAisle().playerIdlePosX;
                 this.sprite.scale.x = 1;
             }
             this.timer -= dt;
@@ -294,11 +296,9 @@ export class Player extends Thing
             {
                 this.state = Player.STATES.RUNNING_DOWN;
             }
-            else if (this.sprite.position.x > this.getAisle().counterRightPos + 16)
+            else if (this.sprite.position.x > this.getAisle().playerIdlePosX-1)
             {
-                this.getAisle().cabinetArea.addChild(this.sprite);
-                this.sprite.x = 0;
-                this.sprite.y = 0;
+                this.getAisle().inFrontCounter.addChild(this.sprite);
                 this.state = Player.STATES.IDLE;
             }
         }

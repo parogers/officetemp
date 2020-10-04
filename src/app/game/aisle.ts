@@ -53,12 +53,7 @@ export class Aisle extends Thing
             getImage(Resource.OFFICE, 'office_desk1')
         );
         this.counter.anchor.set(0, 1);
-        //this.counter.position.set(0, ypos);
         this.container.addChild(this.counter);
-
-        this.cabinetArea = new PIXI.Container();
-        this.cabinetArea.position.set(205, 0);
-        this.container.addChild(this.cabinetArea);
 
         // The counter (top) is referenced to its bottom edge
         this.onCounter = new PIXI.Container();
@@ -83,6 +78,11 @@ export class Aisle extends Thing
     get counterRightPos() : number
     {
         return 190;
+    }
+
+    get playerIdlePosX() : number
+    {
+        return 205;
     }
 
     getY() {
