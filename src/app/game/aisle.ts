@@ -36,6 +36,11 @@ export class Aisle extends Thing
     cabinet : any;
     papers : any[];
 
+    counterLeftPos = 0;
+    counterRightPos = 190;
+    playerIdlePos = 205;
+    playerAisleBlockPos = 10;
+
     constructor()
     {
         super();
@@ -68,21 +73,6 @@ export class Aisle extends Thing
         this.cabinet.sprite.position.set(220, -1);
         this.container.addChild(this.cabinet.sprite);
         this.papers = [];
-    }
-
-    get counterLeftPos() : number
-    {
-        return 0;
-    }
-
-    get counterRightPos() : number
-    {
-        return 190;
-    }
-
-    get playerIdlePosX() : number
-    {
-        return 205;
     }
 
     getY() {

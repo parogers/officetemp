@@ -148,7 +148,7 @@ export class Player extends Thing
             if (stateChanged) {
                 // Done searching
                 this.sprite.scale.x = 1;
-                this.sprite.x = this.aisle.playerIdlePosX;
+                this.sprite.x = this.aisle.playerIdlePos;
                 this.sprite.texture = this.appearance.idle;
                 this.facing = LEFT;
             }
@@ -206,7 +206,7 @@ export class Player extends Thing
                 this.aisleNumber = this.nextAisle;
                 this.aisle.inFrontCounter.addChild(this.sprite);
                 this.state = Player.STATES.IDLE;
-                this.sprite.x = this.aisle.playerIdlePosX;
+                this.sprite.x = this.aisle.playerIdlePos;
                 this.sprite.y = 0;
             }
         }
@@ -215,7 +215,7 @@ export class Player extends Thing
             if (stateChanged) {
                 // The player is searching the filing cabinet
                 this.sprite.texture = this.appearance.search;
-                this.sprite.x = this.aisle.playerIdlePosX + 14;
+                this.sprite.x = this.aisle.playerIdlePos + 14;
                 this.sprite.scale.x = -1;
                 // Open the cabinet
                 this.aisle.cabinet.setOpen(true);
@@ -253,7 +253,7 @@ export class Player extends Thing
                 // Show the throw pose for a bit before going idle again
                 this.timer = 0.1;
                 this.sprite.texture = this.appearance.throw;
-                this.sprite.x = this.aisle.playerIdlePosX;
+                this.sprite.x = this.aisle.playerIdlePos;
                 this.sprite.scale.x = 1;
             }
             this.timer -= dt;
@@ -263,17 +263,15 @@ export class Player extends Thing
         }
         else if (this.state === Player.STATES.RUNNING_DOWN)
         {
-            const aisleMinX = 10;
             this.facing = LEFT;
-
-            if (this.sprite.position.x > aisleMinX)
+            if (this.sprite.position.x > this.aisle.playerAisleBlockPos)
             {
                 this.sprite.position.x -= RUN_SPEED*dt;
                 this.sprite.texture = this.appearance.running.getFrame(dt);
             }
             else
             {
-                this.sprite.position.x = aisleMinX;
+                this.sprite.position.x = this.aisle.playerAisleBlockPos;
                 this.sprite.texture = this.appearance.idle;
             }
 
@@ -292,7 +290,7 @@ export class Player extends Thing
             {
                 this.state = Player.STATES.RUNNING_DOWN;
             }
-            else if (this.sprite.position.x > this.aisle.playerIdlePosX-1)
+            else if (this.sprite.position.x > this.aisle.playerIdlePos-1)
             {
                 this.aisle.inFrontCounter.addChild(this.sprite);
                 this.state = Player.STATES.IDLE;
