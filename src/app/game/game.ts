@@ -26,7 +26,7 @@ const getImage = Resource.getImage;
 
 declare const PIXI : any;
 
-const AISLE_YPOS_LIST = [72, 111, 150];
+const AISLE_YPOS_LIST = [65, 104, 143];
 
 export class GameScreen
 {
@@ -75,22 +75,22 @@ export class GameScreen
 
         img = getImage(Resource.OFFICE, 'office_counter');
         sprite = new PIXI.Sprite(img);
-        sprite.position.set(80, 15);
+        sprite.position.set(80, 10);
         this.stage.addChild(sprite);
 
         img = getImage(Resource.OFFICE, 'office_microwave');
         sprite = new PIXI.Sprite(img);
-        sprite.position.set(88, 9);
+        sprite.position.set(88, 4);
         this.stage.addChild(sprite);
 
         img = getImage(Resource.OFFICE, 'office_counter2');
         sprite = new PIXI.Sprite(img);
-        sprite.position.set(24, 15);
+        sprite.position.set(24, 10);
         this.stage.addChild(sprite);
 
         img = getImage(Resource.OFFICE, 'office_counter3');
         sprite = new PIXI.Sprite(img);
-        sprite.position.set(182, 15);
+        sprite.position.set(182, 10);
         this.stage.addChild(sprite);
 
         this.aisleList = [];

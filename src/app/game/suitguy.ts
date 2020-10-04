@@ -126,7 +126,7 @@ export class SuitGuy extends Thing
                 // of the body is rendered), so we can sign the papers
                 // on the desk.
                 this.sprite.texture = this.appearance.sign1;
-                this.sprite.y = 16;
+                this.sprite.y = 15;
                 this.aisle.onCounter.addChild(this.sprite);
             }
             else

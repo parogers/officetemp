@@ -62,15 +62,15 @@ export class Aisle extends Thing
 
         // The counter (top) is referenced to its bottom edge
         this.onCounter = new PIXI.Container();
-        this.onCounter.position.set(0, -20);
+        this.onCounter.position.set(0, -16);
         this.container.addChild(this.onCounter);
 
         this.inFrontCounter = new PIXI.Container();
-        this.inFrontCounter.position.set(0, -1);
+        this.inFrontCounter.position.set(0, 2);
         this.container.addChild(this.inFrontCounter);
 
         this.cabinet = new Sprites.Cabinet();
-        this.cabinet.sprite.position.set(270, -1);
+        this.cabinet.sprite.position.set(270, 2);
         this.container.addChild(this.cabinet.sprite);
         this.papers = [];
     }
