@@ -89,7 +89,7 @@ export class Player extends Thing
     sprite : any;
     state : number;
     lastState : number;
-    aisle : number;
+    aisleNumber : number;
     timer : number;
     chargeTime : number;
     nextAisle : number;
