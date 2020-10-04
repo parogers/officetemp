@@ -87,7 +87,6 @@ export class Application
             //preserveDrawingBuffer: true,
             //antialias: false,
             forceCanvas: true,
-            roundPixels: true,
         });
         this.pixiApp.renderer.plugins.interaction.destroy();
         this.container.appendChild(this.pixiApp.view);
