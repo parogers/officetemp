@@ -205,7 +205,6 @@ export class Player extends Thing
             // The player is moving between aisles
             if (this.movementTween.done)
             {
-                this.aisle.inFrontCounter.removeChild(this.sprite);
                 this.aisleNumber = this.nextAisle;
                 this.aisle.inFrontCounter.addChild(this.sprite);
                 this.state = Player.STATES.IDLE;
