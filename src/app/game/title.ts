@@ -53,27 +53,29 @@ export class TitleScreen
         img.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR;
         img.baseTexture.dispose();
 
+        const charOffsetX = 75;
+
         this.timer = 0;
-        this.terranceX = 210;
+        this.terranceX = 255;
         this.terranceY = 110;
         this.terrance = new PIXI.Sprite(getSprite("terrance_idle"));
         this.terrance.anchor.set(0.5, 1);
         this.terrance.scale.set(SCALE);
-        this.terrance.position.set(this.terranceX + 50, this.terranceY);
+        this.terrance.position.set(this.terranceX + charOffsetX, this.terranceY);
         this.stage.addChild(this.terrance);
 
-        this.sweaterX = 40;
+        this.sweaterX = 45;
         this.sweaterY = 110;
         this.sweaterGuy = new PIXI.Sprite(getSprite("sweater_drink1"));
         this.sweaterGuy.anchor.set(0.5, 1);
         this.sweaterGuy.scale.set(SCALE);
-        this.sweaterGuy.position.set(this.sweaterX-50, this.sweaterY);
+        this.sweaterGuy.position.set(this.sweaterX - charOffsetX, this.sweaterY);
         this.stage.addChild(this.sweaterGuy);
 
         this.title = new PIXI.Sprite(getImage(Resource.TITLE));
-        this.title.scale.set(0.2);
+        this.title.scale.set(0.25);
         this.title.anchor.set(0.5, 0.5);
-        this.title.position.set(125, 80);
+        this.title.position.set(150, 80);
 
         // Use a promise chain to handle the intro animation
         Promise.resolve().then(() => {

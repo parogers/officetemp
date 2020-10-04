@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getSprite } from './resource';
+import { getSprite, GAME_WIDTH, GAME_HEIGHT } from './resource';
 
 declare const PIXI : any;
 
@@ -28,17 +28,23 @@ export class NextScreen
         this.timer = 3;
     }
 
-    start() {
+    start()
+    {
+        const scale = 1.5;
         // TODO - lots of magic numbers here
         this.stage = new PIXI.Container();
-        this.stage.scale.set(1.5);
+        this.stage.scale.set(scale);
 
         let bg = new PIXI.Sprite(getSprite('colours_black'));
-        bg.scale.set(6, 4);
+        bg.scale.set(8, 4);
         this.stage.addChild(bg);
 
         let portrait = new PIXI.Sprite(getSprite('portraits_terrance'));
-        portrait.position.set(65, 30);
+        portrait.anchor.set(0.5, 0.5);
+        portrait.position.set(
+            (GAME_WIDTH/2)/scale,
+            (GAME_HEIGHT/2)/scale - 5
+        );
         this.stage.addChild(portrait);
 
         let msg = 'GET READY!';
@@ -50,7 +56,11 @@ export class NextScreen
                 }
             }
         );
-        text.position.set(53, 62);
+        text.anchor.set(0.5, 0.5);
+        text.position.set(
+            portrait.position.x,
+            portrait.position.y + 22
+        );
         this.stage.addChild(text);
     }
 
