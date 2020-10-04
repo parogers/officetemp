@@ -37,7 +37,7 @@ import { NextScreen } from './next';
 
 declare const PIXI : any;
 
-const GAME_WIDTH = 250;
+const GAME_WIDTH = 300;
 const GAME_HEIGHT = 150;
 const ASPECT_RATIO = GAME_WIDTH/GAME_HEIGHT;
 

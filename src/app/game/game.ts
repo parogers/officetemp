@@ -75,22 +75,22 @@ export class GameScreen
 
         img = getImage(Resource.OFFICE, 'office_counter');
         sprite = new PIXI.Sprite(img);
-        sprite.position.set(118, 15);
+        sprite.position.set(80, 15);
         this.stage.addChild(sprite);
 
         img = getImage(Resource.OFFICE, 'office_microwave');
         sprite = new PIXI.Sprite(img);
-        sprite.position.set(126, 9);
+        sprite.position.set(88, 9);
         this.stage.addChild(sprite);
 
         img = getImage(Resource.OFFICE, 'office_counter2');
         sprite = new PIXI.Sprite(img);
-        sprite.position.set(6, 15);
+        sprite.position.set(24, 15);
         this.stage.addChild(sprite);
 
         img = getImage(Resource.OFFICE, 'office_counter3');
         sprite = new PIXI.Sprite(img);
-        sprite.position.set(187, 15);
+        sprite.position.set(182, 15);
         this.stage.addChild(sprite);
 
         this.aisleList = [];
