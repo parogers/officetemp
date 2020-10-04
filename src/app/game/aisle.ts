@@ -61,7 +61,7 @@ export class Aisle extends Thing
         this.container.addChild(this.onCounter);
 
         this.inFrontCounter = new PIXI.Container();
-        this.inFrontCounter.position.set(0, this.behindCounter.position.y);
+        this.inFrontCounter.position.set(0, -1);
         this.container.addChild(this.inFrontCounter);
 
         this.cabinet = new Sprites.Cabinet();

@@ -149,7 +149,6 @@ export class Player extends Thing
                 // Done searching
                 this.sprite.scale.x = 1;
                 this.sprite.x = this.aisle.playerIdlePosX;
-                this.sprite.y = 0;
                 this.sprite.texture = this.appearance.idle;
                 this.facing = LEFT;
             }
@@ -160,7 +159,6 @@ export class Player extends Thing
                 this.state = Player.STATES.RUNNING_DOWN;
                 // Move the player in front of the counter
                 this.aisle.inFrontCounter.addChild(this.sprite);
-                this.sprite.y = 4;
                 return;
             }
 
@@ -218,7 +216,6 @@ export class Player extends Thing
                 // The player is searching the filing cabinet
                 this.sprite.texture = this.appearance.search;
                 this.sprite.x = this.aisle.playerIdlePosX + 14;
-                this.sprite.y = 0;
                 this.sprite.scale.x = -1;
                 // Open the cabinet
                 this.aisle.cabinet.setOpen(true);
