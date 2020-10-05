@@ -19,11 +19,13 @@ def xcf_get_comment(path):
     return out.decode('UTF-8')
 
 def xcf_to_pil(src):
+    assert os.path.exists(src), 'cannot find file: {}'.format(src)
     proc = subprocess.Popen(
-        ['xcf2png', '-C', src], 
+        ['xcf2png', '-C', src],
         stdout=subprocess.PIPE
     )
     out, err = proc.communicate()
+    assert proc.returncode == 0, 'xcf2png exited with failure: {}'.format(proc.returncode)
     return PIL.Image.open(io.BytesIO(out))
 
 def get_alpha_at(img, x, y):
