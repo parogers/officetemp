@@ -28,6 +28,7 @@ const STATES = {
     SLIDING_BACK: 2,
     PAUSING: 3,
     ANGRY: 4,
+    SIGNING_PAUSED: 5,
 };
 
 class SuitGuyAppearance
@@ -38,6 +39,7 @@ class SuitGuyAppearance
     fist : Texture;
     throw : Texture;
     idle : Texture;
+    signingPaused : Texture;
     signingAnim : Anim;
     angryAnim : Anim;
 
@@ -49,6 +51,7 @@ class SuitGuyAppearance
         this.fist = getSprite('bluesuit_fist');
         this.throw = getSprite('bluesuit_throw');
         this.idle = getSprite('bluesuit_idle');
+        this.signingPaused = getSprite('bluesuit_signp');
     }
 }
 
@@ -98,7 +101,7 @@ export class SuitGuy extends Thing
     {
         this.aisle.behindCounter.addChild(this.sprite);
         this.gameScreen = gameScreen;
-        this.sprite.position.x = this.aisle.counterLeftPos + 12;
+        this.sprite.position.x = this.aisle.counterLeftPos + 20;
         // this.sprite.position.x = this.aisle.counterRightPos-10;
     }
 
@@ -110,10 +113,17 @@ export class SuitGuy extends Thing
         // Check for any papers to sign
         for (let paper of this.aisle.papers)
         {
-            if (paper.isSigned ||
-                paper.sprite.x > this.sprite.x ||
+            if (paper.sprite.x > this.sprite.x ||
                 paper.sprite.x + paper.sprite.width < this.sprite.x)
             {
+                continue;
+            }
+            if (this.state === SuitGuy.STATES.SIGNING)
+            {
+                this.state = SuitGuy.STATES.SIGNING_PAUSED;
+                break;
+            }
+            if (paper.isSigned) {
                 continue;
             }
             if (this.state === SuitGuy.STATES.ADVANCING ||
@@ -129,13 +139,12 @@ export class SuitGuy extends Thing
                 this.sprite.y = 15;
                 this.aisle.onCounter.addChild(this.sprite);
             }
-            else
-            {
-                // Bounce the paper to the floor
-                paper.velx *= -1;
-                paper.falling = true;
-            }
-            return;
+            // else
+            // {
+            //     // Bounce the paper to the floor
+            //     paper.velx *= -1;
+            //     paper.falling = true;
+            // }
         }
 
         if (this.state === SuitGuy.STATES.ADVANCING)
@@ -190,6 +199,20 @@ export class SuitGuy extends Thing
                 });
                 paper.sprite.position.set(this.sprite.position.x+1, 0);
                 this.gameScreen.addThing(paper);
+            }
+        }
+        else if (this.state === SuitGuy.STATES.SIGNING_PAUSED)
+        {
+            if (stateChanged)
+            {
+                this.counter = 0.5;
+                this.speechContainer.removeChildren();
+            }
+            this.sprite.texture = this.appearance.signingPaused;
+            this.counter -= dt;
+            if (this.counter < 0)
+            {
+                this.state = SuitGuy.STATES.SIGNING;
             }
         }
         else if (this.state === SuitGuy.STATES.SLIDING_BACK)
