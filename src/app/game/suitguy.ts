@@ -66,6 +66,7 @@ export class SuitGuy extends Thing
     fistCount : number;
     fistDelay : number;
     counter : number;
+    signingTimer : number;
     gameScreen : any;
     speechContainer : any;
     appearance : SuitGuyAppearance;
@@ -107,7 +108,8 @@ export class SuitGuy extends Thing
 
     update(dt)
     {
-        let stateChanged = (this.state !== this.lastState);
+        const previousState = this.lastState;
+        const stateChanged = (this.state !== this.lastState);
         this.lastState = this.state;
 
         // Check for any papers to sign
@@ -171,19 +173,21 @@ export class SuitGuy extends Thing
         else if (this.state === SuitGuy.STATES.SIGNING)
         {
             if (stateChanged) {
-                this.timer = 0.5;
                 this.frame = 0;
                 // Suit guy talks money while signing
                 let img = getImage(Resource.SPRITES, 'speech_dollars');
                 let balloon = new PIXI.Sprite(img);
                 balloon.anchor.set(0.5, 1);
                 this.speechContainer.addChild(balloon);
-                this.counter = 8;
+                // Keep the signing progress going if we were just paused
+                if (previousState !== SuitGuy.STATES.SIGNING_PAUSED) {
+                    this.signingTimer = 8;
+                }
             }
             this.sprite.texture = this.appearance.signingAnim.getFrame(dt);
 
-            this.counter -= dt;
-            if (this.counter <= 0)
+            this.signingTimer -= dt;
+            if (this.signingTimer <= 0)
             {
                 // Done signing the paper. Throw it back and continue
                 // advancing.
