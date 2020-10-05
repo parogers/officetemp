@@ -21,12 +21,15 @@ import { Player } from './player';
 import { SuitGuy } from './suitguy';
 import { Aisle } from './aisle';
 import { LEDSign } from './ledsign';
+import { Thing } from './thing';
+import { ScoreDisplay } from './score';
 
 const getImage = Resource.getImage;
 
 declare const PIXI : any;
 
 const AISLE_YPOS_LIST = [65, 104, 143];
+
 
 export class GameScreen
 {
@@ -39,6 +42,8 @@ export class GameScreen
     background : any;
     ledSign : any;
     aisleList : any;
+    scoreDisplay : ScoreDisplay;
+    statusContainer : any;
 
     constructor(controls)
     {
@@ -114,6 +119,13 @@ export class GameScreen
         this.ledSign.addMessage("THIS IS ANOTHER THING", {
             separator: " *** "
         });
+
+        this.statusContainer = new PIXI.Container();
+        this.statusContainer.position.set(0, 4);
+        this.stage.addChild(this.statusContainer);
+
+        this.scoreDisplay = new ScoreDisplay();
+        this.addThing(this.scoreDisplay);
     }
 
     addThing(thing) {
@@ -146,6 +158,8 @@ export class GameScreen
     update(dt)
     {
         this.timer += dt;
+
+        this.scoreDisplay.score = (this.timer|0);
 
         let n = 0;
         while(n < this.things.length) {
