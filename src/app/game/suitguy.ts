@@ -28,6 +28,7 @@ const STATES = {
     SLIDING_BACK: 2,
     PAUSING: 3,
     ANGRY: 4,
+    SIGNING_PAUSED: 5,
 };
 
 class SuitGuyAppearance
@@ -38,6 +39,7 @@ class SuitGuyAppearance
     fist : Texture;
     throw : Texture;
     idle : Texture;
+    signingPaused : Texture;
     signingAnim : Anim;
     angryAnim : Anim;
 
@@ -49,6 +51,7 @@ class SuitGuyAppearance
         this.fist = getSprite('bluesuit_fist');
         this.throw = getSprite('bluesuit_throw');
         this.idle = getSprite('bluesuit_idle');
+        this.signingPaused = getSprite('bluesuit_signp');
     }
 }
 
@@ -63,6 +66,7 @@ export class SuitGuy extends Thing
     fistCount : number;
     fistDelay : number;
     counter : number;
+    signingTimer : number;
     gameScreen : any;
     speechContainer : any;
     appearance : SuitGuyAppearance;
@@ -98,22 +102,30 @@ export class SuitGuy extends Thing
     {
         this.aisle.behindCounter.addChild(this.sprite);
         this.gameScreen = gameScreen;
-        this.sprite.position.x = this.aisle.counterLeftPos + 12;
+        this.sprite.position.x = this.aisle.counterLeftPos + 20;
         // this.sprite.position.x = this.aisle.counterRightPos-10;
     }
 
     update(dt)
     {
-        let stateChanged = (this.state !== this.lastState);
+        const previousState = this.lastState;
+        const stateChanged = (this.state !== this.lastState);
         this.lastState = this.state;
 
         // Check for any papers to sign
         for (let paper of this.aisle.papers)
         {
-            if (paper.isSigned ||
-                paper.sprite.x > this.sprite.x ||
+            if (paper.sprite.x > this.sprite.x ||
                 paper.sprite.x + paper.sprite.width < this.sprite.x)
             {
+                continue;
+            }
+            if (this.state === SuitGuy.STATES.SIGNING)
+            {
+                this.state = SuitGuy.STATES.SIGNING_PAUSED;
+                break;
+            }
+            if (paper.isSigned) {
                 continue;
             }
             if (this.state === SuitGuy.STATES.ADVANCING ||
@@ -129,13 +141,12 @@ export class SuitGuy extends Thing
                 this.sprite.y = 15;
                 this.aisle.onCounter.addChild(this.sprite);
             }
-            else
-            {
-                // Bounce the paper to the floor
-                paper.velx *= -1;
-                paper.falling = true;
-            }
-            return;
+            // else
+            // {
+            //     // Bounce the paper to the floor
+            //     paper.velx *= -1;
+            //     paper.falling = true;
+            // }
         }
 
         if (this.state === SuitGuy.STATES.ADVANCING)
@@ -162,19 +173,21 @@ export class SuitGuy extends Thing
         else if (this.state === SuitGuy.STATES.SIGNING)
         {
             if (stateChanged) {
-                this.timer = 0.5;
                 this.frame = 0;
                 // Suit guy talks money while signing
                 let img = getImage(Resource.SPRITES, 'speech_dollars');
                 let balloon = new PIXI.Sprite(img);
                 balloon.anchor.set(0.5, 1);
                 this.speechContainer.addChild(balloon);
-                this.counter = 8;
+                // Keep the signing progress going if we were just paused
+                if (previousState !== SuitGuy.STATES.SIGNING_PAUSED) {
+                    this.signingTimer = 8;
+                }
             }
             this.sprite.texture = this.appearance.signingAnim.getFrame(dt);
 
-            this.counter -= dt;
-            if (this.counter <= 0)
+            this.signingTimer -= dt;
+            if (this.signingTimer <= 0)
             {
                 // Done signing the paper. Throw it back and continue
                 // advancing.
@@ -190,6 +203,20 @@ export class SuitGuy extends Thing
                 });
                 paper.sprite.position.set(this.sprite.position.x+1, 0);
                 this.gameScreen.addThing(paper);
+            }
+        }
+        else if (this.state === SuitGuy.STATES.SIGNING_PAUSED)
+        {
+            if (stateChanged)
+            {
+                this.counter = 0.5;
+                this.speechContainer.removeChildren();
+            }
+            this.sprite.texture = this.appearance.signingPaused;
+            this.counter -= dt;
+            if (this.counter < 0)
+            {
+                this.state = SuitGuy.STATES.SIGNING;
             }
         }
         else if (this.state === SuitGuy.STATES.SLIDING_BACK)
