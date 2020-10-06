@@ -26,7 +26,7 @@ import { ScoreDisplay } from './score';
 
 const getImage = Resource.getImage;
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
 
 const AISLE_YPOS_LIST = [65, 104, 143];
 

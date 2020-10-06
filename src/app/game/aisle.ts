@@ -21,7 +21,8 @@ import * as Sprites from './sprites';
 
 import * as Resource from './resource';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
+
 
 const getImage = Resource.getImage;
 

@@ -19,7 +19,8 @@
 
 export type Texture = any;
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
+
 
 export const GAME_WIDTH = 300;
 export const GAME_HEIGHT = 150;

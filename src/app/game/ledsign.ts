@@ -19,7 +19,8 @@ import { Thing } from './thing';
 
 import * as Resource from './resource';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
+
 
 export class LEDSign extends Thing
 {
@@ -82,10 +83,8 @@ export class LEDSign extends Thing
         }
         let text = new PIXI.BitmapText(
             msg, {
-                font : {
-                    'name' : 'ledfont',
-                    'size' : 6,
-                }
+                fontName: 'ledfont',
+                fontSize: 6,
             }
         );
         // Append the message to the end of the list

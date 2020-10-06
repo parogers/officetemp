@@ -22,7 +22,7 @@ import { Process } from './process';
 import * as Resource from './resource';
 import { getImage, getSprite } from './resource';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
 
 const SCALE = 1.3;
 
