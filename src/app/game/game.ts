@@ -44,6 +44,7 @@ export class GameScreen
     aisleList : any;
     scoreDisplay : ScoreDisplay;
     statusContainer : PIXI.Container;
+    gameOver : boolean = false;
 
     constructor(controls)
     {

@@ -35,6 +35,7 @@ const STATES = {
     THROWING: 3,
     RUNNING_DOWN: 4,
     RUNNING_BACK: 5,
+    GAMEOVER: 6,
 };
 
 const RUN_SPEED = 75;
@@ -141,6 +142,10 @@ export class Player extends Thing
 
     update(dt)
     {
+        if (this.gameScreen.gameOver) {
+            this.state = Player.STATES.GAMEOVER;
+        }
+
         let stateChanged = (this.lastState !== this.state);
         this.lastState = this.state;
         if (this.state === Player.STATES.IDLE)
@@ -296,6 +301,14 @@ export class Player extends Thing
                 this.state = Player.STATES.IDLE;
             }
         }
+        else if (this.state === Player.STATES.GAMEOVER)
+        {
+            if (stateChanged) {
+                this.terrance.texture = this.appearance.frazzled;
+            }
+            this.timer += dt;
+        }
+
         if (this.state === Player.STATES.RUNNING_DOWN ||
             this.state === Player.STATES.RUNNING_BACK)
         {
