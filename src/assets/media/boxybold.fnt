@@ -73,6 +73,6 @@
 <char chnl="0" height="8" id="124" letter="|" page="0" width="4" x="48" xadvance="4" xoffset="0" y="46" yoffset="0" />
 <char chnl="0" height="8" id="125" letter="}" page="0" width="5" x="53" xadvance="5" xoffset="0" y="46" yoffset="0" />
 <char chnl="0" height="8" id="126" letter="~" page="0" width="9" x="59" xadvance="9" xoffset="0" y="46" yoffset="0" />
-<char chnl="0" height="8" id="32" letter=" " page="0" width="7" x="50" xadvance="7" xoffset="0" y="19" yoffset="0" />
+<char chnl="0" height="8" id="32" letter=" " page="0" width="4" x="50" xadvance="4" xoffset="0" y="19" yoffset="0" />
 </chars>
 </font>
