@@ -19,7 +19,7 @@
 
 import { Thing } from './thing';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
 
 
 function getNumDigits(n : number)
@@ -41,8 +41,8 @@ function repeat(char, n)
 
 export class ScoreDisplay extends Thing
 {
-    sprite : any;
-    textSprite : any;
+    sprite : PIXI.Container;
+    textSprite : PIXI.BitmapText;
     private _score : number;
 
     constructor()
@@ -53,13 +53,11 @@ export class ScoreDisplay extends Thing
 
         this.textSprite = new PIXI.BitmapText(
             '', {
-                font : {
-                    'name' : 'boxybold',
-                    'size' : 6,
-                },
-            }
+                fontName: 'boxybold',
+                fontSize: 6,
+            },
         );
-        this.textSprite.anchor.set(1, 0);
+        (<PIXI.Point>this.textSprite.anchor).set(1, 0);
         this.sprite.addChild(this.textSprite);
         this.score = 0;
     }

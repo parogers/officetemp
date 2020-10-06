@@ -37,7 +37,8 @@ import { NextScreen } from './next';
 
 import { GAME_WIDTH, GAME_HEIGHT, ASPECT_RATIO } from './resource';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
+
 
 var app = null;
 

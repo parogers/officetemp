@@ -19,7 +19,8 @@
 
 import * as Resource from './resource';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
+
 
 export class LoadingScreen
 {

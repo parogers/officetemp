@@ -19,6 +19,7 @@
 
 export class Thing
 {
+    // We choose 'any' type because subclasses may use sprite or container
     sprite : any;
 
     constructor() {

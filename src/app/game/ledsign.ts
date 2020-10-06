@@ -19,15 +19,15 @@ import { Thing } from './thing';
 
 import * as Resource from './resource';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
+
 
 export class LEDSign extends Thing
 {
     scrollSpeed = 10;
-    textContainer : any;
+    textContainer : PIXI.Container;
     sprite : any;
-    bg : any;
-    textSprites : any[];
+    bg : PIXI.Sprite;
 
     constructor()
     {
@@ -38,8 +38,6 @@ export class LEDSign extends Thing
         this.bg = new PIXI.Sprite(img);
         this.bg.anchor.set(0, 0);
         this.sprite.addChild(this.bg);
-
-        this.textSprites = [];
 
         this.textContainer = new PIXI.Container();
         this.textContainer.position.set(6, 4.25);
@@ -68,7 +66,7 @@ export class LEDSign extends Thing
             text.position.x -= this.scrollSpeed*dt;
         }
         // Remove elements as they scroll off the display
-        let first = this.textContainer.children[0];
+        let first = <PIXI.BitmapText>this.textContainer.children[0];
         if (first && first.position.x + first.width < 0) {
             this.textContainer.removeChild(first);
         }
@@ -82,15 +80,13 @@ export class LEDSign extends Thing
         }
         let text = new PIXI.BitmapText(
             msg, {
-                font : {
-                    'name' : 'ledfont',
-                    'size' : 6,
-                }
+                fontName: 'ledfont',
+                fontSize: 6,
             }
         );
         // Append the message to the end of the list
         for (let other of this.textContainer.children) {
-            text.position.x += other.width;
+            text.position.x += (<PIXI.BitmapText>other).width;
         }
         this.textContainer.addChild(text);
     }

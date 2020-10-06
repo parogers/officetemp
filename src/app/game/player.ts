@@ -23,7 +23,7 @@ import { Thing } from './thing';
 
 import { getSprite, Texture, Anim } from './resource';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
 
 const LEFT = 1;
 const RIGHT = -1;
@@ -86,7 +86,7 @@ class PlayerAppearance
 
 export class Player extends Thing
 {
-    sprite : any;
+    sprite : PIXI.Sprite;
     state : number;
     lastState : number;
     aisleNumber : number;

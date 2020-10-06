@@ -20,7 +20,7 @@ import { Thing } from './thing';
 import * as Resource from './resource';
 import { getSprite, getImage, Texture, Anim } from './resource';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
 
 const STATES = {
     ADVANCING: 0,
@@ -68,7 +68,7 @@ export class SuitGuy extends Thing
     counter : number;
     signingTimer : number;
     gameScreen : any;
-    speechContainer : any;
+    speechContainer : PIXI.Container;
     appearance : SuitGuyAppearance;
 
     constructor(aisle)

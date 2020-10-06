@@ -17,12 +17,12 @@
 
 import { getSprite, GAME_WIDTH, GAME_HEIGHT } from './resource';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
 
 export class NextScreen
 {
     timer : number;
-    stage : any;
+    stage : PIXI.Container;
 
     constructor() {
         this.timer = 3;
@@ -50,13 +50,12 @@ export class NextScreen
         let msg = 'GET READY!';
         let text = new PIXI.BitmapText(
             msg, {
-                font : {
-                    'name' : 'boxybold',
-                    'size' : 6,
-                }
+                fontName: 'boxybold',
+                fontSize: 6,
             }
         );
-        text.anchor.set(0.5, 0.5);
+        // Explicit cast to make typescript happy
+        (<PIXI.Point>text.anchor).set(0.5, 0.5);
         text.position.set(
             portrait.position.x,
             portrait.position.y + 22

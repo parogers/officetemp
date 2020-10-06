@@ -19,7 +19,7 @@ import { Thing } from './thing';
 
 import { getSprite, Texture } from './resource';
 
-declare const PIXI : any;
+import * as PIXI from 'pixi.js';
 
 export class Cabinet extends Thing
 {
