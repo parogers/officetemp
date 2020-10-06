@@ -121,11 +121,13 @@ export class GameScreen
         });
 
         this.statusContainer = new PIXI.Container();
-        this.statusContainer.position.set(0, 4);
+        this.statusContainer.position.set(0, 5);
         this.stage.addChild(this.statusContainer);
 
         this.scoreDisplay = new ScoreDisplay();
         this.addThing(this.scoreDisplay);
+
+        this.scoreDisplay.score = 100;
     }
 
     addThing(thing) {
@@ -158,8 +160,6 @@ export class GameScreen
     update(dt)
     {
         this.timer += dt;
-
-        this.scoreDisplay.score = (this.timer|0);
 
         let n = 0;
         while(n < this.things.length) {

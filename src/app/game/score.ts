@@ -21,6 +21,24 @@ import { Thing } from './thing';
 
 declare const PIXI : any;
 
+
+function getNumDigits(n : number)
+{
+    if (n === 0) return 1;
+    return (Math.log10(n) + 1)|0;
+}
+
+
+function repeat(char, n)
+{
+    let str = '';
+    while(n-- > 0) {
+        str += char;
+    }
+    return str;
+}
+
+
 export class ScoreDisplay extends Thing
 {
     sprite : any;
@@ -34,7 +52,7 @@ export class ScoreDisplay extends Thing
         this.sprite.scale.set(1.5);
 
         this.textSprite = new PIXI.BitmapText(
-            '0', {
+            '', {
                 font : {
                     'name' : 'boxybold',
                     'size' : 6,
@@ -43,6 +61,7 @@ export class ScoreDisplay extends Thing
         );
         this.textSprite.anchor.set(1, 0);
         this.sprite.addChild(this.textSprite);
+        this.score = 0;
     }
 
     spawn(screen)
@@ -56,8 +75,10 @@ export class ScoreDisplay extends Thing
     {
         if (this._score !== value)
         {
+            const digits = getNumDigits(value);
+            const zeros = repeat('0', 6 - digits);
             this._score = value;
-            this.textSprite.text = '' + this._score;
+            this.textSprite.text = 'SCORE: $' + zeros + value;
         }
     }
 }
