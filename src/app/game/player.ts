@@ -317,6 +317,8 @@ export class Player extends Thing
                 this.terrance.texture = this.appearance.frazzled;
             }
             this.timer += dt;
+            this.terrance.x = 0.25*Math.cos(this.timer*90);
+            this.terrance.y = 0.5*Math.sin(this.timer*50);
         }
 
         if (this.state === Player.STATES.RUNNING_DOWN ||
