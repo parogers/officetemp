@@ -65,9 +65,11 @@ class PlayerAppearance
     search : Texture;
     throw : Texture;
     running : Anim;
+    frazzled : Texture;
 
     constructor()
     {
+        this.frazzled = getSprite('terrance_frazzled');
         this.idle = getSprite('terrance_idle');
         this.search = getSprite('terrance_search');
         this.throw = getSprite('terrance_throw');
@@ -87,7 +89,7 @@ class PlayerAppearance
 
 export class Player extends Thing
 {
-    sprite : PIXI.Sprite;
+    sprite : any;
     state : number;
     lastState : number;
     aisleNumber : number;
@@ -103,8 +105,15 @@ export class Player extends Thing
     {
         super();
         this.appearance = new PlayerAppearance();
-        this.sprite = new PIXI.Sprite(this.appearance.idle);
-        this.sprite.anchor.set(0.5, 1);
+        // Use a container as the top-level PIXI object, then put a terrance
+        // sprite inside. This way we can position player using the container,
+        // but offset them (eg when frazzled) using the sprite without having
+        // to consider or change the sprite position.
+        this.terrance = new PIXI.Sprite(this.appearance.idle);
+        this.terrance.anchor.set(0.5, 1);
+        this.sprite = new PIXI.Container();
+        this.sprite.addChild(this.terrance);
+
         this.state = Player.STATES.IDLE;
         this.lastState = -1;
         this.aisleNumber = 0;
@@ -117,12 +126,12 @@ export class Player extends Thing
 
     set facing(dir : number)
     {
-        this.sprite.scale.x = Math.sign(dir);
+        this.terrance.scale.x = Math.sign(dir);
     }
 
     get facing()
     {
-        return this.sprite.scale.x;
+        return this.terrance.scale.x;
     }
 
     static get STATES() {
@@ -148,13 +157,14 @@ export class Player extends Thing
 
         let stateChanged = (this.lastState !== this.state);
         this.lastState = this.state;
+
         if (this.state === Player.STATES.IDLE)
         {
             if (stateChanged) {
                 // Done searching
-                this.sprite.scale.x = 1;
+                this.facing = LEFT;
                 this.sprite.x = this.aisle.playerIdlePos;
-                this.sprite.texture = this.appearance.idle;
+                this.terrance.texture = this.appearance.idle;
                 this.facing = LEFT;
             }
 
@@ -219,9 +229,9 @@ export class Player extends Thing
         {
             if (stateChanged) {
                 // The player is searching the filing cabinet
-                this.sprite.texture = this.appearance.search;
+                this.terrance.texture = this.appearance.search;
                 this.sprite.x = this.aisle.playerIdlePos + 14;
-                this.sprite.scale.x = -1;
+                this.facing = RIGHT;
                 // Open the cabinet
                 this.aisle.cabinet.setOpen(true);
                 // Have the player searching for a minimum amount of time
@@ -257,9 +267,9 @@ export class Player extends Thing
             if (stateChanged) {
                 // Show the throw pose for a bit before going idle again
                 this.timer = 0.1;
-                this.sprite.texture = this.appearance.throw;
+                this.terrance.texture = this.appearance.throw;
                 this.sprite.x = this.aisle.playerIdlePos;
-                this.sprite.scale.x = 1;
+                this.facing = LEFT;
             }
             this.timer -= dt;
             if (this.timer <= 0) {
@@ -272,12 +282,12 @@ export class Player extends Thing
             if (this.sprite.position.x > this.aisle.playerAisleBlockPos)
             {
                 this.sprite.position.x -= RUN_SPEED*dt;
-                this.sprite.texture = this.appearance.running.getFrame(dt);
+                this.terrance.texture = this.appearance.running.getFrame(dt);
             }
             else
             {
                 this.sprite.position.x = this.aisle.playerAisleBlockPos;
-                this.sprite.texture = this.appearance.idle;
+                this.terrance.texture = this.appearance.idle;
             }
 
             if (!this.controls.left.held)
@@ -288,7 +298,7 @@ export class Player extends Thing
         else if (this.state === Player.STATES.RUNNING_BACK)
         {
             this.facing = RIGHT;
-            this.sprite.texture = this.appearance.running.getFrame(dt);
+            this.terrance.texture = this.appearance.running.getFrame(dt);
             this.sprite.position.x += RUN_SPEED*dt;
 
             if (this.controls.left.held)
