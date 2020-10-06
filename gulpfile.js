@@ -40,11 +40,11 @@ gulp.task('build-fonts', function(cb) {
 
     return Promise.all([
 	run_genblockfont(
-	    src_media_path + '/boxy_bold_font_rev.xcf',
+	    src_media_path + '/fonts/boxy_bold_font_rev.xcf',
 	    dest_media_path + '/boxybold'),
 
 	run_genblockfont(
-	    src_media_path + '/led_font.xcf',
+	    src_media_path + '/fonts/led_font.xcf',
 	    dest_media_path + '/ledfont', 1),
     ]);
 });
