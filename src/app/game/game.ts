@@ -24,7 +24,7 @@ import { LEDSign } from './ledsign';
 import { Thing } from './thing';
 import { ScoreDisplay } from './score';
 
-const getImage = Resource.getImage;
+import { getImage, Texture } from './resource';
 
 import * as PIXI from 'pixi.js';
 
@@ -33,17 +33,17 @@ const AISLE_YPOS_LIST = [65, 104, 143];
 
 export class GameScreen
 {
-    stage : any;
+    stage : PIXI.Container;
     controls : any;
     timer : number;
     aisle : number;
     player : any;
     things : any[];
-    background : any;
+    background : Texture;
     ledSign : any;
     aisleList : any;
     scoreDisplay : ScoreDisplay;
-    statusContainer : any;
+    statusContainer : PIXI.Container;
 
     constructor(controls)
     {

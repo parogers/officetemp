@@ -28,13 +28,13 @@ const getImage = Resource.getImage;
 
 export class Aisle extends Thing
 {
-    container : any;
-    behindCounter : any;
-    inFrontCounter : any;
-    cabinetArea : any;
-    onCounter : any;
-    counter : any;
-    cabinet : any;
+    container : PIXI.Container;
+    behindCounter : PIXI.Container;
+    inFrontCounter : PIXI.Container;
+    cabinetArea : PIXI.Container;
+    onCounter : PIXI.Container;
+    counter : PIXI.Sprite;
+    cabinet : Thing;
     papers : any[];
 
     counterLeftPos = 0;

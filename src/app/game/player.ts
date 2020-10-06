@@ -86,7 +86,7 @@ class PlayerAppearance
 
 export class Player extends Thing
 {
-    sprite : any;
+    sprite : PIXI.Sprite;
     state : number;
     lastState : number;
     aisleNumber : number;

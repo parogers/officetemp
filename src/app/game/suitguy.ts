@@ -68,7 +68,7 @@ export class SuitGuy extends Thing
     counter : number;
     signingTimer : number;
     gameScreen : any;
-    speechContainer : any;
+    speechContainer : PIXI.Container;
     appearance : SuitGuyAppearance;
 
     constructor(aisle)

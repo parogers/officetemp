@@ -22,7 +22,7 @@ import * as PIXI from 'pixi.js';
 export class NextScreen
 {
     timer : number;
-    stage : any;
+    stage : PIXI.Container;
 
     constructor() {
         this.timer = 3;

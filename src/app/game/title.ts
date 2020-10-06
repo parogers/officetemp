@@ -28,18 +28,18 @@ const SCALE = 1.3;
 
 export class TitleScreen
 {
-    stage : any;
+    stage : PIXI.Container;
     process : Process = new Process();
     controls : any;
     done : boolean = false;
     timer : number;
-    terrance : any;
-    sweaterGuy : any;
+    terrance : PIXI.Sprite;
+    sweaterGuy : PIXI.Sprite;
     terranceX : number;
     terranceY : number;
     sweaterX : number;
     sweaterY : number;
-    title : any;
+    title : PIXI.Sprite;
 
     constructor(controls)
     {
