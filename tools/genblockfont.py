@@ -10,6 +10,25 @@ import PIL
 import PIL.Image
 import argparse
 
+
+class CharsetDescription:
+    rows = None
+    spaceWidth = 0
+
+    def __init__(self):
+        self.rows = []
+
+    @classmethod
+    def from_string(cls, txt):
+        desc = CharsetDescription()
+        desc.rows = [
+            line
+            for line in txt.split('\n')
+            if line != ''
+        ]
+        return desc
+
+
 def xcf_get_comment(path):
     out, err = subprocess.Popen([
         'exiftool',
@@ -39,7 +58,7 @@ def is_row_clear(img, y):
 def is_col_clear(img, x, y1, y2):
     return all(get_alpha_at(img, x, y) == 0 for y in range(y1, y2+1))
 
-def get_char_info(img, chars, char_height):
+def get_char_info(img, charDesc, char_height):
     # Now parse out the character widths from the image
     CharInfo = collections.namedtuple('charinfo', (
         'x', 'y', 'width', 'height', 'char'))
@@ -47,19 +66,20 @@ def get_char_info(img, chars, char_height):
     lst = []
     x = 1
     y = 1
-    for char in chars:
-        if char == '\n':
-            x = 1
-            y += char_height+1
-            continue
-        # Measure the character width
-        width = 0
-        while not is_col_clear(img, x+width, y, y+char_height):
-            width += 1
-        info = CharInfo(x, y, width, char_height, char)
-        lst.append(info)
-        x += width + 1
-        infoByLetter[char] = info
+    for row in charDesc.rows:
+        for char in row:
+            # Measure the character width
+            width = 0
+            while not is_col_clear(img, x+width, y, y+char_height):
+                width += 1
+            info = CharInfo(x, y, width, char_height, char)
+            lst.append(info)
+            x += width + 1
+            infoByLetter[char] = info
+
+        x = 1
+        y += char_height+1
+        continue
 
     # Fix the width for the space character, since the above method will
     # always report the space as having zero width.
@@ -71,9 +91,9 @@ def get_char_info(img, chars, char_height):
         lst.remove(space)
         lst.append(CharInfo(
             space.x, space.y,
-            infoByLetter['J'].width,
+            infoByLetter['!'].width,
             char_height, space.char))
-        
+
     return lst
 
 def get_char_height(img):
@@ -107,14 +127,16 @@ if __name__ == '__main__':
 
     # The outer image 1-pixel wide perimeter should be blank. The matrix of
     # characters should appear within that perimeter organized into rows of
-    # constant height. The characters themselves can be variable width, 
+    # constant height. The characters themselves can be variable width,
     # but should have a 1-pixel wide gap between adjacient characters.
     img = xcf_to_pil(args.src)
 
     char_height = get_char_height(img)
 
-    chars = xcf_get_comment(args.src)
-    char_info = get_char_info(img, chars, char_height)
+    charDesc = CharsetDescription.from_string(
+        xcf_get_comment(args.src)
+    )
+    char_info = get_char_info(img, charDesc, char_height)
 
     # Dump the XML font file
     font_el = ET.Element('font')
@@ -142,7 +164,7 @@ if __name__ == '__main__':
         'pages' : '1',
         'packed' : '0',
     }
-    
+
     pages_el = ET.SubElement(font_el, 'pages')
     page_el = ET.SubElement(pages_el, 'page')
     page_el.attrib = {
@@ -173,4 +195,3 @@ if __name__ == '__main__':
     with open(args.dest + '.fnt', 'w') as fd:
         txt = ET.tostring(font_el).decode('UTF-8').replace('>', '>\n')
         fd.write(txt)
-
