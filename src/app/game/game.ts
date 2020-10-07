@@ -23,8 +23,8 @@ import { Aisle } from './aisle';
 import { LEDSign } from './ledsign';
 import { Thing } from './thing';
 import { ScoreDisplay } from './score';
-
 import { getImage, Texture } from './resource';
+import { GameOverMessage } from './gameover';
 
 import * as PIXI from 'pixi.js';
 
@@ -129,6 +129,8 @@ export class GameScreen
         this.addThing(this.scoreDisplay);
 
         this.scoreDisplay.score = 100;
+
+        this.addThing(new GameOverMessage())
     }
 
     addThing(thing) {
