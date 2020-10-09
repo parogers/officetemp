@@ -44,6 +44,7 @@ export class GameOverMessage extends Thing
     gameScreen : any;
     tween : Tween;
     textBox : PIXI.Container;
+    pauseDuringGameOver = false;
 
     constructor()
     {
@@ -81,6 +82,11 @@ export class GameOverMessage extends Thing
 
     static get states() : any {
         return STATES;
+    }
+
+    get pauseGamePlay() : boolean
+    {
+        return this.state >= STATES.FADE_IN;
     }
 
     update(dt : number)
@@ -129,12 +135,12 @@ export class GameOverMessage extends Thing
                     ],
                     interpolate: LinearSlowdownInterp,
                 });
+                this.tween.pauseDuringGameOver = false;
                 this.gameScreen.addThing(this.tween);
             }
         }
         else if (this.state === STATES.SLIDE_TEXT)
         {
-
         }
     }
 

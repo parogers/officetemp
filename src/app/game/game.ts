@@ -45,6 +45,7 @@ export class GameScreen
     scoreDisplay : ScoreDisplay;
     statusContainer : PIXI.Container;
     gameOver : boolean = false;
+    gameOverMessage : GameOverMessage;
 
     constructor(controls)
     {
@@ -130,7 +131,13 @@ export class GameScreen
 
         this.scoreDisplay.score = 100;
 
-        this.addThing(new GameOverMessage())
+        this.gameOverMessage = new GameOverMessage();
+        this.addThing(this.gameOverMessage);
+    }
+
+    get showingGameOver() : boolean
+    {
+        return this.gameOverMessage.pauseGamePlay;
     }
 
     addThing(thing) {
@@ -165,8 +172,14 @@ export class GameScreen
         this.timer += dt;
 
         let n = 0;
-        while(n < this.things.length) {
+        while(n < this.things.length)
+        {
             let thing = this.things[n];
+            if (this.showingGameOver && thing.pauseDuringGameOver)
+            {
+                n++;
+                continue;
+            }
             if (thing.update && thing.update(dt) === false) {
                 this.removeThing(thing);
             } else {
