@@ -40,20 +40,28 @@ import { GAME_WIDTH, GAME_HEIGHT, ASPECT_RATIO } from './resource';
 import * as PIXI from 'pixi.js';
 
 
+const STATES = {
+    START: 0,
+    LOADING: 1,
+    TITLE: 2,
+    NEXT: 3,
+    GAME: 4,
+};
+
+
 var app = null;
 
 export class Application
 {
     container : HTMLElement;
     pixiApp : any;
-    screens : any;
     screen : any;
     controls : any;
+    state : number = STATES.START;
 
     constructor()
     {
         this.pixiApp = null;
-        this.screens = {};
         this.screen = null;
         this.controls = new KeyboardControls();
         this.controls.attachKeyboardEvents();
@@ -93,15 +101,6 @@ export class Application
 
         this.pixiApp.stage.scale.set(scale);
 
-        this.screens = {
-            loading: new LoadingScreen(),
-            title: new TitleScreen(this.controls),
-            game: new GameScreen(this.controls),
-            nextLevel: new NextScreen(),
-        }
-        this.screen = this.screens.loading;
-        this.screen.start();
-
         // Start the ticker, which will drive the render loop
         PIXI.Ticker.shared.add(() => {
             this.update(PIXI.Ticker.shared.elapsedMS/1000.0);
@@ -127,22 +126,31 @@ export class Application
         this.controls.update(dt);
 
         // If the screen is done, figure out where to go next
-        if (this.screen.isDone())
+        if (!this.screen || this.screen.isDone())
         {
-            if (this.screen === this.screens.loading) {
-                this.setScreen(this.screens.title);
+            if (this.state === STATES.START) {
+                this.state = STATES.LOADING;
+                this.setScreen(new LoadingScreen());
             }
-            else if (this.screen === this.screens.title) {
-                this.setScreen(this.screens.nextLevel);
 
-            } else if (this.screen === this.screens.nextLevel) {
-                this.setScreen(this.screens.game);
+            else if (this.state === STATES.LOADING) {
+                this.state = STATES.TITLE;
+                this.setScreen(new TitleScreen(this.controls));
+            }
 
-            } else if (this.screen === this.screens.game) {
-                this.setScreen(this.screens.nextLevel);
+            else if (this.state === STATES.TITLE) {
+                this.state = STATES.NEXT;
+                this.setScreen(new NextScreen());
+            }
 
-            } else {
-                this.setScreen(null);
+            else if (this.state === STATES.NEXT) {
+                this.state = STATES.GAME;
+                this.setScreen(new GameScreen(this.controls));
+            }
+
+            else if (this.state === STATES.GAME) {
+                this.state = STATES.NEXT;
+                this.setScreen(new NextScreen());
             }
         }
     }
