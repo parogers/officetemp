@@ -138,6 +138,9 @@ export class Application
             } else if (this.screen === this.screens.nextLevel) {
                 this.setScreen(this.screens.game);
 
+            } else if (this.screen === this.screens.game) {
+                this.setScreen(this.screens.nextLevel);
+
             } else {
                 this.setScreen(null);
             }

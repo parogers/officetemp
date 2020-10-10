@@ -34,6 +34,7 @@ const STATES = {
     SLIDE_TRY_AGAIN: 4,
     PRE_TAP_MSG_DELAY: 5,
     SLIDE_TAP_CONTINUE: 6,
+    DONE: 7,
 };
 
 
@@ -125,6 +126,11 @@ export class GameOverMessage extends Thing
         return this.state >= STATES.FADE_IN;
     }
 
+    get done() : boolean
+    {
+        return this.state === STATES.DONE;
+    }
+
     update(dt : number)
     {
         if (this.state !== this.lastState) {
@@ -205,6 +211,13 @@ export class GameOverMessage extends Thing
             }
         }
         else if (this.state === STATES.SLIDE_TAP_CONTINUE)
+        {
+            if (this.tween.done && this.gameScreen.controls.anyKey.justReleased)
+            {
+                this.state = STATES.DONE;
+            }
+        }
+        else if (this.state === STATES.DONE)
         {
         }
     }
