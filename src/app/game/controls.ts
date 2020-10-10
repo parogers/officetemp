@@ -64,12 +64,12 @@ export class Input
         this.doublePressed = false;
     }
 
-    press(set) {
+    press() {
         this.justPressed = !this.held;
-        this.held = (set === undefined ? true : set);
+        this.held = true;
     }
 
-    release(set) {
+    release() {
         this.justReleased = !!this.held;
         this.held = false;
     }
