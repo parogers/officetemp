@@ -57,6 +57,12 @@ export class Input
         this.doublePressed = false;
     }
 
+    reset()
+    {
+        this.held = false;
+        this.clearMomentary();
+    }
+
     clearMomentary()
     {
         this.justPressed = false;
@@ -116,6 +122,15 @@ export class KeyboardControls
             }
         }
         this.anyKey = new Input('*');
+    }
+
+    reset()
+    {
+        this.numKeysDown = 0;
+        for (let input of this.inputs) {
+            input.reset();
+        }
+        this.anyKey.reset();
     }
 
     getX()
@@ -181,8 +196,14 @@ export class KeyboardControls
                 input.release();
             }
             this.numKeysDown--;
-            if (this.numKeysDown === 0) {
+            // Sometimes we lose track of how many keys are pressed. This is
+            // mostly fixed by resetting input state when the page becomes
+            // visible, but the extra check here for a negative number of keys
+            // pressed is a good idea.
+            if (this.numKeysDown <= 0)
+            {
                 this.anyKey.release();
+                this.numKeysDown = 0;
             }
         });
     }

@@ -123,6 +123,9 @@ export class Application
 
     resume()
     {
+        // Reset the controls, just in case we've lost track of keyup/down
+        // events as the user was tabbing about.
+        this.controls.reset();
         PIXI.Ticker.shared.start();
     }
 
