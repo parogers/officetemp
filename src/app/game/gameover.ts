@@ -37,7 +37,7 @@ const STATES = {
 };
 
 
-function createTryAgainBox() : PIXI.Sprite
+function createTryAgainBox() : PIXI.Container
 {
     const box = new PIXI.Container();
 
@@ -61,7 +61,7 @@ function createTryAgainBox() : PIXI.Sprite
     return box;
 }
 
-function createTapContinueBox() : PIXI.Sprite
+function createTapContinueBox() : PIXI.Container
 {
     const box = new PIXI.Container();
 
