@@ -102,8 +102,8 @@ export class SuitGuy extends Thing
     {
         this.aisle.behindCounter.addChild(this.sprite);
         this.gameScreen = gameScreen;
-        this.sprite.position.x = this.aisle.counterLeftPos + 20;
-        // this.sprite.position.x = this.aisle.counterRightPos-10;
+        // this.sprite.position.x = this.aisle.counterLeftPos + 20;
+        this.sprite.position.x = this.aisle.counterRightPos-10;
     }
 
     update(dt)
@@ -274,6 +274,7 @@ export class SuitGuy extends Thing
                 this.speechContainer.addChild(balloon);
             }
             this.sprite.texture = this.appearance.angryAnim.getFrame(dt);
+            this.gameScreen.gameOver = true;
         }
     }
 }

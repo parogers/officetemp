@@ -22,6 +22,10 @@ export class Thing
     // We choose 'any' type because subclasses may use sprite or container
     sprite : any;
 
+    // Whether to skip the update method of this thing when the game over
+    // animation is playing.
+    pauseDuringGameOver : boolean = true;
+
     constructor() {
     }
 
