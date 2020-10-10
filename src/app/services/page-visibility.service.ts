@@ -24,9 +24,9 @@ import { Injectable, EventEmitter } from '@angular/core';
 function isPageVisible() : boolean
 {
     return (
-        (document.hidden !== undefined && !document.hidden) ||
-        (document.msHidden !== undefined && !document.msHidden) ||
-        (document.webkitHidden !== undefined && !document.webkitHidden)
+        (document['hidden'] !== undefined && !document['hidden']) ||
+        (document['msHidden'] !== undefined && !document['msHidden']) ||
+        (document['webkitHidden'] !== undefined && !document['webkitHidden'])
     );
 }
 
@@ -36,9 +36,9 @@ function isPageVisible() : boolean
  */
 function getVisibilityChangeEventName() : string
 {
-    if (document.hidden !== undefined) return 'visibilitychange';
-    if (document.msHidden !== undefined) return 'msvisibilitychange';
-    if (document.webkitHidden !== undefined) return 'webkitvisibilitychange'
+    if (document['hidden'] !== undefined) return 'visibilitychange';
+    if (document['msHidden'] !== undefined) return 'msvisibilitychange';
+    if (document['webkitHidden'] !== undefined) return 'webkitvisibilitychange'
     return '';
 }
 
