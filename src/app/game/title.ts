@@ -184,7 +184,7 @@ export class TitleScreen
         this.process.update(dt);
         this.timer += dt;
 
-        if (this.controls.primary.justPressed) {
+        if (this.controls.anyKey.justPressed) {
             this.done = true;
         }
     }

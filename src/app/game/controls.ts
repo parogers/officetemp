@@ -82,6 +82,8 @@ export class KeyboardControls
     primary : Input;
     swap : Input;
     space : Input;
+    anyKey : Input;
+    numKeysDown : number = 0;
 
     constructor()
     {
@@ -106,6 +108,7 @@ export class KeyboardControls
                 this.inputByKey[key] = this[name];
             }
         }
+        this.anyKey = new Input('*');
     }
 
     getX()
@@ -148,14 +151,23 @@ export class KeyboardControls
                 event.stopPropagation();
                 event.preventDefault();
             }
+            if (this.numKeysDown === 0) {
+                this.anyKey.press();
+            }
+            this.numKeysDown++;
         });
 
         window.addEventListener("keyup", (event) => {
             var input = this.inputByKey[event.keyCode];
-            if (input) {
+            if (input)
+            {
                 input.release();
                 event.stopPropagation();
                 event.preventDefault();
+            }
+            this.numKeysDown--;
+            if (this.numKeysDown === 0) {
+                this.anyKey.release();
             }
         });
     }
