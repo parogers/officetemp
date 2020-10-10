@@ -16,24 +16,3 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-
-import { AppComponent } from './app.component';
-
-import { PageVisibilityService } from './services/page-visibility.service';
-
-@NgModule({
-    declarations: [
-        AppComponent,
-    ],
-    imports: [
-        BrowserModule,
-    ],
-    providers: [
-        PageVisibilityService,
-    ],
-    bootstrap: [AppComponent]
-})
-export class AppModule
-{ }

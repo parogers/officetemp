@@ -116,6 +116,19 @@ export class Application
         // });
     }
 
+    pause()
+    {
+        PIXI.Ticker.shared.stop();
+    }
+
+    resume()
+    {
+        // Reset the controls, just in case we've lost track of keyup/down
+        // events as the user was tabbing about.
+        this.controls.reset();
+        PIXI.Ticker.shared.start();
+    }
+
     // Called from the render loop (which is handled via PIXI ticker)
     update(dt)
     {

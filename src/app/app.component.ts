@@ -21,6 +21,8 @@ import { Component, ViewChild } from '@angular/core';
 
 import { Application } from './game/main';
 
+import { PageVisibilityService } from './services/page-visibility.service';
+
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
@@ -33,14 +35,22 @@ export class AppComponent
 
     application : Application;
 
-    constructor()
+    constructor(
+        private visibilityService : PageVisibilityService,
+    )
     {
         this.application = new Application();
+        this.visibilityService.change.subscribe(visible => {
+            if (visible) {
+                this.application.resume();
+            } else {
+                this.application.pause();
+            }
+        });
     }
 
     ngOnInit()
     {
         this.application.start(this.gameArea.nativeElement);
     }
-
 }

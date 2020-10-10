@@ -16,24 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 
-import { AppComponent } from './app.component';
+import { PageVisibilityService } from './page-visibility.service';
 
-import { PageVisibilityService } from './services/page-visibility.service';
+describe('PageVisibilityService', () => {
+    let service: PageVisibilityService;
 
-@NgModule({
-    declarations: [
-        AppComponent,
-    ],
-    imports: [
-        BrowserModule,
-    ],
-    providers: [
-        PageVisibilityService,
-    ],
-    bootstrap: [AppComponent]
-})
-export class AppModule
-{ }
+    beforeEach(() => {
+        TestBed.configureTestingModule({});
+        service = TestBed.inject(PageVisibilityService);
+    });
+
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
+});
