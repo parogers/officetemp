@@ -83,7 +83,6 @@ export class Application
         this.pixiApp = new PIXI.Application({
             width: GAME_WIDTH*scale,
             height: GAME_HEIGHT*scale,
-            backgroundColor: 0xe0e0a0,
             //resolution: 1,
             //preserveDrawingBuffer: true,
             //antialias: false,

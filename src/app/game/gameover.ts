@@ -17,7 +17,7 @@
  *
  */
 
-import { getSprite, GAME_WIDTH, GAME_HEIGHT } from './resource';
+import { getSprite, GAME_WIDTH, GAME_HEIGHT, makeSolidColourSprite } from './resource';
 
 import { Thing } from './thing';
 
@@ -37,13 +37,12 @@ const STATES = {
 };
 
 
-function createTryAgainBox() : PIXI.Sprite
+function createTryAgainBox() : PIXI.Container
 {
     const box = new PIXI.Container();
 
-    const bg = new PIXI.Sprite(getSprite('colours_lime'));
+    const bg = makeSolidColourSprite('lime', GAME_WIDTH, 24);
     bg.anchor.set(0, 0.5);
-    bg.scale.set(GAME_WIDTH/bg.width, 24/bg.height);
     box.addChild(bg);
 
     const text = new PIXI.BitmapText(
@@ -61,13 +60,12 @@ function createTryAgainBox() : PIXI.Sprite
     return box;
 }
 
-function createTapContinueBox() : PIXI.Sprite
+function createTapContinueBox() : PIXI.Container
 {
     const box = new PIXI.Container();
 
-    const bg = new PIXI.Sprite(getSprite('colours_lime'));
+    const bg = makeSolidColourSprite('lime', GAME_WIDTH, 12);
     bg.anchor.set(0, 0.5);
-    bg.scale.set(GAME_WIDTH/bg.width, 12/bg.height);
     box.addChild(bg);
 
     const text = new PIXI.BitmapText(
@@ -103,9 +101,8 @@ export class GameOverMessage extends Thing
         super();
         this.sprite = new PIXI.Container();
 
-        this.background = new PIXI.Sprite(getSprite('colours_black'));
+        this.background = makeSolidColourSprite('black', GAME_WIDTH, GAME_HEIGHT);
         this.background.alpha = 0;
-        this.background.scale.set(10, 5);
         this.sprite.addChild(this.background);
 
         this.tryAgainBox = createTryAgainBox();

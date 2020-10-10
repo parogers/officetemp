@@ -20,7 +20,7 @@
 import { Tween, LinearInterp, LinearSlowdownInterp } from './tween';
 import { Process } from './process';
 import * as Resource from './resource';
-import { getImage, getSprite } from './resource';
+import { getImage, getSprite, makeSolidColourSprite, GAME_WIDTH, GAME_HEIGHT } from './resource';
 
 import * as PIXI from 'pixi.js';
 
@@ -40,6 +40,7 @@ export class TitleScreen
     sweaterX : number;
     sweaterY : number;
     title : PIXI.Sprite;
+    bg : PIXI.Sprite;
 
     constructor(controls)
     {
@@ -49,6 +50,9 @@ export class TitleScreen
 
     start()
     {
+        const bg = makeSolidColourSprite('lime', GAME_WIDTH, GAME_HEIGHT);
+        this.stage.addChild(bg);
+
         let img = getImage(Resource.TITLE);
         img.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR;
         img.baseTexture.dispose();

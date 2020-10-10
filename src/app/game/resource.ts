@@ -86,3 +86,17 @@ export class Anim
         return this.frames[frame];
     }
 }
+
+export function makeSolidColourSprite(
+    name : string,
+    width : number,
+    height : number
+) : PIXI.Sprite
+{
+    const sprite = new PIXI.Sprite(getSprite('colours_' + name));
+    sprite.scale.set(
+        width / sprite.width,
+        height / sprite.height
+    );
+    return sprite;
+}
