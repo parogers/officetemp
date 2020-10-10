@@ -57,12 +57,19 @@ export class Input
         this.doublePressed = false;
     }
 
-    press(set) {
-        this.justPressed = !this.held;
-        this.held = (set === undefined ? true : set);
+    clearMomentary()
+    {
+        this.justPressed = false;
+        this.justReleased = false;
+        this.doublePressed = false;
     }
 
-    release(set) {
+    press() {
+        this.justPressed = !this.held;
+        this.held = true;
+    }
+
+    release() {
         this.justReleased = !!this.held;
         this.held = false;
     }
@@ -125,11 +132,11 @@ export class KeyboardControls
     update(dt)
     {
         this.time += dt;
-        for (let input of this.inputs) {
-            input.justPressed = false;
-            input.justReleased = false;
-            input.doublePressed = false;
+        for (let input of this.inputs)
+        {
+            input.clearMomentary();
         }
+        this.anyKey.clearMomentary();
     }
 
     attachKeyboardEvents()

@@ -188,7 +188,8 @@ export class GameScreen
         }
     }
 
-    isDone() {
-        return false;
+    isDone()
+    {
+        return this.gameOverMessage.done;
     }
 }
