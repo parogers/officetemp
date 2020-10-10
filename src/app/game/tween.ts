@@ -72,3 +72,13 @@ export const LinearSlowdownInterp = function(param, src, dest) {
     let dy = param*(dest[1] - src[1]);
     return [src[0] + dx, src[1] + dy];
 };
+
+export const EaseInOut = function(t, src, dest)
+{
+    // This equation gives us a nice S-curve shape. It was found by messing
+    // around in gnuplot until the graph looked good enough.
+    let t0 = (1-(1-t)**3)**4;
+    let dx = t0*(dest[0] - src[0]);
+    let dy = t0*(dest[1] - src[1]);
+    return [src[0] + dx, src[1] + dy];
+}
