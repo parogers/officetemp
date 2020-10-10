@@ -116,6 +116,16 @@ export class Application
         // });
     }
 
+    pause()
+    {
+        PIXI.Ticker.shared.stop();
+    }
+
+    resume()
+    {
+        PIXI.Ticker.shared.start();
+    }
+
     // Called from the render loop (which is handled via PIXI ticker)
     update(dt)
     {
