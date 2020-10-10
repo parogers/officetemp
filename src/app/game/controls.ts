@@ -187,39 +187,3 @@ export class KeyboardControls
         });
     }
 }
-
-/******************/
-/* ManualControls */
-/******************/
-
-export class ManualControls
-{
-    dirx : number;
-    diry : number;
-    up : Input;
-    down : Input;
-    left : Input;
-    right : Input;
-    primary : Input;
-    swap : Input;
-    space : Input;
-
-    constructor()
-    {
-        this.dirx = 0;
-        this.diry = 0;
-
-        for (let name of Object.keys(DEFAULTS))
-        {
-            this[name] = new Input(name);
-        }
-    }
-
-    getX() {
-        return this.dirx;
-    }
-
-    getY() {
-        return this.diry;
-    }
-}
