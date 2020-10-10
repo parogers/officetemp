@@ -21,7 +21,7 @@ import { getSprite, GAME_WIDTH, GAME_HEIGHT } from './resource';
 
 import { Thing } from './thing';
 
-import { Tween, LinearSlowdownInterp } from './tween';
+import { Tween, LinearInterp, EaseInOut } from './tween';
 
 import * as PIXI from 'pixi.js';
 
@@ -31,8 +31,59 @@ const STATES = {
     PRE_FADE_DELAY: 1,
     FADE_IN: 2,
     POST_FADE_DELAY: 3,
-    SLIDE_TEXT: 4,
+    SLIDE_TRY_AGAIN: 4,
+    PRE_TAP_MSG_DELAY: 5,
+    SLIDE_TAP_CONTINUE: 6,
 };
+
+
+function createTryAgainBox() : PIXI.Sprite
+{
+    const box = new PIXI.Container();
+
+    const bg = new PIXI.Sprite(getSprite('colours_lime'));
+    bg.anchor.set(0, 0.5);
+    bg.scale.set(GAME_WIDTH/bg.width, 24/bg.height);
+    box.addChild(bg);
+
+    const text = new PIXI.BitmapText(
+        'TRY AGAIN?',
+        {
+            fontName: 'boxybold',
+            fontSize: 6,
+        }
+    );
+    text.scale.set(2);
+    text.x = GAME_WIDTH/2;
+    (text.anchor as PIXI.Point).set(0.5, 0.5);
+    box.addChild(text);
+
+    return box;
+}
+
+function createTapContinueBox() : PIXI.Sprite
+{
+    const box = new PIXI.Container();
+
+    const bg = new PIXI.Sprite(getSprite('colours_lime'));
+    bg.anchor.set(0, 0.5);
+    bg.scale.set(GAME_WIDTH/bg.width, 12/bg.height);
+    box.addChild(bg);
+
+    const text = new PIXI.BitmapText(
+        'TAP TO CONTINUE',
+        {
+            fontName: 'boxybold',
+            fontSize: 4,
+        }
+    );
+    text.scale.set(2);
+    text.x = GAME_WIDTH/2;
+    (text.anchor as PIXI.Point).set(0.5, 0.5);
+    box.addChild(text);
+
+    return box;
+}
 
 
 export class GameOverMessage extends Thing
@@ -43,7 +94,8 @@ export class GameOverMessage extends Thing
     counter : number = 0;
     gameScreen : any;
     tween : Tween;
-    textBox : PIXI.Container;
+    tryAgainBox : PIXI.Container;
+    tapContinueBox : PIXI.Container;
     pauseDuringGameOver = false;
 
     constructor()
@@ -56,28 +108,15 @@ export class GameOverMessage extends Thing
         this.background.scale.set(10, 5);
         this.sprite.addChild(this.background);
 
-        this.textBox = new PIXI.Container();
-        this.textBox.x = -GAME_WIDTH;
-        this.sprite.addChild(this.textBox);
+        this.tryAgainBox = createTryAgainBox();
+        this.tryAgainBox.x = -GAME_WIDTH;
+        this.tryAgainBox.y = GAME_HEIGHT/2;
+        this.sprite.addChild(this.tryAgainBox);
 
-        const bg = new PIXI.Sprite(getSprite('colours_lime'));
-        bg.anchor.set(0, 0.5);
-        bg.scale.set(GAME_WIDTH/bg.width, 24/bg.height);
-        bg.y = GAME_HEIGHT/2;
-        this.textBox.addChild(bg);
-
-        const text = new PIXI.BitmapText(
-            'TRY AGAIN?',
-            {
-                fontName: 'boxybold',
-                fontSize: 6,
-            }
-        );
-        text.scale.set(2);
-        text.x = GAME_WIDTH/2;
-        text.y = GAME_HEIGHT/2;
-        (text.anchor as PIXI.Point).set(0.5, 0.5);
-        this.textBox.addChild(text);
+        this.tapContinueBox = createTapContinueBox();
+        this.tapContinueBox.x = -GAME_WIDTH;
+        this.tapContinueBox.y = GAME_HEIGHT/2 + 20;
+        this.sprite.addChild(this.tapContinueBox);
     }
 
     static get states() : any {
@@ -122,24 +161,53 @@ export class GameOverMessage extends Thing
             this.counter += dt;
             if (this.counter > 0.5)
             {
-                this.state = STATES.SLIDE_TEXT;
-                this.tween = new Tween(this.textBox, {
-                    duration: 0.5,
+                this.state = STATES.SLIDE_TRY_AGAIN;
+                this.tween = new Tween(this.tryAgainBox, {
+                    duration: 1,
                     src: [
-                        this.textBox.x,
-                        this.textBox.y,
+                        this.tryAgainBox.x,
+                        this.tryAgainBox.y,
                     ],
                     dest: [
                         0,
-                        0
+                        this.tryAgainBox.y
                     ],
-                    interpolate: LinearSlowdownInterp,
+                    interpolate: EaseInOut,
                 });
                 this.tween.pauseDuringGameOver = false;
                 this.gameScreen.addThing(this.tween);
             }
         }
-        else if (this.state === STATES.SLIDE_TEXT)
+        else if (this.state === STATES.SLIDE_TRY_AGAIN)
+        {
+            if (this.tween.done)
+            {
+                this.state = STATES.PRE_TAP_MSG_DELAY;
+            }
+        }
+        else if (this.state === STATES.PRE_TAP_MSG_DELAY)
+        {
+            this.counter += dt;
+            if (this.counter > 0.5)
+            {
+                this.state = STATES.SLIDE_TAP_CONTINUE;
+                this.tween = new Tween(this.tapContinueBox, {
+                    duration: 1,
+                    src: [
+                        this.tapContinueBox.x,
+                        this.tapContinueBox.y,
+                    ],
+                    dest: [
+                        0,
+                        this.tapContinueBox.y
+                    ],
+                    interpolate: EaseInOut,
+                });
+                this.tween.pauseDuringGameOver = false;
+                this.gameScreen.addThing(this.tween);
+            }
+        }
+        else if (this.state === STATES.SLIDE_TAP_CONTINUE)
         {
         }
     }
