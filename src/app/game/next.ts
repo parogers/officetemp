@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getSprite, GAME_WIDTH, GAME_HEIGHT } from './resource';
+import { getSprite, GAME_WIDTH, GAME_HEIGHT, makeSolidColourSprite } from './resource';
 
 import * as PIXI from 'pixi.js';
 
@@ -35,8 +35,7 @@ export class NextScreen
         this.stage = new PIXI.Container();
         this.stage.scale.set(scale);
 
-        let bg = new PIXI.Sprite(getSprite('colours_black'));
-        bg.scale.set(8, 4);
+        const bg = makeSolidColourSprite('black', GAME_WIDTH, GAME_HEIGHT);
         this.stage.addChild(bg);
 
         let portrait = new PIXI.Sprite(getSprite('portraits_terrance'));
