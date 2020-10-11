@@ -157,9 +157,6 @@ export class KeyboardControls
     attachKeyboardEvents()
     {
         window.addEventListener("keydown", (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-
             // Ignore auto-repeated characters when the user holds down a key
             if (event.repeat)
             {
@@ -179,6 +176,8 @@ export class KeyboardControls
                 this.lastInputPressed = input;
 
                 input.press();
+                event.stopPropagation();
+                event.preventDefault();
             }
             if (this.numKeysDown === 0) {
                 this.anyKey.press();
@@ -187,13 +186,12 @@ export class KeyboardControls
         });
 
         window.addEventListener("keyup", (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-
             var input = this.inputByKey[event.keyCode];
             if (input)
             {
                 input.release();
+                event.stopPropagation();
+                event.preventDefault();
             }
             this.numKeysDown--;
             // Sometimes we lose track of how many keys are pressed. This is
