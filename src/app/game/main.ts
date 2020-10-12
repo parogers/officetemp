@@ -37,6 +37,8 @@ import { NextScreen } from './next';
 
 import { GAME_WIDTH, GAME_HEIGHT, ASPECT_RATIO } from './resource';
 
+import { LEVELS } from './level';
+
 import * as PIXI from 'pixi.js';
 
 
@@ -158,7 +160,7 @@ export class Application
 
             else if (this.state === STATES.NEXT) {
                 this.state = STATES.GAME;
-                this.setScreen(new GameScreen(this.controls));
+                this.setScreen(new GameScreen(LEVELS[0], this.controls));
             }
 
             else if (this.state === STATES.GAME) {

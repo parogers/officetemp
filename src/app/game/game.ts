@@ -25,6 +25,7 @@ import { Thing } from './thing';
 import { ScoreDisplay } from './score';
 import { getImage, Texture } from './resource';
 import { GameOverMessage } from './gameover';
+import { LevelSetup } from './level';
 
 import * as PIXI from 'pixi.js';
 
@@ -34,7 +35,6 @@ const AISLE_YPOS_LIST = [65, 104, 143];
 export class GameScreen
 {
     stage : PIXI.Container;
-    controls : any;
     timer : number;
     aisle : number;
     player : any;
@@ -47,7 +47,10 @@ export class GameScreen
     gameOver : boolean = false;
     gameOverMessage : GameOverMessage;
 
-    constructor(controls)
+    constructor(
+        private levelSetup : LevelSetup,
+        private controls : any
+    )
     {
         this.stage = new PIXI.Container();
         this.controls = controls;
@@ -110,8 +113,17 @@ export class GameScreen
         this.player = new Player(this.controls);
         this.addThing(this.player);
 
-        let guy = new SuitGuy(this.aisleList[1]);
-        this.addThing(guy);
+        for (let aisle = 0; aisle < this.levelSetup.aisles.length; aisle++)
+        {
+            for (let boss of this.levelSetup.aisles[aisle].initial)
+            {
+                const guy = new SuitGuy(
+                    boss,
+                    this.aisleList[aisle]
+                );
+                this.addThing(guy);
+            }
+        }
 
         this.ledSign = new LEDSign();
         this.ledSign.position.set(8, 0);
