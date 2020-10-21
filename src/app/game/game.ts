@@ -181,7 +181,27 @@ export class GameScreen
 
     update(dt)
     {
+        const last = this.timer;
         this.timer += dt;
+
+        // Look for new suitguys to spawn
+        for (let aisle = 0; aisle < this.levelSetup.aisles.length; aisle++)
+        {
+            if (!this.levelSetup.aisles[aisle].entrance) {
+                continue;
+            }
+            for (let boss of this.levelSetup.aisles[aisle].entrance)
+            {
+                if (boss.entry !== undefined && last < boss.entry && this.timer > boss.entry)
+                {
+                    const guy = new SuitGuy(
+                        boss,
+                        this.aisleList[aisle]
+                    );
+                    this.addThing(guy);
+                }
+            }
+        }
 
         let n = 0;
         while(n < this.things.length)

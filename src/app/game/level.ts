@@ -14,7 +14,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 export interface BossSetup
@@ -22,11 +21,13 @@ export interface BossSetup
     sprite : string;
     pos? : number;
     fistPumps? : number;
+    entry? : number;
 }
 
 export interface AisleSetup
 {
     initial : BossSetup[];
+    entrance? : BossSetup[];
 }
 
 export interface LevelSetup
@@ -39,7 +40,6 @@ export const LEVELS : LevelSetup[] = [
         aisles: [
             {
                 initial: [
-                    { sprite: 'bluesuit', pos: 10, },
                     { sprite: 'bluesuit', pos: 20, },
                     { sprite: 'bluesuit', pos: 30, },
                 ]
@@ -47,12 +47,18 @@ export const LEVELS : LevelSetup[] = [
             {
                 initial: [
                     { sprite: 'bluesuit', pos: 50, fistPumps: 3, },
-                ]
+                ],
+                entrance: [
+                    { sprite: 'bluesuit', entry: 2, },
+                ],
             },
             {
                 initial: [
                     { sprite: 'bluesuit', pos: 80, fistPumps: 8, },
-                ]
+                ],
+                entrance: [
+                    { sprite: 'bluesuit', entry: 3, fistPumps: 1, },
+                ],
             },
         ],
     },

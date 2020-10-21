@@ -14,7 +14,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 /* Imports */
@@ -96,7 +95,7 @@ export class Application
             //resolution: 1,
             //preserveDrawingBuffer: true,
             //antialias: false,
-            forceCanvas: true,
+            // forceCanvas: true,
         });
         this.pixiApp.renderer.plugins.interaction.destroy();
         this.container.appendChild(this.pixiApp.view);

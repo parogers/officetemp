@@ -85,12 +85,17 @@ export class SuitGuy extends Thing
         this.speechContainer.position.set(15, -34);
         this.sprite.addChild(this.speechContainer);
 
-        this.state = SuitGuy.STATES.PAUSING;
         this.lastState = -1;
         this.speed = 25;
         this.frame = 0;
         this.timer = 0;
-        this.aislePos = bossSetup.pos;
+        if (bossSetup.pos === undefined) {
+            this.aislePos = 0;
+            this.state = SuitGuy.STATES.ADVANCING;
+        } else {
+            this.aislePos = bossSetup.pos;
+            this.state = SuitGuy.STATES.PAUSING;
+        }
         // How many fist pumps to do before advancing
         this.fistCount = bossSetup.fistPumps !== undefined ? bossSetup.fistPumps : 5;
         // Pause time between raising/lowering the fist
