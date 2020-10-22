@@ -19,6 +19,7 @@ import * as Sprites from './sprites';
 import { Thing } from './thing';
 import * as Resource from './resource';
 import { getSprite, getImage, Texture, Anim } from './resource';
+import { BossSetup } from './level';
 
 import * as PIXI from 'pixi.js';
 
@@ -43,15 +44,15 @@ class SuitGuyAppearance
     signingAnim : Anim;
     angryAnim : Anim;
 
-    constructor()
+    constructor(spriteName : string)
     {
-        this.sign1 = getSprite('bluesuit_sign1');
-        this.signingAnim = new Anim(['bluesuit_sign2', 'bluesuit_sign3'], 10);
-        this.angryAnim = new Anim(['bluesuit_angry1', 'bluesuit_angry2'], 6);
-        this.fist = getSprite('bluesuit_fist');
-        this.throw = getSprite('bluesuit_throw');
-        this.idle = getSprite('bluesuit_idle');
-        this.signingPaused = getSprite('bluesuit_signp');
+        this.sign1 = getSprite(spriteName + '_sign1');
+        this.signingAnim = new Anim([spriteName + '_sign2', spriteName + '_sign3'], 10);
+        this.angryAnim = new Anim([spriteName + '_angry1', spriteName + '_angry2'], 6);
+        this.fist = getSprite(spriteName + '_fist');
+        this.throw = getSprite(spriteName + '_throw');
+        this.idle = getSprite(spriteName + '_idle');
+        this.signingPaused = getSprite(spriteName + '_signp');
     }
 }
 
@@ -59,7 +60,6 @@ export class SuitGuy extends Thing
 {
     state : number;
     lastState: number;
-    aisle : any;
     speed : number;
     frame : number;
     timer : number
@@ -70,25 +70,34 @@ export class SuitGuy extends Thing
     gameScreen : any;
     speechContainer : PIXI.Container;
     appearance : SuitGuyAppearance;
+    aislePos : number;
 
-    constructor(aisle)
+    constructor(
+        bossSetup : BossSetup,
+        private aisle : any,
+    )
     {
         super();
-        this.appearance = new SuitGuyAppearance();
+        this.appearance = new SuitGuyAppearance(bossSetup.sprite);
         this.sprite = new PIXI.Sprite(this.appearance.idle);
         this.sprite.anchor.set(0.5, 1);
         this.speechContainer = new PIXI.Container();
         this.speechContainer.position.set(15, -34);
         this.sprite.addChild(this.speechContainer);
 
-        this.state = SuitGuy.STATES.PAUSING;
         this.lastState = -1;
-        this.aisle = aisle;
         this.speed = 25;
         this.frame = 0;
         this.timer = 0;
+        if (bossSetup.pos === undefined) {
+            this.aislePos = 0;
+            this.state = SuitGuy.STATES.ADVANCING;
+        } else {
+            this.aislePos = bossSetup.pos;
+            this.state = SuitGuy.STATES.PAUSING;
+        }
         // How many fist pumps to do before advancing
-        this.fistCount = 3;
+        this.fistCount = bossSetup.fistPumps !== undefined ? bossSetup.fistPumps : 5;
         // Pause time between raising/lowering the fist
         this.fistDelay = 0.25;
     }
@@ -102,8 +111,11 @@ export class SuitGuy extends Thing
     {
         this.aisle.behindCounter.addChild(this.sprite);
         this.gameScreen = gameScreen;
-        // this.sprite.position.x = this.aisle.counterLeftPos + 20;
-        this.sprite.position.x = this.aisle.counterRightPos-10;
+        // Find our position within the counter
+        this.sprite.position.x = (
+            this.aisle.counterLeftPos +
+            (this.aisle.counterRightPos - this.aisle.counterLeftPos) * this.aislePos/100
+        );
     }
 
     update(dt)
